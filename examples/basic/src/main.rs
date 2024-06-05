@@ -37,7 +37,7 @@ pub fn app() -> Html {
                     </ybc::ButtonAnchor>
                 </ybc::NavbarItem>
                 <ybc::NavbarItem>
-                    <ybc::ButtonAnchor classes={classes!("is-black", "is-outlined")} rel={String::from("noopener noreferrer")} target={String::from("_blank")} href="https://github.com/thedodd/ybc">
+                    <ybc::ButtonAnchor classes={classes!("is-black", "is-outlined")} rel={String::from("noopener noreferrer")} target={String::from("_blank")} href="https://github.com/goodidea-kp/ybc">
                         {"YBC"}
                     </ybc::ButtonAnchor>
                 </ybc::NavbarItem>
@@ -120,7 +120,7 @@ use ybc::ModalCloserContext;
 pub fn MyModal1() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = {
-        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id0-close".to_string()))
+        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id0-close".to_string().parse().unwrap()))
     };
     let on_click_cb = Callback::from(move |e: AttrValue| {
         gloo_console::log!("Button clicked!");
@@ -161,11 +161,11 @@ pub fn MyModal1() -> Html {
 pub fn MyModal2() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = {
-        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id2-close".to_string()))
+        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id2-close".to_string().parse().unwrap()))
     };
     let msg_ctx2 = use_context::<ModalCloserContext>().unwrap();
     let onsave = {
-        Callback::from(move |e:MouseEvent| msg_ctx2.dispatch( "id2-close".to_string()))
+        Callback::from(move |e:MouseEvent| msg_ctx2.dispatch( "id2-close".to_string().parse().unwrap()))
     };
     let on_click_cb = Callback::from(move |e: AttrValue| {
         gloo_console::log!("Button clicked!");
