@@ -8,3 +8,4 @@ pub mod navbar;
 pub mod pagination;
 pub mod panel;
 pub mod tabs;
+pub mod calendar;

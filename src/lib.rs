@@ -53,6 +53,8 @@ pub use components::pagination::{
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
 pub use components::tabs::{Tabs, TabsProps};
 
+pub use components::calendar::{Calendar, CalendarProps};
+
 // elements
 pub use elements::block::{Block, BlockProps};
 pub use elements::button::{
