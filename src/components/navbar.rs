@@ -87,7 +87,6 @@ impl Component for Navbar {
             }
             NavbarMsg::CloseEvent(state) => {
                 self.state = state;
-                // gloo_console::log!("state: {:?}", self.state.total_clicks);
                 self.is_menu_open = false;
             }
         }
