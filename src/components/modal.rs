@@ -272,24 +272,6 @@ impl Reducible for ModalCloseMsg {
 /// First, in your component which is using this modal, configure a `ModalCloser` dispatcher.
 /// ```rust
 
-/// ```
-///
-/// Next, in your component's `view` method, setup a callback to handle your component's close
-/// event. ```rust
-/// let closer = self.link.callback(|_| ModalCloseMsg("modal-0".into()));
-/// // ... snip ...
-/// <ModalCard
-///     id="modal-0"
-///     // ... snip ...
-///     footer=html!{
-///         <Button onclick=Some(closer)>{"Close"}</Button>
-///     }
-/// />
-/// ```
-///
-///
-/// This pattern allows you to communicate with a modal by its given ID, allowing
-/// you to close the modal from anywhere in your application.
 pub struct ModalCloser {
     link: WorkerScope<Self>,
     subscribers: HashSet<HandlerId>,
