@@ -286,13 +286,7 @@ impl Reducible for ModalCloseMsg {
 ///
 /// First, in your component which is using this modal, configure a `ModalCloser` dispatcher.
 /// ```rust
-/// use yew::agent::Dispatcher;
-/// use yew::prelude::*;
-/// // .. snip ..
-/// fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-///     let bridge = ModalCloser::dispatcher();
-///     Self { link, props, bridge }
-/// }
+
 /// ```
 ///
 /// Next, in your component's `view` method, setup a callback to handle your component's close
