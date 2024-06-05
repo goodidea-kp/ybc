@@ -1,11 +1,19 @@
 use derive_more::Display;
+use std::rc::Rc;
 use yew::prelude::*;
 
 use crate::components::dropdown::DropdownMsg;
 
+#[derive(Clone, Eq, PartialEq)]
+pub struct NavBurgerCloserState {
+    /// The total number of clicks received.
+    pub total_clicks: u32,
+}
+
 /// The message type used by the `Navbar` component.
 pub enum NavbarMsg {
     ToggleMenu,
+    CloseEvent(Rc<NavBurgerCloserState>),
 }
 
 #[derive(Clone, Debug, Properties, PartialEq)]
@@ -56,6 +64,8 @@ pub struct NavbarProps {
 /// [https://bulma.io/documentation/components/navbar/](https://bulma.io/documentation/components/navbar/)
 pub struct Navbar {
     is_menu_open: bool,
+    _listener: ContextHandle<Rc<NavBurgerCloserState>>,
+    state: Rc<NavBurgerCloserState>,
 }
 
 impl Component for Navbar {
@@ -63,13 +73,22 @@ impl Component for Navbar {
     type Properties = NavbarProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Self { is_menu_open: false }
+        let (state, _listener) = _ctx
+            .link()
+            .context::<Rc<NavBurgerCloserState>>(_ctx.link().callback(NavbarMsg::CloseEvent))
+            .expect("context to be set");
+        Self { is_menu_open: false, _listener, state }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             NavbarMsg::ToggleMenu => {
                 self.is_menu_open = !self.is_menu_open;
+            }
+            NavbarMsg::CloseEvent(state) => {
+                self.state = state;
+                // gloo_console::log!("state: {:?}", self.state.total_clicks);
+                self.is_menu_open = false;
             }
         }
         true

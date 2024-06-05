@@ -90,4 +90,6 @@ pub enum InputType {
     Email,
     #[display(fmt = "tel")]
     Tel,
+    #[display(fmt = "number")]
+    Number,
 }
