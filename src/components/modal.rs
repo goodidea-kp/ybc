@@ -116,8 +116,6 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     let id = props.id.clone();
     let closer_ctx = use_context::<ModalCloserContext>().expect("Modal closer in context");
 
-    // gloo_console::log!("closer_ctx: full ID {}", closer_ctx.0.as_str());
-
     let (_id, closed) = match closer_ctx.0.contains("-") {
         true => {
             let result = closer_ctx.0.split("-").collect::<Vec<&str>>();
@@ -127,12 +125,9 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     };
     let is_active = use_state(|| false);
 
-    // gloo_console::log!("closer_ctx: {:?} id:{:?} is closed:", _id.clone().into(), id.clone().into(), closed);
-
     if _id == id && closed {
         is_active.set(false);
         closer_ctx.dispatch(id.clone());
-        // gloo_console::log!("closed!");
     }
 
     let mut class = Classes::from("modal");
@@ -141,20 +136,16 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     let (opencb, closecb) = if _id == id && *is_active {
 
         class.push("is-active");
-        // gloo_console::log!("is_active=true call");
 
         let is_active = is_active.clone();
 
         (Callback::noop(), Callback::from(move |e:MouseEvent| {
             let target = e.target();
-            // gloo_console::log!("Close event from modal-card: {:?}");
-            // Check if the target is an element that you want to ignore
             if let Some(target) = target {
                 let target_element = target.dyn_into::<web_sys::Element>().unwrap();
                 if target_element.id().starts_with("modal-ignore-") {
                     // If the target is an element to ignore, stop the event propagation
                     e.stop_propagation();
-                    // gloo_console::log!("Ignoring event");
                     return;
                 }
             }
@@ -165,7 +156,6 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
         // gloo_console::log!("is_active=false call");
         (Callback::from(move |_| is_active.set(true)), Callback::noop())
     } else {
-        // gloo_console::log!("NOOP call");
         (Callback::noop(), Callback::noop())
     };
 
@@ -199,7 +189,6 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
     let id = props.id.clone();
     let closer_ctx = use_context::<ModalCloserContext>().expect("Modal closer in context");
 
-    // gloo_console::log!("closer_ctx: full ID {}", closer_ctx.0.as_str());
     let action = closer_ctx.0.as_str();
     let (_id, closed) = match action.contains("-") {
         true => {
@@ -210,12 +199,10 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
     };
     let is_active = use_state(|| false);
 
-    // gloo_console::log!("closer_ctx: {:?} id:{:?} is closed:", _id.clone().into(), id.clone().into(), closed);
 
     if _id == id && closed {
         is_active.set(false);
         closer_ctx.dispatch(id.clone());
-        // gloo_console::log!("closed!");
     }
 
     let mut class = Classes::from("modal");
@@ -230,10 +217,8 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
         (Callback::noop(), Callback::from(move |_| is_active.set(false)))
     } else if _id == id {
         let is_active = is_active.clone();
-        // gloo_console::log!("is_active=false call");
         (Callback::from(move |_| is_active.set(true)), Callback::noop())
     } else {
-        // gloo_console::log!("NOOP call");
         (Callback::noop(), Callback::noop())
     };
 
@@ -302,14 +287,6 @@ impl Reducible for ModalCloseMsg {
 /// />
 /// ```
 ///
-/// Finally, in your component's `update` method, send the `ModalCloseMsg` over to the agent which
-/// will forward the message to the modal to cause it to close.
-/// ```rust
-/// fn update(&mut self, msg: Self::Message) -> ShouldRender {
-///     self.bridge.send(msg);
-///     true
-/// }
-/// ```
 ///
 /// This pattern allows you to communicate with a modal by its given ID, allowing
 /// you to close the modal from anywhere in your application.
