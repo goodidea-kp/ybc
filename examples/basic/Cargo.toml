@@ -6,10 +6,14 @@ edition = "2018"
 
 [dependencies]
 console_error_panic_hook = "0.1"
-gloo-console = "0.2"
+gloo-console = "0.3.0"
 wasm-bindgen = "0.2"
 ybc = { path = "../../" }
-yew = "0.20"
+yew = { version = "0.21.0", features = ["csr"] }
+yew-agent = "0.3.0"
+postcard = "1"
+serde = { version = "1", features = ["derive"] }
+js-sys = "0.3"
 
 [features]
 default = []

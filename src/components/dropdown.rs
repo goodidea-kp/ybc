@@ -61,7 +61,10 @@ impl Component for Dropdown {
             class.push("is-hoverable");
             Callback::noop()
         } else {
-            ctx.link().callback(|_| DropdownMsg::Open)
+            ctx.link().callback(|event: MouseEvent| {
+                event.prevent_default();
+                DropdownMsg::Open
+            })
         };
         let overlay = if self.is_menu_active {
             class.push("is-active");
