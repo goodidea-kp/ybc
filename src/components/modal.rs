@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use yew::prelude::*;
 
-use yew_agent::{use_bridge, HandlerId, Public, UseBridgeHandle, Worker, WorkerLink};
+// use yew_agent::{use_bridge, HandlerId, Public, UseBridgeHandle, Worker, WorkerLink};
 
 /// Modal actions.
 pub enum ModalMsg {
