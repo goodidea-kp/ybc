@@ -147,14 +147,14 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
 
         (Callback::noop(), Callback::from(move |e:MouseEvent| {
             let target = e.target();
-            gloo_console::log!("Close event from modal-card: {:?}");
+            // gloo_console::log!("Close event from modal-card: {:?}");
             // Check if the target is an element that you want to ignore
             if let Some(target) = target {
                 let target_element = target.dyn_into::<web_sys::Element>().unwrap();
                 if target_element.id().starts_with("modal-ignore-") {
                     // If the target is an element to ignore, stop the event propagation
                     e.stop_propagation();
-                    gloo_console::log!("Ignoring event");
+                    // gloo_console::log!("Ignoring event");
                     return;
                 }
             }
@@ -162,10 +162,10 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
         }))
     } else if _id == id {
         let is_active = is_active.clone();
-        gloo_console::log!("is_active=false call");
+        // gloo_console::log!("is_active=false call");
         (Callback::from(move |_| is_active.set(true)), Callback::noop())
     } else {
-        gloo_console::log!("NOOP call");
+        // gloo_console::log!("NOOP call");
         (Callback::noop(), Callback::noop())
     };
 
@@ -215,7 +215,7 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
     if _id == id && closed {
         is_active.set(false);
         closer_ctx.dispatch(id.clone());
-        gloo_console::log!("closed!");
+        // gloo_console::log!("closed!");
     }
 
     let mut class = Classes::from("modal");
@@ -223,17 +223,17 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
 
     let (opencb, closecb) = if _id == id && *is_active {
         class.push("is-active");
-        gloo_console::log!("is_active=true call");
+        // gloo_console::log!("is_active=true call");
 
         let is_active = is_active.clone();
 
         (Callback::noop(), Callback::from(move |_| is_active.set(false)))
     } else if _id == id {
         let is_active = is_active.clone();
-        gloo_console::log!("is_active=false call");
+        // gloo_console::log!("is_active=false call");
         (Callback::from(move |_| is_active.set(true)), Callback::noop())
     } else {
-        gloo_console::log!("NOOP call");
+        // gloo_console::log!("NOOP call");
         (Callback::noop(), Callback::noop())
     };
 
