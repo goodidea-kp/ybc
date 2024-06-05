@@ -61,6 +61,9 @@ pub struct ButtonProps {
     /// Disable this component.
     #[prop_or_default]
     pub disabled: bool,
+    #[prop_or_default]
+    pub id: String,
+
 }
 
 /// A button element.
@@ -74,8 +77,9 @@ pub fn button(props: &ButtonProps) -> Html {
         props.loading.then_some("is-loading"),
         props.r#static.then_some("is-static")
     );
+    let _id = props.id.clone();
     html! {
-        <button {class} onclick={props.onclick.clone()} disabled={props.disabled}>
+        <button id={_id} {class} onclick={props.onclick.clone()} disabled={props.disabled}>
             {props.children.clone()}
         </button>
     }

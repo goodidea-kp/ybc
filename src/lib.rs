@@ -39,10 +39,13 @@ pub use components::card::{
 pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::menu::{Menu, MenuLabel, MenuLabelProps, MenuList, MenuListProps, MenuProps};
 pub use components::message::{Message, MessageBody, MessageBodyProps, MessageHeader, MessageHeaderProps, MessageProps};
-pub use components::modal::{Modal, ModalCard, ModalCardProps, ModalCloseMsg, ModalCloser, ModalMsg, ModalProps};
+pub use components::modal::{
+    Modal, ModalCard, ModalCardProps, ModalCloseMsg, ModalCloser, ModalCloserContext, ModalCloserProvider, ModalCloserProviderProps, ModalMsg,
+    ModalProps,
+};
 pub use components::navbar::{
-    Navbar, NavbarDivider, NavbarDividerProps, NavbarDropdown, NavbarDropdownProps, NavbarFixed, NavbarItem, NavbarItemProps, NavbarItemTag,
-    NavbarMsg, NavbarProps,
+    NavBurgerCloserState, Navbar, NavbarDivider, NavbarDividerProps, NavbarDropdown, NavbarDropdownProps, NavbarFixed, NavbarItem, NavbarItemProps,
+    NavbarItemTag, NavbarMsg, NavbarProps,
 };
 pub use components::pagination::{
     Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemRouter, PaginationItemType, PaginationProps,
