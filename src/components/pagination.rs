@@ -64,8 +64,6 @@ pub struct PaginationItemProps {
     /// The click handler for this component.
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
-    #[prop_or_default]
-    pub current: bool,
 }
 
 /// A pagination element representing a link to a page number, the previous page or the next page.
@@ -73,12 +71,8 @@ pub struct PaginationItemProps {
 /// [https://bulma.io/documentation/components/pagination/](https://bulma.io/documentation/components/pagination/)
 #[function_component(PaginationItem)]
 pub fn pagination_item(props: &PaginationItemProps) -> Html {
-    let effective_class = match props.current {
-        true => format!("{} is-current", props.item_type.to_string()),
-        false => format!("{}", props.item_type.to_string()),
-    };
     html! {
-        <a class={effective_class} aria-label={props.label.clone()} onclick={props.onclick.clone()}>
+        <a class={props.item_type.to_string()} aria-label={props.label.clone()} onclick={props.onclick.clone()}>
             {props.children.clone()}
         </a>
     }
