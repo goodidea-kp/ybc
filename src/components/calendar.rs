@@ -104,8 +104,8 @@ export function setup_date_picker(element, callback, initial_date, date_format, 
             type: 'datetime',
             color: 'info',
             lang: 'en',
-            dateFormat: dateFormat,
-            timeFormat: timeFormat,
+            dateFormat: date_format,
+            timeFormat: time_format,
             // other options...
         });
         init.set(element.id, calendarInstances[0]);
@@ -118,7 +118,7 @@ export function setup_date_picker(element, callback, initial_date, date_format, 
     }
     // console.log('Setting up date picker:' + initialDate);
     // console.dir(bulmaCalendar);
-    init.get(element.id).value(initialDate);
+    init.get(element.id).value(initial_date);
 
     // Define the callback function here
 
