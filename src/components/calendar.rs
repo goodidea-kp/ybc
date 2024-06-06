@@ -15,9 +15,9 @@ pub struct Calendar {
 #[derive(Clone, PartialEq, Properties)]
 pub struct CalendarProps {
     pub id: String,
-    #[prop_or_default("yyyy-MM-dd")]
+    #[prop_or_default]
     pub date_format: String,
-    #[prop_or_default("HH:mm")]
+    #[prop_or_default]
     pub time_format: String,
     pub date: Option<String>,
     pub on_date_changed: Callback<String>,
@@ -78,8 +78,20 @@ impl Component for Calendar {
             }) as Box<dyn FnMut(JsValue)>);
 
             unsafe {
+                let _date_format = if ctx.props().date_format.trim().len() == 0 {
+                    "yyyy-MM-dd".to_string()
+                } else {
+                    ctx.props().date_format.trim().to_string()
+                };
+
+                let _time_format = if ctx.props().time_format.trim().len() == 0 {
+                    "HH:mm".to_string()
+                } else {
+                    ctx.props().time_format.trim().to_string()
+                };
+
                 setup_date_picker(&element, callback.as_ref(), &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
-                &JsValue::from(ctx.props().date_format.as_str()), &JsValue::from(ctx.props().time_format.as_str()));
+                &JsValue::from(_date_format), &JsValue::from(_time_format));
             }
 
             // Don't forget to forget the callback, otherwise it will be cleaned up when it goes out of scope.
@@ -98,7 +110,7 @@ impl Component for Calendar {
 #[wasm_bindgen(inline_js = r#"
 let init = new Map();
 export function setup_date_picker(element, callback, initial_date, date_format, time_format) {
-    // console.log('Setting up date picker ID:' + element.id);
+    // console.log('Setting up date picker ID:' + element.id + 'date format:' + date_format + ' time format:' + time_format);
     if (!init.has(element.id)) {
       let calendarInstances = bulmaCalendar.attach(element, {
             type: 'datetime',
@@ -116,7 +128,7 @@ export function setup_date_picker(element, callback, initial_date, date_format, 
         // You can add more code here to handle the selected date
     });
     }
-    // console.log('Setting up date picker:' + initialDate);
+    // console.log('Setting up date picker:' + initial_date);
     // console.dir(bulmaCalendar);
     init.get(element.id).value(initial_date);
 
