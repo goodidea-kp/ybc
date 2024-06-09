@@ -81,6 +81,14 @@ pub fn app() -> Html {
                             <ybc::Tile ctx={Child} classes={classes!("notification", "is-success")}>
                                 <ybc::Subtitle size={ybc::HeaderSize::Is3} classes={classes!("has-text-white")}>{"YBC"}</ybc::Subtitle>
                                 <p>{"A Yew component library based on the Bulma CSS framework."}</p>
+                                <ybc::Accordions id="accordions">
+                                    <ybc::AccordionItem title={"Accordion 1"} open={true} id={"accordion1"}>
+                                        <p>{"This is the content of the first accordion."}</p>
+                                    </ybc::AccordionItem>
+                                    <ybc::AccordionItem title={"Accordion 2"} open={false} id={"accordion2"}>
+                                        <p>{"This is the content of the second accordion."}</p>
+                                    </ybc::AccordionItem>
+                                </ybc::Accordions>
                                 <ModalCloserProvider id="id0">
                                        <MyModal1/>
                                 </ModalCloserProvider>

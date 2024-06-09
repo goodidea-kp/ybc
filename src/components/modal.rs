@@ -6,8 +6,6 @@ use yew::prelude::*;
 
 use yew_agent::worker::{HandlerId, Worker, WorkerScope};
 
-use yew_agent::prelude::*;
-
 /// Modal actions.
 pub enum ModalMsg {
     Open,

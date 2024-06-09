@@ -77,22 +77,20 @@ impl Component for Calendar {
                 link.send_message(Msg::DateChanged(date_str));
             }) as Box<dyn FnMut(JsValue)>);
 
-            unsafe {
-                let _date_format = if ctx.props().date_format.trim().len() == 0 {
-                    "yyyy-MM-dd".to_string()
-                } else {
-                    ctx.props().date_format.trim().to_string()
-                };
+            let _date_format = if ctx.props().date_format.trim().len() == 0 {
+                "yyyy-MM-dd".to_string()
+            } else {
+                ctx.props().date_format.trim().to_string()
+            };
 
-                let _time_format = if ctx.props().time_format.trim().len() == 0 {
-                    "HH:mm".to_string()
-                } else {
-                    ctx.props().time_format.trim().to_string()
-                };
+            let _time_format = if ctx.props().time_format.trim().len() == 0 {
+                "HH:mm".to_string()
+            } else {
+                ctx.props().time_format.trim().to_string()
+            };
 
-                setup_date_picker(&element, callback.as_ref(), &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
-                &JsValue::from(_date_format), &JsValue::from(_time_format));
-            }
+            setup_date_picker(&element, callback.as_ref(), &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
+                              &JsValue::from(_date_format), &JsValue::from(_time_format));
 
             // Don't forget to forget the callback, otherwise it will be cleaned up when it goes out of scope.
             callback.forget();
@@ -101,9 +99,7 @@ impl Component for Calendar {
 
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        unsafe {
-            detach_date_picker(&JsValue::from(self.id.as_str()));
-        }
+        detach_date_picker(&JsValue::from(self.id.as_str()));
     }
 }
 
