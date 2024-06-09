@@ -5,6 +5,7 @@ use console_error_panic_hook::set_once as set_panic_hook;
 use wasm_bindgen::prelude::*;
 use ybc::TileCtx::{Ancestor, Child, Parent};
 use yew::prelude::*;
+use ybc::Calendar;
 
 
 use ybc::{ NavBurgerCloserState};
@@ -12,6 +13,14 @@ use ybc::{ NavBurgerCloserState};
 #[function_component(App)]
 pub fn app() -> Html {
     let state = Rc::new(NavBurgerCloserState { total_clicks: 0 });
+    let cb_date_changed = Callback::from(|date: String| {
+        gloo_console::log!("Date changed: {}", date);
+    });
+
+    let calendar_departure_date = html! {
+       <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={cb_date_changed.clone()} class={vec!["input".to_string()]} />
+    };
+
     html! {
         <>
         <ContextProvider<Rc<NavBurgerCloserState>> context={state}>
@@ -80,6 +89,15 @@ pub fn app() -> Html {
                                 </ModalCloserProvider>
                             </ybc::Tile>
                         </ybc::Tile>
+                        <ybc::Tile>
+                            <ybc::Tile>
+                                <ybc::Field label={Some("Departure to Mars")} help={"Enter desired departure date"}>
+                                      <ybc::Control>
+                                          {calendar_departure_date}
+                                      </ybc::Control>
+                                </ybc::Field>
+                            </ybc::Tile>
+                       </ybc::Tile>
                     </ybc::Tile>
                 </ybc::Tile>
                 </ybc::Container>
@@ -116,8 +134,8 @@ use ybc::ModalCloserProvider;
 use ybc::ModalCloserContext;
 
 
-#[function_component]
-pub fn MyModal1() -> Html {
+#[function_component(MyModal1)]
+pub fn my_modal1() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = {
         Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id0-close".to_string().parse().unwrap()))
@@ -157,8 +175,8 @@ pub fn MyModal1() -> Html {
     }
 }
 
-#[function_component]
-pub fn MyModal2() -> Html {
+#[function_component(MyModal2)]
+pub fn my_modal2() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = {
         Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id2-close".to_string().parse().unwrap()))
