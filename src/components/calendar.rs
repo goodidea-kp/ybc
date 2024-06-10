@@ -1,16 +1,15 @@
 use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 use web_sys::Element;
-use yew::{Callback, Component, Context, Html};
 use yew::prelude::*;
+use yew::{Callback, Component, Context, Html};
 
 pub struct Calendar {
     format: String,
     date: Option<String>,
     id: String,
 }
-
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct CalendarProps {
@@ -77,33 +76,33 @@ impl Component for Calendar {
                 link.send_message(Msg::DateChanged(date_str));
             }) as Box<dyn FnMut(JsValue)>);
 
-            unsafe {
-                let _date_format = if ctx.props().date_format.trim().len() == 0 {
-                    "yyyy-MM-dd".to_string()
-                } else {
-                    ctx.props().date_format.trim().to_string()
-                };
+            let _date_format = if ctx.props().date_format.trim().len() == 0 {
+                "yyyy-MM-dd".to_string()
+            } else {
+                ctx.props().date_format.trim().to_string()
+            };
 
-                let _time_format = if ctx.props().time_format.trim().len() == 0 {
-                    "HH:mm".to_string()
-                } else {
-                    ctx.props().time_format.trim().to_string()
-                };
+            let _time_format = if ctx.props().time_format.trim().len() == 0 {
+                "HH:mm".to_string()
+            } else {
+                ctx.props().time_format.trim().to_string()
+            };
 
-                setup_date_picker(&element, callback.as_ref(), &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
-                &JsValue::from(_date_format), &JsValue::from(_time_format));
-            }
+            setup_date_picker(
+                &element,
+                callback.as_ref(),
+                &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
+                &JsValue::from(_date_format),
+                &JsValue::from(_time_format),
+            );
 
             // Don't forget to forget the callback, otherwise it will be cleaned up when it goes out of scope.
             callback.forget();
         }
     }
 
-
     fn destroy(&mut self, ctx: &Context<Self>) {
-        unsafe {
-            detach_date_picker(&JsValue::from(self.id.as_str()));
-        }
+        detach_date_picker(&JsValue::from(self.id.as_str()));
     }
 }
 

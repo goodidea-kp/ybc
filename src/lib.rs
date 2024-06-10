@@ -32,6 +32,7 @@ pub use columns::{Column, ColumnProps, Columns, ColumnsProps};
 pub use common::{Alignment, Size};
 
 // components
+pub use components::accordion::{AccordionItem, AccordionItemProps, Accordions, AccordionsProps};
 pub use components::breadcrumb::{Breadcrumb, BreadcrumbProps, BreadcrumbSeparator, BreadcrumbSize};
 pub use components::card::{
     Card, CardContent, CardContentProps, CardFooter, CardFooterProps, CardHeader, CardHeaderProps, CardImage, CardImageProps, CardProps,

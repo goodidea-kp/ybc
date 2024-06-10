@@ -1,14 +1,15 @@
 #![recursion_limit = "1024"]
 
-use std::rc::Rc;
 use console_error_panic_hook::set_once as set_panic_hook;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
+use ybc::Calendar;
 use ybc::TileCtx::{Ancestor, Child, Parent};
 use yew::prelude::*;
-use ybc::Calendar;
 
-
-use ybc::{ NavBurgerCloserState};
+use ybc::ModalCloserContext;
+use ybc::ModalCloserProvider;
+use ybc::NavBurgerCloserState;
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -81,6 +82,14 @@ pub fn app() -> Html {
                             <ybc::Tile ctx={Child} classes={classes!("notification", "is-success")}>
                                 <ybc::Subtitle size={ybc::HeaderSize::Is3} classes={classes!("has-text-white")}>{"YBC"}</ybc::Subtitle>
                                 <p>{"A Yew component library based on the Bulma CSS framework."}</p>
+                                <ybc::Accordions id="accordions">
+                                    <ybc::AccordionItem title={"Accordion 1"} open={true} id={"accordion1"}>
+                                        <p>{"This is the content of the first accordion."}</p>
+                                    </ybc::AccordionItem>
+                                    <ybc::AccordionItem title={"Accordion 2"} open={false} id={"accordion2"}>
+                                        <p>{"This is the content of the second accordion."}</p>
+                                    </ybc::AccordionItem>
+                                </ybc::Accordions>
                                 <ModalCloserProvider id="id0">
                                        <MyModal1/>
                                 </ModalCloserProvider>
@@ -129,17 +138,10 @@ fn main() {
     yew::Renderer::<App>::new().render();
 }
 
-
-use ybc::ModalCloserProvider;
-use ybc::ModalCloserContext;
-
-
 #[function_component(MyModal1)]
 pub fn my_modal1() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
-    let onclick = {
-        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id0-close".to_string().parse().unwrap()))
-    };
+    let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id0-close".to_string().parse().unwrap())) };
     let on_click_cb = Callback::from(move |e: AttrValue| {
         gloo_console::log!("Button clicked!");
     });
@@ -178,13 +180,9 @@ pub fn my_modal1() -> Html {
 #[function_component(MyModal2)]
 pub fn my_modal2() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
-    let onclick = {
-        Callback::from(move |e:MouseEvent| msg_ctx.dispatch( "id2-close".to_string().parse().unwrap()))
-    };
+    let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id2-close".to_string().parse().unwrap())) };
     let msg_ctx2 = use_context::<ModalCloserContext>().unwrap();
-    let onsave = {
-        Callback::from(move |e:MouseEvent| msg_ctx2.dispatch( "id2-close".to_string().parse().unwrap()))
-    };
+    let onsave = { Callback::from(move |e: MouseEvent| msg_ctx2.dispatch("id2-close".to_string().parse().unwrap())) };
     let on_click_cb = Callback::from(move |e: AttrValue| {
         gloo_console::log!("Button clicked!");
     });

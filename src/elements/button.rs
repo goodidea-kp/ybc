@@ -63,7 +63,6 @@ pub struct ButtonProps {
     pub disabled: bool,
     #[prop_or_default]
     pub id: String,
-
 }
 
 /// A button element.
