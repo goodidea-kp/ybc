@@ -1,28 +1,23 @@
-use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 use web_sys::Element;
 use yew::prelude::*;
 
-
 #[function_component(AccordionItem)]
 pub fn accordion_item(props: &AccordionItemProps) -> Html {
-    let accordion_classes = if props.open {
-        "accordion is-active"
-    } else {
-        "accordion"
-    };
+    let accordion_classes = if props.open { "accordion is-active" } else { "accordion" };
     html! {
-                        <article class={classes!(accordion_classes)}>
-                            <div class="accordion-header toggle" onclick={props.on_toggle.clone()}>
-                                <p>{&props.title}</p>
-                            </div>
-                            <div class="accordion-body">
-                                <div class="accordion-content">
-                                    {props.children.clone()}
-                                </div>
-                            </div>
-                        </article>
-                    }
+    <article class={classes!(accordion_classes)}>
+        <div class="accordion-header toggle" onclick={props.on_toggle.clone()}>
+            <p>{&props.title}</p>
+        </div>
+        <div class="accordion-body">
+            <div class="accordion-content">
+                {props.children.clone()}
+            </div>
+        </div>
+    </article>
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Properties)]
@@ -86,7 +81,6 @@ impl Component for Accordions {
             setup_accordion(&element);
         }
     }
-
 
     fn destroy(&mut self, ctx: &Context<Self>) {
         detach_accordion(&JsValue::from(self.id.as_str()));

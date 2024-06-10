@@ -1,4 +1,6 @@
+pub mod accordion;
 pub mod breadcrumb;
+pub mod calendar;
 pub mod card;
 pub mod dropdown;
 pub mod menu;
@@ -8,5 +10,3 @@ pub mod navbar;
 pub mod pagination;
 pub mod panel;
 pub mod tabs;
-pub mod calendar;
-pub mod accordion;
