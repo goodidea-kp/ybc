@@ -67,10 +67,9 @@ pub fn input(props: &InputProps) -> Html {
         input.value()
     });
 
-
     let input_ref = use_node_ref();
 
-    let oninput_number =props.update.reform({
+    let oninput_number = props.update.reform({
         let input_ref = input_ref.clone();
         move |_| {
             if let Some(input) = input_ref.cast::<HtmlInputElement>() {
