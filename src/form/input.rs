@@ -40,6 +40,9 @@ pub struct InputProps {
     /// Make this component static.
     #[prop_or_default]
     pub r#static: bool,
+
+    #[prop_or_default]
+    pub step: f32,
 }
 
 /// A text input element.
@@ -59,21 +62,67 @@ pub fn input(props: &InputProps) -> Html {
         props.loading.then_some("is-loading"),
         props.r#static.then_some("is-static"),
     );
-    let oninput = props.update.reform(|ev: web_sys::InputEvent| {
+    let oninput_text = props.update.reform(|ev: web_sys::InputEvent| {
         let input: HtmlInputElement = ev.target_dyn_into().expect_throw("event target should be an input");
         input.value()
     });
+
+
+    let input_ref = use_node_ref();
+
+    let oninput_number =props.update.reform({
+        let input_ref = input_ref.clone();
+        move |_| {
+            if let Some(input) = input_ref.cast::<HtmlInputElement>() {
+                input.set_custom_validity("");
+                input.check_validity();
+                return input.value();
+            };
+            "".to_string()
+        }
+    });
+
+    let oninvalid = Callback::from({
+        let input_ref = input_ref.clone();
+        move |_| {
+            if let Some(input) = input_ref.cast::<HtmlInputElement>() {
+                if input.value() == "" {
+                    input.set_custom_validity("");
+                } else {
+                    input.set_custom_validity("Please enter a number with up to two decimal places.");
+                }
+            }
+        }
+    });
+
     html! {
-        <input
-            name={props.name.clone()}
-            value={props.value.clone()}
-            {oninput}
-            {class}
-            type={props.r#type.to_string()}
-            placeholder={props.placeholder.clone()}
-            disabled={props.disabled}
-            readonly={props.readonly}
-            />
+        if props.r#type == InputType::Number {
+            <input
+                name={props.name.clone()}
+                value={props.value.clone()}
+                {class}
+                type={props.r#type.to_string()}
+                ref={input_ref.clone()}
+                oninput={oninput_number}
+                oninvalid={oninvalid}
+                placeholder={props.placeholder.clone()}
+                disabled={props.disabled}
+                readonly={props.readonly}
+                step={props.step.to_string()}
+                pattern="[0-9]+([.][0-9]{0,2})?"
+                />
+        } else {
+            <input
+                name={props.name.clone()}
+                value={props.value.clone()}
+                oninput={oninput_text}
+                {class}
+                type={props.r#type.to_string()}
+                placeholder={props.placeholder.clone()}
+                disabled={props.disabled}
+                readonly={props.readonly}
+                />
+        }
     }
 }
 
