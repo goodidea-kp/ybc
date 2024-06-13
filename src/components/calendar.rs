@@ -155,6 +155,6 @@ export function detach_date_picker(id) {
 
 "#)]
 extern "C" {
-    fn setup_date_picker(element: &Element, callback: &JsValue, clear_callback: &JsValue,initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue);
+    fn setup_date_picker(element: &Element, callback: &JsValue, clear_callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue);
     fn detach_date_picker(id: &JsValue);
 }
