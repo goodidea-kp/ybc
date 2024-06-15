@@ -67,7 +67,6 @@ impl Component for Calendar {
                 .get_element_by_id(self.id.as_str())
                 .expect(format!("should have #{} on the page", self.id.as_str()).as_str());
 
-
             // Clone the link from the context
             let link = ctx.link().clone();
 
@@ -149,11 +148,8 @@ export function detach_date_picker(id) {
     // console.log('Detaching date picker #id='+id+'!');
 }
 
-
 "#)]
 extern "C" {
-    fn setup_date_picker(
-        element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue,
-    );
+    fn setup_date_picker(element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue);
     fn detach_date_picker(id: &JsValue);
 }
