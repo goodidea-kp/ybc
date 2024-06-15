@@ -67,20 +67,16 @@ impl Component for Calendar {
                 .get_element_by_id(self.id.as_str())
                 .expect(format!("should have #{} on the page", self.id.as_str()).as_str());
 
+
             // Clone the link from the context
             let link = ctx.link().clone();
 
             // Move the cloned link into the closure
             let callback = Closure::wrap(Box::new(move |date: JsValue| {
                 let date_str = date.as_string().unwrap_or_default();
-                // gloo_console::log!("Date changed: {}", date_str.clone());
+                gloo_console::log!("Date changed: {}", date_str.clone());
                 link.send_message(Msg::DateChanged(date_str));
             }) as Box<dyn FnMut(JsValue)>);
-            let link = ctx.link().clone();
-            let clear_callback = Closure::wrap(Box::new(move || {
-                // gloo_console::log!("Date cleared");
-                link.send_message(Msg::DateChanged("".to_string()));
-            }) as Box<dyn FnMut()>);
 
             let _date_format = if ctx.props().date_format.trim().len() == 0 {
                 "yyyy-MM-dd".to_string()
@@ -97,15 +93,11 @@ impl Component for Calendar {
             setup_date_picker(
                 &element,
                 callback.as_ref(),
-                clear_callback.as_ref(),
                 &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
                 &JsValue::from(_date_format),
                 &JsValue::from(_time_format),
             );
-
-            // Don't forget to forget the callback, otherwise it will be cleaned up when it goes out of scope.
             callback.forget();
-            clear_callback.forget();
         }
     }
 
@@ -116,7 +108,7 @@ impl Component for Calendar {
 
 #[wasm_bindgen(inline_js = r#"
 let init = new Map();
-export function setup_date_picker(element, callback, clear_callback, initial_date, date_format, time_format) {
+export function setup_date_picker(element, callback, initial_date, date_format, time_format) {
     // console.log('Setting up date picker ID:' + element.id + 'date format:' + date_format + ' time format:' + time_format);
     if (!init.has(element.id)) {
       let calendarInstances = bulmaCalendar.attach(element, {
@@ -130,15 +122,20 @@ export function setup_date_picker(element, callback, clear_callback, initial_dat
         init.set(element.id, calendarInstances[0]);
         let calendarInstance = calendarInstances[0];
         calendarInstance.on('select', function(datepicker) {
-        // console.log("Selected date: " + datepicker.data.value());
+         // console.log("Selected date: " + datepicker.data.value());
          callback(datepicker.data.value());
         // You can add more code here to handle the selected date
         });
         calendarInstance.on('clear', function(datepicker) {
-         clear_callback();
+         callback('');
+        });
+         calendarInstance.on('validate', function(datepicker) {
+         // console.log("Selected date: " + datepicker.data.value());
+         callback(datepicker.data.value());
+        // You can add more code here to handle the selected date
         });
     }
-    // console.log('Setting up date picker:' + initial_date);
+    console.log('Setting up date picker:' + initial_date);
     // console.dir(bulmaCalendar);
     init.get(element.id).value(initial_date);
 
@@ -156,7 +153,7 @@ export function detach_date_picker(id) {
 "#)]
 extern "C" {
     fn setup_date_picker(
-        element: &Element, callback: &JsValue, clear_callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue,
+        element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue,
     );
     fn detach_date_picker(id: &JsValue);
 }
