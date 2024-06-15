@@ -74,7 +74,7 @@ impl Component for Calendar {
             // Move the cloned link into the closure
             let callback = Closure::wrap(Box::new(move |date: JsValue| {
                 let date_str = date.as_string().unwrap_or_default();
-                gloo_console::log!("Date changed: {}", date_str.clone());
+                // gloo_console::log!("Date changed: {}", date_str.clone());
                 link.send_message(Msg::DateChanged(date_str));
             }) as Box<dyn FnMut(JsValue)>);
 
@@ -135,7 +135,7 @@ export function setup_date_picker(element, callback, initial_date, date_format, 
         // You can add more code here to handle the selected date
         });
     }
-    console.log('Setting up date picker:' + initial_date);
+    // console.log('Setting up date picker:' + initial_date);
     // console.dir(bulmaCalendar);
     init.get(element.id).value(initial_date);
 
@@ -146,7 +146,7 @@ export function setup_date_picker(element, callback, initial_date, date_format, 
 
 export function detach_date_picker(id) {
     init.delete(id);
-    console.log('Detaching date picker #id='+id+'!');
+    // console.log('Detaching date picker #id='+id+'!');
 }
 
 
