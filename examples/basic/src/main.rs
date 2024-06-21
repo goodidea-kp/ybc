@@ -18,6 +18,12 @@ pub fn app() -> Html {
         gloo_console::log!("Date changed: {}", date);
     });
 
+    let cb_on_update = Callback::from(|tag: String| {
+        gloo_console::log!("Tag updated: {}", tag);
+    });
+    let cb_on_remove = Callback::from(|tag: String| {
+        gloo_console::log!("Tag removed: {}", tag);
+    });
     let calendar_departure_date = html! {
        <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={cb_date_changed.clone()} class={vec!["input".to_string()]} />
     };
@@ -104,6 +110,33 @@ pub fn app() -> Html {
                                       <ybc::Control>
                                           {calendar_departure_date}
                                       </ybc::Control>
+                                </ybc::Field>
+                            </ybc::Tile>
+                       </ybc::Tile>
+                       <ybc::Tile>
+                            <ybc::Tile>
+                                <ybc::Field label={Some("Tags")} help={"Enter tags"}>
+                                    <ybc::Control>
+                                        <ybc::AutoComplete
+                                          classes={classes!("is-primary")}
+                                          current_selector={"tag3".to_string()}
+                                          id={"tags"} items={vec!["tag1".to_string(), "tag2".to_string(), "tag3".to_string()]} max_items={1}
+                                          on_update={cb_on_update.clone()}
+                                          on_remove={cb_on_remove.clone()}
+                                          is_multiple={true}
+                                        />
+                                    </ybc::Control>
+                                </ybc::Field>
+                                <ybc::Field label={Some("Tags as free text")} help={"Enter some data"}>
+                                    <ybc::Control>
+                                        <ybc::AutoComplete
+                                          classes={classes!("is-primary")}
+                                          current_selector={"Apple".to_string()}
+                                          id={"tags2"}
+                                          on_update={cb_on_update.clone()}
+                                          on_remove={cb_on_remove.clone()}
+                                        />
+                                    </ybc::Control>
                                 </ybc::Field>
                             </ybc::Tile>
                        </ybc::Tile>
