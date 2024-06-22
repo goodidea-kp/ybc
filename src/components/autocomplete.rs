@@ -9,7 +9,6 @@ use yew::prelude::*;
 pub struct AutoComplete {
     current_selector: String,
     id: String,
-    items: Vec<String>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -26,10 +25,20 @@ pub struct AutoCompleteProps {
     pub current_selector: String,
     #[prop_or("Choose Tags".to_string())]
     pub placeholder: String,
-    #[prop_or(classes!("".to_string()))]
+    #[prop_or(classes ! ("".to_string()))]
     pub classes: Classes,
-    #[prop_or(false)]
-    pub is_multiple: bool,
+    #[prop_or(true)]
+    pub case_sensitive: bool,
+    #[prop_or("".to_string())]
+    pub data_item_text: String,
+    #[prop_or("".to_string())]
+    pub data_item_value: String,
+    #[prop_or("".to_string())]
+    pub data_item: String,
+    #[prop_or("".to_string())]
+    pub url_for_fetch: String,
+    #[prop_or("".to_string())]
+    pub auth_header: String,
 }
 
 pub enum Msg {
@@ -44,7 +53,6 @@ impl Component for AutoComplete {
         Self {
             current_selector: ctx.props().current_selector.clone(),
             id: ctx.props().id.clone(),
-            items: ctx.props().items.clone(),
         }
     }
 
@@ -63,10 +71,7 @@ impl Component for AutoComplete {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let items = self
-            .items
-            .iter()
-            .clone()
+        let items = ctx.props().items.iter()
             .map(|item| {
                 if item == &self.current_selector {
                     html! {
@@ -79,22 +84,47 @@ impl Component for AutoComplete {
                 }
             })
             .collect::<Html>();
-        if ctx.props().is_multiple {
+        if ctx.props().items.len() > 0 && ctx.props().data_item.len() == 0 {
             html! {
                 <div class={classes!(ctx.props().classes.clone(), "select")}>
                     <select
-                        id={self.id.clone()} multiple={true} data-type="tags" data-placeholder={ctx.props().placeholder.clone()}
+                        id={self.id.clone()} data-type="tags"
+                        data-placeholder={ctx.props().placeholder.clone()}
                         value={self.current_selector.clone()}
                         >
                         {items}
                     </select>
                 </div>
             }
+        } else if ctx.props().data_item_text.len() > 0 && ctx.props().data_item_value.len() > 0 {
+            let has_value = self.current_selector.len() > 0;
+            if has_value {
+                    let value = format!("{{\"{}\":\"{}\"}}",ctx.props().data_item_value.clone(),self.current_selector.clone());
+                    html! {
+                           <input type="text"
+                             class={classes!(ctx.props().classes.clone(), "input")}
+                                     // data-type="name"
+                                  data-item-text={ctx.props().data_item_text.clone()}
+                                  data-item-value={ctx.props().data_item_value.clone()}
+                                  id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()}
+                                  value={value} />
+                    }
+            }
+            else {
+                html! {
+                   <input type="text"
+                     class={classes!(ctx.props().classes.clone(), "input")}
+                             // data-type="name"
+                          data-item-text={ctx.props().data_item_text.clone()}
+                          data-item-value={ctx.props().data_item_value.clone()}
+                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()} />
+            }
+            }
         } else {
             html! {
                    <input type="text"
                      class={classes!(ctx.props().classes.clone(), "input")}
-                          id={self.id.clone()} data-type="tags" data-placeholder={ctx.props().placeholder.clone()} value={self.current_selector.clone()} />
+                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()} value={self.current_selector.clone()} />
             }
         }
     }
@@ -102,7 +132,9 @@ impl Component for AutoComplete {
     fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
         if first_render {
             let _max_items = ctx.props().max_items;
-            let _is_multiple = ctx.props().is_multiple;
+            let _case_sensitive = ctx.props().case_sensitive;
+            let _url_for_fetch = ctx.props().url_for_fetch.clone();
+            let _auth_header = ctx.props().auth_header.clone();
             let window = web_sys::window().expect("no global `window` exists");
             let document = window.document().expect("should have a document on window");
 
@@ -125,8 +157,24 @@ impl Component for AutoComplete {
                     link.send_message(Msg::Removed(value.as_string().unwrap()));
                 }
             }) as Box<dyn FnMut(JsValue)>);
-
-            setup_autocomplete(&element, callback.as_ref(), &JsValue::from(_max_items), &JsValue::from(_is_multiple));
+            if _url_for_fetch.len() == 0 {
+                setup_static_autocomplete(
+                    &element,
+                    callback.as_ref(),
+                    &JsValue::from(_max_items),
+                    &JsValue::from(_case_sensitive),
+                );
+            } else {
+                setup_dynamic_autocomplete(
+                    &element,
+                    callback.as_ref(),
+                    &JsValue::from(_max_items),
+                    &JsValue::from(_url_for_fetch),
+                    &JsValue::from(_auth_header),
+                    &JsValue::from(_case_sensitive),
+                    &JsValue::from(ctx.props().data_item_value.clone()),
+                );
+            }
             callback.forget();
         }
     }
@@ -138,46 +186,83 @@ impl Component for AutoComplete {
 
 #[wasm_bindgen(inline_js = r#"
 let init = new Map();
-export function setup_autocomplete(element, callback, max_tags, is_multiple) {
+export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_fetch, auth_header, case_sensitive, data_item_value) {
     // Attach Bulma autocomplete here
-    // console.log('Setting up autocomplete ID:' + element.id);
+    console.log('Setting up dynamic autocomplete ID:' + element.id + ' fetch:' + url_for_fetch + ' auth:' + auth_header + ' case:' + case_sensitive + ' max:' + max_tags);
      if (!init.has(element.id)) {
+		 console.log('Setting up dynamic autocomplete ID:' + element.id);
          let autocompleteInstance = BulmaTagsInput.attach( element, {
             maxTags: max_tags,
+            caseSensitive: case_sensitive,
+            source: async function(value) {
+                console.log('Fetching data for:'+value);
+				return await fetch(url_for_fetch + value)
+					.then(function(response) {
+					    if (response.status !== 200) {
+                            throw new Error('Failed to fetch data');
+                        }
+						return response.json();
+					});},
          });
            let autocomplete = autocompleteInstance[0];
            // console.log('Attached autocomplete:'+element.id + ' ' + autocomplete);
             autocomplete.on('after.add', function(tag) {
-                // console.log('tag:'+tag);
-                if (is_multiple) {
-                   callback('{"op":"add","value":"'+tag.item.value+'"}');
+                // console.log(tag);
+                callback('{"op":"add","value":"'+tag.item[data_item_value]+'"}');
+            });
+            autocomplete.on('after.remove', function(tag) {
+                // console.log(tag);
+                callback('{"op":"remove","value":"'+tag[data_item_value]+'"}');
+            });
+
+          init.set(element.id, autocomplete);
+     }
+}
+
+export function setup_static_autocomplete(element, callback, max_tags, case_sensitive) {
+    // Attach Bulma autocomplete here
+    console.log('Setting up static autocomplete ID:' + element.id + ' case:' + case_sensitive + ' max:' + max_tags);
+     if (!init.has(element.id)) {
+         let autocompleteInstance = BulmaTagsInput.attach( element, {
+            maxTags: max_tags,
+            caseSensitive: case_sensitive,
+         });
+           let autocomplete = autocompleteInstance[0];
+           // console.log('Attached autocomplete:'+element.id + ' ' + autocomplete);
+            autocomplete.on('after.add', function(tag) {
+                // console.log(tag);
+                if (tag.item && tag.item.value) {
+                    callback('{"op":"add","value":"'+tag.item.value+'"}');
+                } else if (tag.value) {
+                    callback('{"op":"add","value":"'+tag.value+'"}');
                 } else {
-                   callback('{"op":"add","value":"'+tag.item+'"}');
+                    callback('{"op":"add","value":"'+tag.item+'"}');
                 }
             });
             autocomplete.on('after.remove', function(tag) {
-                // console.log('tag2:'+tag);
-                if (is_multiple) {
-                   callback('{"op":"remove","value":"'+tag.value+'"}');
+                // console.log(tag);
+                if (tag.item && tag.item.value) {
+                    callback('{"op":"remove","value":"'+tag.item.value+'"}');
+                } else if (tag.value) {
+                    callback('{"op":"remove","value":"'+tag.value+'"}');
                 } else {
-                   callback('{"op":"remove","value":"'+tag+'"}');
+                    callback('{"op":"remove","value":"'+tag+'"}');
                 }
             });
 
           init.set(element.id, autocomplete);
 
      }
-
-
-    // Call callback when an item is selected
 }
 
 export function detach_autocomplete(id) {
    init.delete(id);
    // console.log('Detached autocomplete:'+id);
 }
+
 "#)]
 extern "C" {
-    fn setup_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, is_multiple: &JsValue);
+    fn setup_dynamic_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, url_to_fetch: &JsValue, auth_header: &JsValue, case_sensitive: &JsValue, data_item_value: &JsValue);
+    fn setup_static_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, case_sensitive: &JsValue);
     fn detach_autocomplete(id: &JsValue);
 }

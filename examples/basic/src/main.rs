@@ -28,6 +28,9 @@ pub fn app() -> Html {
        <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={cb_date_changed.clone()} class={vec!["input".to_string()]} />
     };
 
+    let items: UseStateHandle<Vec<String>> = use_state(|| vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string()]);
+
+
     html! {
         <>
         <ContextProvider<Rc<NavBurgerCloserState>> context={state}>
@@ -119,11 +122,16 @@ pub fn app() -> Html {
                                     <ybc::Control>
                                         <ybc::AutoComplete
                                           classes={classes!("is-primary")}
-                                          current_selector={"tag3".to_string()}
-                                          id={"tags"} items={vec!["tag1".to_string(), "tag2".to_string(), "tag3".to_string()]} max_items={1}
+                                          current_selector={"FR".to_string()}
+                                          id={"tags"}
+                                          data_item_text={"cca2".to_string()}
+                                          data_item_value={"cca2".to_string()}
+                                          max_items={1}
+                                          url_for_fetch={"https://restcountries.com/v3.1/name/".to_string()}
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
-                                          is_multiple={true}
+                                          case_sensitive={false}
+                                          placeholder={"Enter country name"}
                                         />
                                     </ybc::Control>
                                 </ybc::Field>
@@ -135,6 +143,18 @@ pub fn app() -> Html {
                                           id={"tags2"}
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
+                                        />
+                                    </ybc::Control>
+                                </ybc::Field>
+                               <ybc::Field label={Some("Tags as fixed list")} help={"Enter some data"}>
+                                    <ybc::Control>
+                                        <ybc::AutoComplete
+                                          classes={classes!("is-primary")}
+                                          current_selector={"Apple".to_string()}
+                                          id={"tags3"}
+                                          on_update={cb_on_update.clone()}
+                                          on_remove={cb_on_remove.clone()}
+                                          items={(*items).clone()}
                                         />
                                     </ybc::Control>
                                 </ybc::Field>
