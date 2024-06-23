@@ -7,7 +7,6 @@ use web_sys::{js_sys, Element};
 use yew::prelude::*;
 
 pub struct AutoComplete {
-    current_selector: String,
     id: String,
 }
 
@@ -50,10 +49,7 @@ impl Component for AutoComplete {
     type Message = Msg;
     type Properties = AutoCompleteProps;
     fn create(ctx: &Context<Self>) -> Self {
-        Self {
-            current_selector: ctx.props().current_selector.clone(),
-            id: ctx.props().id.clone(),
-        }
+        Self { id: ctx.props().id.clone() }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -71,9 +67,13 @@ impl Component for AutoComplete {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let items = ctx.props().items.iter()
+        let current_selector = ctx.props().current_selector.clone();
+        let items = ctx
+            .props()
+            .items
+            .iter()
             .map(|item| {
-                if item == &self.current_selector {
+                if item == &current_selector {
                     html! {
                          <option value={item.clone()} selected=true>{item.clone()}</option>
                     }
@@ -90,41 +90,29 @@ impl Component for AutoComplete {
                     <select
                         id={self.id.clone()} data-type="tags"
                         data-placeholder={ctx.props().placeholder.clone()}
-                        value={self.current_selector.clone()}
+                        value={current_selector.clone()}
                         >
                         {items}
                     </select>
                 </div>
             }
         } else if ctx.props().data_item_text.len() > 0 && ctx.props().data_item_value.len() > 0 {
-            let has_value = self.current_selector.len() > 0;
-            if has_value {
-                    let value = format!("{{\"{}\":\"{}\"}}",ctx.props().data_item_value.clone(),self.current_selector.clone());
-                    html! {
-                           <input type="text"
-                             class={classes!(ctx.props().classes.clone(), "input")}
-                                     // data-type="name"
-                                  data-item-text={ctx.props().data_item_text.clone()}
-                                  data-item-value={ctx.props().data_item_value.clone()}
-                                  id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()}
-                                  value={value} />
-                    }
-            }
-            else {
-                html! {
+            let has_value = current_selector.len() > 0;
+            let value = format!("{{\"{}\":\"{}\"}}", ctx.props().data_item_value.as_str(), current_selector);
+            html! {
                    <input type="text"
                      class={classes!(ctx.props().classes.clone(), "input")}
                              // data-type="name"
                           data-item-text={ctx.props().data_item_text.clone()}
                           data-item-value={ctx.props().data_item_value.clone()}
-                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()} />
-            }
+                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()}
+                          value={if has_value {value} else {"{}".to_string()}} />
             }
         } else {
             html! {
                    <input type="text"
                      class={classes!(ctx.props().classes.clone(), "input")}
-                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()} value={self.current_selector.clone()} />
+                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()} value={current_selector.clone()} />
             }
         }
     }
@@ -158,12 +146,7 @@ impl Component for AutoComplete {
                 }
             }) as Box<dyn FnMut(JsValue)>);
             if _url_for_fetch.len() == 0 {
-                setup_static_autocomplete(
-                    &element,
-                    callback.as_ref(),
-                    &JsValue::from(_max_items),
-                    &JsValue::from(_case_sensitive),
-                );
+                setup_static_autocomplete(&element, callback.as_ref(), &JsValue::from(_max_items), &JsValue::from(_case_sensitive));
             } else {
                 setup_dynamic_autocomplete(
                     &element,
@@ -190,12 +173,12 @@ export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_
     // Attach Bulma autocomplete here
     console.log('Setting up dynamic autocomplete ID:' + element.id + ' fetch:' + url_for_fetch + ' auth:' + auth_header + ' case:' + case_sensitive + ' max:' + max_tags);
      if (!init.has(element.id)) {
-		 console.log('Setting up dynamic autocomplete ID:' + element.id);
+		 // console.log('Setting up dynamic autocomplete ID:' + element.id);
          let autocompleteInstance = BulmaTagsInput.attach( element, {
             maxTags: max_tags,
             caseSensitive: case_sensitive,
             source: async function(value) {
-                console.log('Fetching data for:'+value);
+                // console.log('Fetching data for:'+value);
 				return await fetch(url_for_fetch + value)
 					.then(function(response) {
 					    if (response.status !== 200) {
@@ -221,7 +204,7 @@ export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_
 
 export function setup_static_autocomplete(element, callback, max_tags, case_sensitive) {
     // Attach Bulma autocomplete here
-    console.log('Setting up static autocomplete ID:' + element.id + ' case:' + case_sensitive + ' max:' + max_tags);
+    // console.log('Setting up static autocomplete ID:' + element.id + ' case:' + case_sensitive + ' max:' + max_tags);
      if (!init.has(element.id)) {
          let autocompleteInstance = BulmaTagsInput.attach( element, {
             maxTags: max_tags,
@@ -262,7 +245,10 @@ export function detach_autocomplete(id) {
 
 "#)]
 extern "C" {
-    fn setup_dynamic_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, url_to_fetch: &JsValue, auth_header: &JsValue, case_sensitive: &JsValue, data_item_value: &JsValue);
+    fn setup_dynamic_autocomplete(
+        element: &Element, callback: &JsValue, max_tags: &JsValue, url_to_fetch: &JsValue, auth_header: &JsValue, case_sensitive: &JsValue,
+        data_item_value: &JsValue,
+    );
     fn setup_static_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, case_sensitive: &JsValue);
     fn detach_autocomplete(id: &JsValue);
 }

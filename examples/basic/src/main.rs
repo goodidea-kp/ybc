@@ -27,9 +27,7 @@ pub fn app() -> Html {
     let calendar_departure_date = html! {
        <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={cb_date_changed.clone()} class={vec!["input".to_string()]} />
     };
-
     let items: UseStateHandle<Vec<String>> = use_state(|| vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string()]);
-
 
     html! {
         <>
