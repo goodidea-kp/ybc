@@ -171,7 +171,7 @@ impl Component for AutoComplete {
 let init = new Map();
 export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_fetch, auth_header, case_sensitive, data_item_value) {
     // Attach Bulma autocomplete here
-    console.log('Setting up dynamic autocomplete ID:' + element.id + ' fetch:' + url_for_fetch + ' auth:' + auth_header + ' case:' + case_sensitive + ' max:' + max_tags);
+    // console.log('Setting up dynamic autocomplete ID:' + element.id + ' fetch:' + url_for_fetch + ' auth:' + auth_header + ' case:' + case_sensitive + ' max:' + max_tags);
      if (!init.has(element.id)) {
 		 // console.log('Setting up dynamic autocomplete ID:' + element.id);
          let autocompleteInstance = BulmaTagsInput.attach( element, {
