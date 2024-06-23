@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
@@ -7,37 +8,35 @@ use web_sys::{js_sys, Element};
 use yew::prelude::*;
 
 pub struct AutoComplete {
-    id: String,
+    id: Rc<str>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct AutoCompleteProps {
-    #[prop_or("autocomplete".to_string())]
-    pub id: String,
+    #[prop_or("".to_string().into())]
+    pub id: Rc<str>,
     #[prop_or(10)]
     pub max_items: u32,
     #[prop_or_default]
     pub items: Vec<String>,
     pub on_update: Callback<String>,
     pub on_remove: Callback<String>,
-    #[prop_or("".to_string())]
-    pub current_selector: String,
-    #[prop_or("Choose Tags".to_string())]
-    pub placeholder: String,
+    #[prop_or("".to_string().into())]
+    pub current_selector: Rc<str>,
+    #[prop_or("Choose Tags".to_string().into())]
+    pub placeholder: Rc<str>,
     #[prop_or(classes ! ("".to_string()))]
     pub classes: Classes,
     #[prop_or(true)]
     pub case_sensitive: bool,
-    #[prop_or("".to_string())]
-    pub data_item_text: String,
-    #[prop_or("".to_string())]
-    pub data_item_value: String,
-    #[prop_or("".to_string())]
-    pub data_item: String,
-    #[prop_or("".to_string())]
-    pub url_for_fetch: String,
-    #[prop_or("".to_string())]
-    pub auth_header: String,
+    #[prop_or("".to_string().into())]
+    pub data_item_text: Rc<str>,
+    #[prop_or("".to_string().into())]
+    pub data_item_value: Rc<str>,
+    #[prop_or("".to_string().into())]
+    pub url_for_fetch: Rc<str>,
+    #[prop_or("".to_string().into())]
+    pub auth_header: Rc<str>,
 }
 
 pub enum Msg {
@@ -67,24 +66,24 @@ impl Component for AutoComplete {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let current_selector = ctx.props().current_selector.clone();
+        let current_selector = ctx.props().current_selector.to_string();
         let items = ctx
             .props()
             .items
             .iter()
             .map(|item| {
-                if item == &current_selector {
+                if item == current_selector.as_str() {
                     html! {
-                         <option value={item.clone()} selected=true>{item.clone()}</option>
+                         <option value={item.to_string()} selected=true>{&item}</option>
                     }
                 } else {
                     html! {
-                         <option value={item.clone()}>{item.clone()}</option>
+                         <option value={item.to_string()}>{&item}</option>
                     }
                 }
             })
             .collect::<Html>();
-        if ctx.props().items.len() > 0 && ctx.props().data_item.len() == 0 {
+        if ctx.props().items.len() > 0 && ctx.props().data_item_text.len() == 0 && ctx.props().data_item_value.len() == 0 {
             html! {
                 <div class={classes!(ctx.props().classes.clone(), "select")}>
                     <select
@@ -98,14 +97,14 @@ impl Component for AutoComplete {
             }
         } else if ctx.props().data_item_text.len() > 0 && ctx.props().data_item_value.len() > 0 {
             let has_value = current_selector.len() > 0;
-            let value = format!("{{\"{}\":\"{}\"}}", ctx.props().data_item_value.as_str(), current_selector);
+            let value = format!("{{\"{}\":\"{}\"}}", ctx.props().data_item_value, current_selector);
             html! {
                    <input type="text"
                      class={classes!(ctx.props().classes.clone(), "input")}
                              // data-type="name"
                           data-item-text={ctx.props().data_item_text.clone()}
                           data-item-value={ctx.props().data_item_value.clone()}
-                          id={self.id.clone()} data-placeholder={ctx.props().placeholder.clone()}
+                          id={self.id.to_string()} data-placeholder={ctx.props().placeholder.clone()}
                           value={if has_value {value} else {"{}".to_string()}} />
             }
         } else {
@@ -127,8 +126,8 @@ impl Component for AutoComplete {
             let document = window.document().expect("should have a document on window");
 
             let element = document
-                .get_element_by_id(self.id.as_str())
-                .expect(format!("should have #{} on the page", self.id.as_str()).as_str());
+                .get_element_by_id(&*self.id)
+                .expect(format!("should have #{} on the page", self.id).as_str());
 
             // Clone the link from the context
             let link = ctx.link().clone();
@@ -152,10 +151,10 @@ impl Component for AutoComplete {
                     &element,
                     callback.as_ref(),
                     &JsValue::from(_max_items),
-                    &JsValue::from(_url_for_fetch),
-                    &JsValue::from(_auth_header),
+                    &JsValue::from(_url_for_fetch.to_string()),
+                    &JsValue::from(_auth_header.to_string()),
                     &JsValue::from(_case_sensitive),
-                    &JsValue::from(ctx.props().data_item_value.clone()),
+                    &JsValue::from(ctx.props().data_item_value.to_string()),
                 );
             }
             callback.forget();
@@ -163,7 +162,7 @@ impl Component for AutoComplete {
     }
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        detach_autocomplete(&JsValue::from(self.id.as_str()));
+        detach_autocomplete(&JsValue::from(self.id.as_ptr()));
     }
 }
 

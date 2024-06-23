@@ -120,16 +120,16 @@ pub fn app() -> Html {
                                     <ybc::Control>
                                         <ybc::AutoComplete
                                           classes={classes!("is-primary")}
-                                          current_selector={"FR".to_string()}
-                                          id={"tags"}
-                                          data_item_text={"cca2".to_string()}
-                                          data_item_value={"cca2".to_string()}
+                                          current_selector={Rc::from("FR")}
+                                          id={Rc::from("tags".to_string().as_str())}
+                                          data_item_text={Rc::from("cca2")}
+                                          data_item_value={Rc::from("cca2")}
                                           max_items={1}
-                                          url_for_fetch={"https://restcountries.com/v3.1/name/".to_string()}
+                                          url_for_fetch={Rc::from("https://restcountries.com/v3.1/name/")}
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
                                           case_sensitive={false}
-                                          placeholder={"Enter country code"}
+                                          placeholder={Rc::from("Enter country code")}
                                         />
                                     </ybc::Control>
                                 </ybc::Field>
@@ -137,8 +137,8 @@ pub fn app() -> Html {
                                     <ybc::Control>
                                         <ybc::AutoComplete
                                           classes={classes!("is-primary")}
-                                          current_selector={"Apple".to_string()}
-                                          id={"tags2"}
+                                          current_selector={Rc::from("Apple")}
+                                          id={Rc::from("tags2")}
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
                                         />
@@ -148,8 +148,8 @@ pub fn app() -> Html {
                                     <ybc::Control>
                                         <ybc::AutoComplete
                                           classes={classes!("is-primary")}
-                                          current_selector={"Apple".to_string()}
-                                          id={"tags3"}
+                                          current_selector={Rc::from("Apple")}
+                                          id={Rc::from("tags3".to_string().as_str())}
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
                                           items={(*items).clone()}
