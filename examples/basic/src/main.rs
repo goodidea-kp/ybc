@@ -116,7 +116,7 @@ pub fn app() -> Html {
                        </ybc::Tile>
                        <ybc::Tile>
                             <ybc::Tile>
-                                <ybc::Field label={Some("Tags")} help={"Enter tags"}>
+                                <ybc::Field label={Some("Select country code")} help={"Enter country code. data taken from 'https://restcountries.com/v3.1/name/'"}>
                                     <ybc::Control>
                                         <ybc::AutoComplete
                                           classes={classes!("is-primary")}
@@ -129,7 +129,7 @@ pub fn app() -> Html {
                                           on_update={cb_on_update.clone()}
                                           on_remove={cb_on_remove.clone()}
                                           case_sensitive={false}
-                                          placeholder={"Enter country name"}
+                                          placeholder={"Enter country code"}
                                         />
                                     </ybc::Control>
                                 </ybc::Field>
