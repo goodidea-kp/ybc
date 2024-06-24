@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
@@ -23,24 +24,23 @@ pub fn accordion_item(props: &AccordionItemProps) -> Html {
 #[derive(Clone, Debug, PartialEq, Properties)]
 pub struct AccordionsProps {
     pub children: ChildrenWithProps<AccordionItem>,
-    pub id: String,
+    pub id: Rc<str>,
 }
 
 pub struct Accordions {
     props: AccordionsProps,
-    id: String,
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct AccordionItemProps {
-    pub title: String,
+    pub title: Rc<str>,
     pub children: Children,
     #[prop_or_default]
     pub open: bool,
     #[prop_or_else(Callback::noop)]
     pub on_toggle: Callback<MouseEvent>,
-    #[prop_or_default]
-    pub id: String,
+    #[prop_or("".into())]
+    pub id: Rc<str>,
 }
 
 impl Component for Accordions {
@@ -48,10 +48,7 @@ impl Component for Accordions {
     type Properties = AccordionsProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        Self {
-            props: ctx.props().clone(),
-            id: format!("accordion-{}", ctx.props().id),
-        }
+        Self { props: ctx.props().clone() }
     }
 
     fn update(&mut self, ctx: &Context<Self>, _msg: Self::Message) -> bool {
@@ -61,7 +58,7 @@ impl Component for Accordions {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <section id={self.id.clone()} class="accordions">
+            <section id={ctx.props().id.to_string()} class="accordions">
                 {for ctx.props().children.iter().map(|child| {
                     html! {child.clone()}
                 })}
@@ -75,15 +72,15 @@ impl Component for Accordions {
             let document = window.document().expect("should have a document on window");
 
             let element = document
-                .get_element_by_id(self.id.as_str())
-                .expect(format!("should have #{} on the page", self.id.as_str()).as_str());
+                .get_element_by_id(ctx.props().id.to_string().as_str())
+                .expect(format!("should have #{} on the page", ctx.props().id).as_str());
 
             setup_accordion(&element);
         }
     }
 
     fn destroy(&mut self, ctx: &Context<Self>) {
-        detach_accordion(&JsValue::from(self.id.as_str()));
+        detach_accordion(&JsValue::from_str(&ctx.props().id));
     }
 }
 

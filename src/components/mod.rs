@@ -1,4 +1,5 @@
 pub mod accordion;
+pub mod autocomplete;
 pub mod breadcrumb;
 pub mod calendar;
 pub mod card;
