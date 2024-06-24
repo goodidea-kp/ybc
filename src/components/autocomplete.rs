@@ -155,6 +155,7 @@ impl Component for AutoComplete {
                     &JsValue::from(_auth_header.to_string()),
                     &JsValue::from(_case_sensitive),
                     &JsValue::from(ctx.props().data_item_value.to_string()),
+                    &JsValue::from(ctx.props().current_selector.to_string()),
                 );
             }
             callback.forget();
@@ -168,7 +169,7 @@ impl Component for AutoComplete {
 
 #[wasm_bindgen(inline_js = r#"
 let init = new Map();
-export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_fetch, auth_header, case_sensitive, data_item_value) {
+export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_fetch, auth_header, case_sensitive, data_item_value, initial_value) {
     // Attach Bulma autocomplete here
     // console.log('Setting up dynamic autocomplete ID:' + element.id + ' fetch:' + url_for_fetch + ' auth:' + auth_header + ' case:' + case_sensitive + ' max:' + max_tags);
      if (!init.has(element.id)) {
@@ -196,6 +197,9 @@ export function setup_dynamic_autocomplete(element, callback, max_tags, url_for_
                 // console.log(tag);
                 callback('{"op":"remove","value":"'+tag[data_item_value]+'"}');
             });
+            if (initial_value.length > 0) {
+                autocomplete.add('{"'+data_item_value+'":"'+initial_value+'"}');
+            }
 
           init.set(element.id, autocomplete);
      }
@@ -246,7 +250,7 @@ export function detach_autocomplete(id) {
 extern "C" {
     fn setup_dynamic_autocomplete(
         element: &Element, callback: &JsValue, max_tags: &JsValue, url_to_fetch: &JsValue, auth_header: &JsValue, case_sensitive: &JsValue,
-        data_item_value: &JsValue,
+        data_item_value: &JsValue, initial_value: &JsValue,
     );
     fn setup_static_autocomplete(element: &Element, callback: &JsValue, max_tags: &JsValue, case_sensitive: &JsValue);
     fn detach_autocomplete(id: &JsValue);

@@ -48,9 +48,7 @@ impl Component for Accordions {
     type Properties = AccordionsProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        Self {
-            props: ctx.props().clone(),
-        }
+        Self { props: ctx.props().clone() }
     }
 
     fn update(&mut self, ctx: &Context<Self>, _msg: Self::Message) -> bool {
