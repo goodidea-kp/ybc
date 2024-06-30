@@ -21,9 +21,15 @@ pub fn progress(props: &ProgressProps) -> Html {
     let max = props.max.to_string();
     let value = props.value.to_string();
     let value_txt = format!("{}%", value);
-    html! {
-        <progress {class} {max} {value}>
-            {value_txt}
-        </progress>
+    if props.value == -1.0 {
+        html! {
+            <progress {class} {max}/>
+        }
+    } else {
+        html! {
+            <progress {class} {max} {value}>
+                {value_txt}
+            </progress>
+        }
     }
 }

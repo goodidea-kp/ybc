@@ -156,6 +156,7 @@ pub fn app() -> Html {
                                         />
                                     </ybc::Control>
                                 </ybc::Field>
+                                <ybc::Progress value={-1.0} max={100.0} classes={classes!("is-primary")} />
                             </ybc::Tile>
                        </ybc::Tile>
                     </ybc::Tile>
