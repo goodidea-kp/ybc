@@ -27,6 +27,9 @@ pub fn app() -> Html {
     let calendar_departure_date = html! {
        <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={cb_date_changed.clone()} class={vec!["input".to_string()]} />
     };
+    let cb_on_text_update = Callback::from(|tag: String| {
+        gloo_console::log!("Tex updated: {}", tag);
+    });
     let items: UseStateHandle<Vec<String>> = use_state(|| vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string()]);
 
     html! {
@@ -44,7 +47,7 @@ pub fn app() -> Html {
             navend={html!{
                 <>
                 <ybc::NavbarItem>
-                    <ybc::ButtonAnchor classes={classes!("is-black", "is-outlined")} rel={String::from("noopener noreferrer")} target={String::from("_blank")} href="https://github.com/thedodd/trunk">
+                    <ybc::ButtonAnchor classes={classes!("is-black", "is-outlined")} rel={String::from("noopener noreferrer")} target={String::from("_blank")} href="https://github.com/goodidea-kp/ybc">
                         {"Trunk"}
                     </ybc::ButtonAnchor>
                 </ybc::NavbarItem>
@@ -157,6 +160,9 @@ pub fn app() -> Html {
                                     </ybc::Control>
                                 </ybc::Field>
                                 <ybc::Progress value={-1.0} max={100.0} classes={classes!("is-primary")} />
+                                <ybc::TextArea update={cb_on_text_update} rows={3} name={String::from("textarea")} value={String::from("Hello, ChatGpt!")} placeholder={String::from("Enter some text")}
+                                   is_genai={true}
+                                />
                             </ybc::Tile>
                        </ybc::Tile>
                     </ybc::Tile>
