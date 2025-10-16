@@ -134,23 +134,25 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     class.push(props.classes.clone());
 
     let (opencb, closecb) = if _id == id && *is_active {
-
         class.push("is-active");
 
         let is_active = is_active.clone();
 
-        (Callback::noop(), Callback::from(move |e:MouseEvent| {
-            let target = e.target();
-            if let Some(target) = target {
-                let target_element = target.dyn_into::<web_sys::Element>().unwrap();
-                if target_element.id().starts_with("modal-ignore-") {
-                    // If the target is an element to ignore, stop the event propagation
-                    e.stop_propagation();
-                    return;
+        (
+            Callback::noop(),
+            Callback::from(move |e: MouseEvent| {
+                let target = e.target();
+                if let Some(target) = target {
+                    let target_element = target.dyn_into::<web_sys::Element>().unwrap();
+                    if target_element.id().starts_with("modal-ignore-") {
+                        // If the target is an element to ignore, stop the event propagation
+                        e.stop_propagation();
+                        return;
+                    }
                 }
-            }
-            is_active.set(false)
-        }))
+                is_active.set(false)
+            }),
+        )
     } else if _id == id {
         let is_active = is_active.clone();
         // gloo_console::log!("is_active=false call");
@@ -198,7 +200,6 @@ pub fn modal_card2(props: &ModalCardProps) -> Html {
         false => (action, false),
     };
     let is_active = use_state(|| false);
-
 
     if _id == id && closed {
         is_active.set(false);
