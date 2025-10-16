@@ -1,7 +1,7 @@
 use derive_more::Display;
 use std::rc::Rc;
-use yew::prelude::*;
 use std::string::ToString;
+use yew::prelude::*;
 
 use crate::components::dropdown::DropdownMsg;
 

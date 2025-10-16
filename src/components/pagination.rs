@@ -124,8 +124,8 @@ pub fn pagination_ellipsis(props: &PaginationEllipsisProps) -> Html {
 mod router {
     use super::*;
     use serde::Serialize;
-    use yew_router::components::Link;
     use yew_router::Routable;
+    use yew_router::components::Link;
 
     #[derive(Clone, Properties, PartialEq)]
     pub struct RouterProps<R: Routable + Clone + PartialEq + 'static> {

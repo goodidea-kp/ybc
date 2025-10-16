@@ -91,8 +91,8 @@ pub fn button(props: &ButtonProps) -> Html {
 mod router {
     use super::*;
     use serde::Serialize;
-    use yew_router::components::Link;
     use yew_router::Routable;
+    use yew_router::components::Link;
 
     #[derive(Clone, Properties, PartialEq)]
     pub struct ButtonRouterProps<R: Routable + Clone + PartialEq + 'static> {
