@@ -70,18 +70,18 @@ pub fn subtitle(props: &SubtitleProps) -> Html {
 ///
 /// https://bulma.io/documentation/elements/title/#sizes
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum HeaderSize {
-    #[display(fmt = "1")]
+    #[display("1")]
     Is1,
-    #[display(fmt = "2")]
+    #[display("2")]
     Is2,
-    #[display(fmt = "3")]
+    #[display("3")]
     Is3,
-    #[display(fmt = "4")]
+    #[display("4")]
     Is4,
-    #[display(fmt = "5")]
+    #[display("5")]
     Is5,
-    #[display(fmt = "6")]
+    #[display("6")]
     Is6,
 }

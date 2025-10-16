@@ -1,6 +1,7 @@
 use derive_more::Display;
 use std::rc::Rc;
 use yew::prelude::*;
+use std::string::ToString;
 
 use crate::components::dropdown::DropdownMsg;
 
@@ -174,11 +175,10 @@ impl Component for Navbar {
 /// NOTE WELL: in order to work properly, the root `html` or `body` element must be configured with
 /// the corresponding `has-navbar-fixed-top` or `has-navbar-fixed-bottom` class.
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
 pub enum NavbarFixed {
-    #[display(fmt = "fixed-top")]
+    #[display("is-fixed-top")]
     Top,
-    #[display(fmt = "fixed-bottom")]
+    #[display("is-fixed-bottom")]
     Bottom,
 }
 
@@ -190,9 +190,9 @@ pub enum NavbarFixed {
 /// [https://bulma.io/documentation/components/navbar/#navbar-item](https://bulma.io/documentation/components/navbar/#navbar-item)
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
 pub enum NavbarItemTag {
-    #[display(fmt = "a")]
+    #[display("a")]
     A,
-    #[display(fmt = "div")]
+    #[display("div")]
     Div,
 }
 
