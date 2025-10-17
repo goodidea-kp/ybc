@@ -1,6 +1,6 @@
+use wasm_bindgen::JsValue;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
 use web_sys::Element;
 use yew::prelude::*;
 use yew::{Callback, Component, Context, Html};

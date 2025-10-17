@@ -1,6 +1,6 @@
 use std::rc::Rc;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::Element;
 use yew::prelude::*;
 
