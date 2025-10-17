@@ -1,4 +1,5 @@
 use derive_more::Display;
+use std::string::ToString;
 use yew::prelude::*;
 
 #[derive(Clone, Debug, Properties, PartialEq)]
@@ -46,13 +47,13 @@ pub fn tile(props: &TileProps) -> Html {
 ///
 /// https://bulma.io/documentation/layout/tiles/#modifiers
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum TileCtx {
-    #[display(fmt = "ancestor")]
+    #[display("ancestor")]
     Ancestor,
-    #[display(fmt = "parent")]
+    #[display("parent")]
     Parent,
-    #[display(fmt = "child")]
+    #[display("child")]
     Child,
 }
 
@@ -60,30 +61,30 @@ pub enum TileCtx {
 ///
 /// https://bulma.io/documentation/layout/tiles/#modifiers
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum TileSize {
-    #[display(fmt = "1")]
+    #[display("1")]
     One,
-    #[display(fmt = "2")]
+    #[display("2")]
     Two,
-    #[display(fmt = "3")]
+    #[display("3")]
     Three,
-    #[display(fmt = "4")]
+    #[display("4")]
     Four,
-    #[display(fmt = "5")]
+    #[display("5")]
     Five,
-    #[display(fmt = "6")]
+    #[display("6")]
     Six,
-    #[display(fmt = "7")]
+    #[display("7")]
     Seven,
-    #[display(fmt = "8")]
+    #[display("8")]
     Eight,
-    #[display(fmt = "9")]
+    #[display("9")]
     Nine,
-    #[display(fmt = "10")]
+    #[display("10")]
     Ten,
-    #[display(fmt = "11")]
+    #[display("11")]
     Eleven,
-    #[display(fmt = "12")]
+    #[display("12")]
     Twelve,
 }

@@ -6,37 +6,31 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          default: true
-          components: clippy, rustfmt, cargo
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+      - name: Run clippy
+        run: cargo clippy
+      - name: Check formatting
+        run: cargo fmt -- --check
+      - name: Build
+        run: cargo build
 
   example_basic:
     name: Example | Basic
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          default: true
-          components: clippy, rustfmt, cargo
-      - name: fetch trunk
-        run: wget -qO- https://github.com/thedodd/trunk/releases/download/v0.16.0/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf-
-      - name: build example
-        run: cd examples/basic && ../../trunk build
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+      - name: Install trunk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: trunk
+      - name: Build example
+        run: cd examples/basic && trunk build

@@ -80,14 +80,14 @@ pub fn hero(props: &HeroProps) -> Html {
 ///
 /// [https://bulma.io/documentation/layout/hero/#sizes](https://bulma.io/documentation/layout/hero/#sizes)
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum HeroSize {
-    #[display(fmt = "medium")]
+    #[display("medium")]
     Medium,
-    #[display(fmt = "large")]
+    #[display("large")]
     Large,
-    #[display(fmt = "fullheight")]
+    #[display("fullheight")]
     Fullheight,
-    #[display(fmt = "fullheight-with-navbar")]
+    #[display("fullheight-with-navbar")]
     FullheightWithNavbar,
 }

@@ -7,8 +7,6 @@ use ybc::Calendar;
 use ybc::TileCtx::{Ancestor, Child, Parent};
 use yew::prelude::*;
 
-use ybc::ModalCloserContext;
-use ybc::ModalCloserProvider;
 use ybc::NavBurgerCloserState;
 
 #[function_component(App)]
@@ -196,8 +194,11 @@ fn main() {
     yew::Renderer::<App>::new().render();
 }
 
-#[function_component(MyModal1)]
-pub fn my_modal1() -> Html {
+use ybc::ModalCloserContext;
+use ybc::ModalCloserProvider;
+
+#[function_component]
+pub fn MyModal1() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id0-close".to_string().parse().unwrap())) };
     let on_click_cb = Callback::from(move |e: AttrValue| {

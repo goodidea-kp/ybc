@@ -59,6 +59,7 @@ pub use components::calendar::{Calendar, CalendarProps};
 
 // elements
 pub use elements::block::{Block, BlockProps};
+pub use elements::r#box::{Box, BoxProps};
 pub use elements::button::{
     Button, ButtonAnchor, ButtonAnchorProps, ButtonAnchorRouter, ButtonGroupSize, ButtonInputReset, ButtonInputResetProps, ButtonInputSubmit,
     ButtonInputSubmitProps, ButtonProps, ButtonRouter, ButtonRouterProps, Buttons, ButtonsProps,
@@ -69,7 +70,6 @@ pub use elements::icon::{Icon, IconProps};
 pub use elements::image::{Image, ImageProps, ImageSize};
 pub use elements::notification::{Notification, NotificationProps};
 pub use elements::progress::{Progress, ProgressProps};
-pub use elements::r#box::{Box, BoxProps};
 pub use elements::table::{Table, TableProps};
 pub use elements::tag::{Tag, TagProps, Tags, TagsProps};
 pub use elements::title::{HeaderSize, Subtitle, SubtitleProps, Title, TitleProps};

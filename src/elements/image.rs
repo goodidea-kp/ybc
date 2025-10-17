@@ -29,52 +29,52 @@ pub fn image(props: &ImageProps) -> Html {
 ///
 /// https://bulma.io/documentation/elements/image/
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum ImageSize {
-    #[display(fmt = "16x16")]
+    #[display("16x16")]
     Is16x16,
-    #[display(fmt = "24x24")]
+    #[display("24x24")]
     Is24x24,
-    #[display(fmt = "32x32")]
+    #[display("32x32")]
     Is32x32,
-    #[display(fmt = "48x48")]
+    #[display("48x48")]
     Is48x48,
-    #[display(fmt = "64x64")]
+    #[display("64x64")]
     Is64x64,
-    #[display(fmt = "96x96")]
+    #[display("96x96")]
     Is96x96,
-    #[display(fmt = "128x128")]
+    #[display("128x128")]
     Is128x128,
-    #[display(fmt = "square")]
+    #[display("square")]
     IsSquare,
-    #[display(fmt = "1by1")]
+    #[display("1by1")]
     Is1by1,
-    #[display(fmt = "5by4")]
+    #[display("5by4")]
     Is5by4,
-    #[display(fmt = "4by3")]
+    #[display("4by3")]
     Is4by3,
-    #[display(fmt = "3by2")]
+    #[display("3by2")]
     Is3by2,
-    #[display(fmt = "5by3")]
+    #[display("5by3")]
     Is5by3,
-    #[display(fmt = "16by9")]
+    #[display("16by9")]
     Is16by9,
-    #[display(fmt = "2by1")]
+    #[display("2by1")]
     Is2by1,
-    #[display(fmt = "3by1")]
+    #[display("3by1")]
     Is3by1,
-    #[display(fmt = "4by5")]
+    #[display("4by5")]
     Is4by5,
-    #[display(fmt = "3by4")]
+    #[display("3by4")]
     Is3by4,
-    #[display(fmt = "2by3")]
+    #[display("2by3")]
     Is2by3,
-    #[display(fmt = "3by5")]
+    #[display("3by5")]
     Is3by5,
-    #[display(fmt = "9by16")]
+    #[display("9by16")]
     Is9by16,
-    #[display(fmt = "1by2")]
+    #[display("1by2")]
     Is1by2,
-    #[display(fmt = "1by3")]
+    #[display("1by3")]
     Is1by3,
 }

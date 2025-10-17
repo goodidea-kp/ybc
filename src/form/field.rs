@@ -124,11 +124,11 @@ pub fn field(props: &FieldProps) -> Html {
 ///
 /// https://bulma.io/documentation/form/general/
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "has-addons-{}")]
+#[display("has-addons-{}")]
 pub enum AddonsAlign {
-    #[display(fmt = "centered")]
+    #[display("centered")]
     Centered,
-    #[display(fmt = "right")]
+    #[display("right")]
     Right,
 }
 
@@ -136,11 +136,11 @@ pub enum AddonsAlign {
 ///
 /// https://bulma.io/documentation/form/general/
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-grouped-{}")]
+#[display("is-grouped-{}")]
 pub enum GroupedAlign {
-    #[display(fmt = "centered")]
+    #[display("centered")]
     Centered,
-    #[display(fmt = "right")]
+    #[display("right")]
     Right,
 }
 
@@ -148,12 +148,12 @@ pub enum GroupedAlign {
 ///
 /// https://bulma.io/documentation/form/general/#horizontal-form
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "is-{}")]
+#[display("is-{}")]
 pub enum LabelSize {
-    #[display(fmt = "small")]
+    #[display("small")]
     Small,
-    #[display(fmt = "medium")]
+    #[display("medium")]
     Medium,
-    #[display(fmt = "large")]
+    #[display("large")]
     Large,
 }

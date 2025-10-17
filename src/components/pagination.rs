@@ -86,16 +86,15 @@ pub fn pagination_item(props: &PaginationItemProps) -> Html {
 
 /// A pagination item type.
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
-#[display(fmt = "pagination-{}")]
 pub enum PaginationItemType {
     /// A pagination link for a specific page number.
-    #[display(fmt = "link")]
+    #[display("pagination-link")]
     Link,
     /// A pagination button for the next page.
-    #[display(fmt = "next")]
+    #[display("pagination-next")]
     Next,
     /// A pagination button for the previous page.
-    #[display(fmt = "previous")]
+    #[display("pagination-previous")]
     Previous,
 }
 
@@ -125,8 +124,8 @@ pub fn pagination_ellipsis(props: &PaginationEllipsisProps) -> Html {
 mod router {
     use super::*;
     use serde::Serialize;
-    use yew_router::components::Link;
     use yew_router::Routable;
+    use yew_router::components::Link;
 
     #[derive(Clone, Properties, PartialEq)]
     pub struct RouterProps<R: Routable + Clone + PartialEq + 'static> {

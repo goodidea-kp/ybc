@@ -130,14 +130,14 @@ pub fn input(props: &InputProps) -> Html {
 /// https://bulma.io/documentation/form/input/
 #[derive(Clone, Debug, Display, PartialEq, Eq)]
 pub enum InputType {
-    #[display(fmt = "text")]
+    #[display("text")]
     Text,
-    #[display(fmt = "password")]
+    #[display("password")]
     Password,
-    #[display(fmt = "email")]
+    #[display("email")]
     Email,
-    #[display(fmt = "tel")]
+    #[display("tel")]
     Tel,
-    #[display(fmt = "number")]
+    #[display("number")]
     Number,
 }
