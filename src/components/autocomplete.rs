@@ -1,10 +1,10 @@
 use std::rc::Rc;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
-use web_sys::js_sys::{Reflect, JSON};
-use web_sys::{js_sys, Element};
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::js_sys::{JSON, Reflect};
+use web_sys::{Element, js_sys};
 use yew::prelude::*;
 
 pub struct AutoComplete {
