@@ -56,7 +56,7 @@ First, add this library to your `Cargo.toml` dependencies.
 
 ```toml
 [dependencies]
-ybc = "*"
+ybc = { git = "https://github.com/goodidea-kp/ybc.git" }
 ```
 
 ### add bulma

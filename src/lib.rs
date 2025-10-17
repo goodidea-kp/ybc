@@ -32,6 +32,8 @@ pub use columns::{Column, ColumnProps, Columns, ColumnsProps};
 pub use common::{Alignment, Size};
 
 // components
+pub use components::accordion::{AccordionItem, AccordionItemProps, Accordions, AccordionsProps};
+pub use components::autocomplete::{AutoComplete, AutoCompleteProps};
 pub use components::breadcrumb::{Breadcrumb, BreadcrumbProps, BreadcrumbSeparator, BreadcrumbSize};
 pub use components::card::{
     Card, CardContent, CardContentProps, CardFooter, CardFooterProps, CardHeader, CardHeaderProps, CardImage, CardImageProps, CardProps,
@@ -52,6 +54,8 @@ pub use components::pagination::{
 };
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
 pub use components::tabs::{Tabs, TabsProps};
+
+pub use components::calendar::{Calendar, CalendarProps};
 
 // elements
 pub use elements::block::{Block, BlockProps};
