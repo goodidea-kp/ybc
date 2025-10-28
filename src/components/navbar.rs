@@ -78,7 +78,11 @@ impl Component for Navbar {
             .link()
             .context::<Rc<NavBurgerCloserState>>(_ctx.link().callback(NavbarMsg::CloseEvent))
             .expect("context to be set");
-        Self { is_menu_open: false, _listener, state }
+        Self {
+            is_menu_open: false,
+            _listener,
+            state,
+        }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {

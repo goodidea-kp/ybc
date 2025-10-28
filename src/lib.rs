@@ -20,7 +20,7 @@
 
 mod columns;
 mod common;
-mod components;
+pub mod components;
 mod elements;
 mod form;
 mod layout;

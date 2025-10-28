@@ -1,0 +1,8 @@
+[build]
+release = false
+# Re-enable wasm-opt for release builds so we can reproduce and debug parsing errors.
+wasm-opt = true
+
+[serve]
+open = true
+port = 8080
