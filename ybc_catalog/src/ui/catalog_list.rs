@@ -21,6 +21,7 @@ pub fn catalog_list() -> Html {
         ("Pagination", Route::Pagination, "Sizes, alignment, rounded, and ellipsis"),
         ("Accordion", Route::Accordion, "Accessible details/summary sections"),
         ("Autocomplete", Route::Autocomplete, "Tags input with static source"),
+        ("Calendar", Route::Calendar, "Date/time picker powered by bulma-calendar"),
     ];
 
     html! {

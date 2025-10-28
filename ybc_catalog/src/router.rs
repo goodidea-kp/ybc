@@ -4,7 +4,7 @@ use yew_router::prelude::*;
 use crate::app::HomePage;
 use crate::components::button_example::ButtonExamplePage;
 use crate::components::{CardExamplePage, ColumnsExamplePage, FormExamplePage, ImageIconExamplePage, ModalExamplePage, NavbarExamplePage, TableExamplePage, TabsExamplePage, TagNotificationExamplePage,
-                        BreadCrumbsExamplePage, MessageExamplePage, PanelExamplePage, PaginationExamplePage, AccordionExamplePage, AutocompleteExamplePage};
+                        BreadCrumbsExamplePage, MessageExamplePage, PanelExamplePage, PaginationExamplePage, AccordionExamplePage, AutocompleteExamplePage, CalendarExamplePage};
 
 #[derive(Routable, Clone, PartialEq, Debug)]
 pub enum Route {
@@ -42,6 +42,8 @@ pub enum Route {
     Accordion,
     #[at("/component/autocomplete")]
     Autocomplete,
+    #[at("/component/calendar")]
+    Calendar,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -69,6 +71,7 @@ pub fn switch_routes() -> Html {
                 Route::Pagination => html! { <PaginationExamplePage/> },
                 Route::Accordion => html! { <AccordionExamplePage/> },
                 Route::Autocomplete => html! { <AutocompleteExamplePage/> },
+                Route::Calendar => html! { <CalendarExamplePage/> },
                 Route::NotFound => html! { <ybc::Section><ybc::Container><h1 class="title">{"404"}</h1></ybc::Container></ybc::Section> },
             }
         }}/>

@@ -2,11 +2,12 @@ catalog:
   name: "YBC Component Catalog"
   css:
     - "bulma@0.9.4"
-    - "font-awesome@6.x"
-  js: []
+    - "font-awesome@7.0.0"
+  js:
+    - "font-awesome@7.0.0"
   notes:
-    - "YBC wraps Bulma. No external JS is needed; Yew handles interactivity."
-    - "All examples compile and run via `trunk serve`."
+    - "YBC wraps Bulma. Most components need only Bulma CSS; Yew handles interactivity."
+    - "Some components require extra Bulma plugins (accordion, tags input). These are preloaded in index.html."
 
 components:
   - id: "button"
@@ -16,12 +17,14 @@ components:
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
+      - "children: Children"
       - "classes: Classes"
       - "onclick: Callback<MouseEvent>"
-      - "children: Html"
+      - "loading: bool, disabled: bool, id: String"
+      - "r#static: bool"
     tags: ["element", "interaction"]
 
- - id: "navbar"
+  - id: "navbar"
     name: "Navbar"
     file: "src/components/navbar_example.rs"
     route: "/component/navbar"
@@ -30,16 +33,10 @@ components:
     props_summary:
       - "children: Children"
       - "classes: Classes"
-      - "fixed: Option<NavbarFixed>"
-      - "transparent: bool"
-      - "spaced: bool"
-      - "padded: bool"
-      - "navbrand: Option<Html>"
-      - "navstart: Option<Html>"
-      - "navend: Option<Html>"
-      - "navburger: bool"
-      - "navburger_classes: Classes"
-
+      - "fixed: Option<NavbarFixed> (Top|Bottom)"
+      - "transparent: bool, spaced: bool, padded: bool"
+      - "navbrand: Option<Html>, navstart: Option<Html>, navend: Option<Html>"
+      - "navburger: bool (default true), navburger_classes: Classes"
 
   - id: "card"
     name: "Card"
@@ -47,31 +44,45 @@ components:
     route: "/component/card"
     requires_css: ["bulma"]
     requires_js: []
-  - id: "cardContent"
-    name: "CardContent"
-    file: "src/components/card_example.rs"
-    route: "/component/card"
-    requires_css: ["bulma"]
-    requires_js: []
-  - id: "cardFooter"
-    name: "CardFooter"
-    file: "src/components/card_example.rs"
-    route: "/component/card"
-    requires_css: ["bulma"]
-    requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
   - id: "cardHeader"
     name: "CardHeader"
     file: "src/components/card_example.rs"
     route: "/component/card"
     requires_css: ["bulma"]
     requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
   - id: "cardImage"
     name: "CardImage"
     file: "src/components/card_example.rs"
     route: "/component/card"
     requires_css: ["bulma"]
     requires_js: []
-
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
+  - id: "cardContent"
+    name: "CardContent"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
+  - id: "cardFooter"
+    name: "CardFooter"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
 
   - id: "form"
     name: "Form Controls"
@@ -98,7 +109,7 @@ components:
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
-      - "striped, bordered, hoverable"
+      - "Use classes: is-striped, is-bordered, is-hoverable"
 
   - id: "modal"
     name: "Modal"
@@ -107,18 +118,22 @@ components:
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
-      - "active: bool"
-      - "on_close: Callback<()>"
+      - "id: String (modal DOM id)"
+      - "children: Children"
+      - "trigger: Html"
+      - "classes: Classes"
 
   - id: "tabs"
     name: "Tabs"
     file: "src/components/tabs_example.rs"
-    route: "/component/tabs"
+    route: "/component/tabs_example"
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
-      - "tabs: Vec<(String, Html)>"
-      - "active_idx: usize"
+      - "children: Children"
+      - "classes: Classes"
+      - "alignment: Option<Alignment>, size: Option<Size>"
+      - "boxed: bool, toggle: bool, rounded: bool, fullwidth: bool"
 
   - id: "tags_notifications"
     name: "Tag & Notification"
@@ -127,7 +142,7 @@ components:
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
-      - "Tag colors, Notification levels"
+      - "Tag colors (is-primary, is-warning, ...), Notification levels"
 
   - id: "image_icon"
     name: "Image & Icon"
@@ -136,4 +151,89 @@ components:
     requires_css: ["bulma", "font-awesome"]
     requires_js: []
     props_summary:
-      - "Icon(name=\"fa-solid fa-user\")"
+      - "Image: children: Children, classes: Classes, size: Option<ImageSize>"
+      - "Icon: children: Children, classes: Classes, onclick: Callback<MouseEvent>"
+      - "Icon: size: Option<Size>, alignment: Option<Alignment>"
+
+  - id: "breadcrumb"
+    name: "Breadcrumb"
+    file: "src/components/bread_crumbs_example.rs"
+    route: "/component/breadcrumb"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
+      - "size: Option<BreadcrumbSize>, alignment: Option<Alignment>, separator: Option<BreadcrumbSeparator>"
+
+  - id: "message"
+    name: "Message"
+    file: "src/components/message_example_page.rs"
+    route: "/component/message"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Message: children: Children, classes: Classes"
+      - "MessageHeader: children: Children, classes: Classes"
+      - "MessageBody: children: Children, classes: Classes"
+
+  - id: "panel"
+    name: "Panel"
+    file: "src/components/panel_example_page.rs"
+    route: "/component/panel"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Panel: children: Children, classes: Classes, heading: Html"
+      - "PanelTabs: children: Children"
+      - "PanelBlock: children: Children, tag: String, active: bool, onclick: Callback<MouseEvent>"
+
+  - id: "pagination"
+    name: "Pagination"
+    file: "src/components/pagination_example_page.rs"
+    route: "/component/pagination"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Pagination: children: Children, classes: Classes"
+      - "Pagination: size: Option<Size>, alignment: Option<Alignment>, rounded: bool"
+      - "previous: Html, next: Html"
+      - "PaginationItem: item_type: PaginationItemType, label: String, onclick: Callback<MouseEvent>, current: bool"
+      - "PaginationEllipsis: character: String"
+
+  - id: "accordion"
+    name: "Accordion"
+    file: "src/components/accordion_example_page.rs"
+    route: "/component/accordion"
+    requires_css: ["bulma", "bulma-accordion@2.0.1"]
+    requires_js: ["bulma-accordion@2.0.1"]
+    props_summary:
+      - "Accordions: children: ChildrenWithProps<AccordionItem>, id: Rc<str>"
+      - "AccordionItem: title: Rc<str>, children: Children, open: bool"
+      - "AccordionItem: on_toggle: Callback<MouseEvent>, id: Rc<str>"
+
+  - id: "autocomplete"
+    name: "Autocomplete (TagsInput)"
+    file: "src/components/autocomple_example_page.rs"
+    route: "/component/autocomplete"
+    requires_css: ["bulma", "bulma-tagsinput@1.0.3"]
+    requires_js: ["bulma-tagsinput@1.0.3"]
+    props_summary:
+      - "id: Rc<str>, classes: Classes, placeholder: Rc<str>"
+      - "items: Vec<String> (for static), current_selector: Rc<str>"
+      - "max_items: u32, case_sensitive: bool"
+      - "on_update: Callback<String>, on_remove: Callback<String>"
+      - "Dynamic mode: url_for_fetch: Rc<str>, auth_header: Rc<str>, data_item_text: Rc<str>, data_item_value: Rc<str>"
+
+  - id: "calendar"
+    name: "Calendar"
+    file: "src/components/calendar_example_page.rs"
+    route: "/component/calendar"
+    requires_css: ["bulma", "bulma-calendar@7.1.1"]
+    requires_js: ["bulma-calendar@7.1.1"]
+    props_summary:
+      - "id: String (unique DOM id)"
+      - "date_format: String, time_format: String"
+      - "date: Option<String>"
+      - "on_date_changed: Callback<String>"
+      - "class: Vec<String> (extra input classes)"

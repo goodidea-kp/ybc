@@ -1,4 +1,3 @@
-use ybc::*;
 use yew::prelude::*;
 
 #[function_component(TabsExamplePage)]
