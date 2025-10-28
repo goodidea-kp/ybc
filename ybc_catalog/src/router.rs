@@ -2,8 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::app::HomePage;
-use crate::components::button_example::ButtonExamplePage;
-use crate::components::{CardExamplePage, ColumnsExamplePage, FormExamplePage, ImageIconExamplePage, ModalExamplePage, NavbarExamplePage, TableExamplePage, TabsExamplePage, TagNotificationExamplePage,
+use crate::components::{ButtonExamplePage, CardExamplePage, ColumnsExamplePage, FormExamplePage, ImageIconExamplePage, ModalExamplePage, NavbarExamplePage, TableExamplePage, TabsExamplePage, TagNotificationExamplePage,
                         BreadCrumbsExamplePage, MessageExamplePage, PanelExamplePage, PaginationExamplePage, AccordionExamplePage, AutocompleteExamplePage, CalendarExamplePage};
 
 #[derive(Routable, Clone, PartialEq, Debug)]

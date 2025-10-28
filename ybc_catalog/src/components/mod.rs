@@ -13,7 +13,7 @@ mod message_example_page;
 pub mod panel_example_page;
 pub mod pagination_example_page;
 pub mod accordion_example_page;
-pub mod autocomple_example_page;
+pub mod autocomplete_example_page;
 pub mod calendar_example_page;
 
 pub use button_example::ButtonExamplePage;
@@ -31,5 +31,5 @@ pub use message_example_page::MessageExamplePage;
 pub use panel_example_page::PanelExamplePage;
 pub use pagination_example_page::PaginationExamplePage;
 pub use accordion_example_page::AccordionExamplePage;
-pub use autocomple_example_page::AutocompleteExamplePage;
+pub use autocomplete_example_page::AutocompleteExamplePage;
 pub use calendar_example_page::CalendarExamplePage;

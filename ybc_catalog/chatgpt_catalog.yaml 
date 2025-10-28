@@ -214,7 +214,7 @@ components:
 
   - id: "autocomplete"
     name: "Autocomplete (TagsInput)"
-    file: "src/components/autocomple_example_page.rs"
+    file: "src/components/autocomplete_example_page.rs"
     route: "/component/autocomplete"
     requires_css: ["bulma", "bulma-tagsinput@1.0.3"]
     requires_js: ["bulma-tagsinput@1.0.3"]
