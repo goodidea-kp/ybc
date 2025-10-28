@@ -17,7 +17,7 @@
 // TODO: add this back in once it is no longer a land mine:
 //  #![cfg_attr(feature = "docinclude", doc = include_str!("../README.md"))]
 #![recursion_limit = "1024"]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(feature = "docinclude", doc = include_str!("../README.md"))]
 
 mod columns;
