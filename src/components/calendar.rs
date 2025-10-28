@@ -263,13 +263,7 @@ export function detach_date_picker(id) {
 extern "C" {
     /// Attach bulmaCalendar to `element`, register `callback`, seed with `initial_date`,
     /// and apply `date_format`/`time_format`.
-    fn setup_date_picker(
-        element: &Element,
-        callback: &JsValue,
-        initial_date: &JsValue,
-        date_format: &JsValue,
-        time_format: &JsValue,
-    );
+    fn setup_date_picker(element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue);
 
     /// Remove the stored calendar instance keyed by the given `id`.
     fn detach_date_picker(id: &JsValue);

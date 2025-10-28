@@ -285,7 +285,10 @@ impl Worker for ModalCloser {
     // The agent forwards the input to all registered modals.
 
     fn create(link: &WorkerScope<Self>) -> Self {
-        Self { link: link.clone(), subscribers: HashSet::new() }
+        Self {
+            link: link.clone(),
+            subscribers: HashSet::new(),
+        }
     }
 
     fn update(&mut self, scope: &WorkerScope<Self>, _: Self::Message) {}
