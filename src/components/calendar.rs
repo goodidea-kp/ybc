@@ -12,7 +12,7 @@
 //! Usage
 //! ```rust
 //! use yew::prelude::*;
-//! use crate::components::calendar::Calendar;
+//! use ybc::components::calendar::Calendar;
 //!
 //! #[function_component(Form)]
 //! fn form() -> Html {

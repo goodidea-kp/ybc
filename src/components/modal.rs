@@ -43,7 +43,7 @@ pub fn modal(props: &ModalProps) -> Html {
     let mut class = Classes::from("modal");
 
     class.push(props.classes.clone());
-    let (_id, closed) = match closer_ctx.0.contains("-") {
+    let (_id, _closed) = match closer_ctx.0.contains("-") {
         true => {
             let result = closer_ctx.0.split("-").collect::<Vec<&str>>();
             (result[0], result[1] == "close")
@@ -291,17 +291,17 @@ impl Worker for ModalCloser {
         }
     }
 
-    fn update(&mut self, scope: &WorkerScope<Self>, _: Self::Message) {}
+    fn update(&mut self, _scope: &WorkerScope<Self>, _: Self::Message) {}
 
-    fn connected(&mut self, scope: &WorkerScope<Self>, id: HandlerId) {
+    fn connected(&mut self, _scope: &WorkerScope<Self>, id: HandlerId) {
         self.subscribers.insert(id);
     }
 
-    fn disconnected(&mut self, scope: &WorkerScope<Self>, id: HandlerId) {
+    fn disconnected(&mut self, _scope: &WorkerScope<Self>, id: HandlerId) {
         self.subscribers.remove(&id);
     }
 
-    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, id: HandlerId) {
+    fn received(&mut self, _scope: &WorkerScope<Self>, msg: Self::Input, _id: HandlerId) {
         for cmp in self.subscribers.iter() {
             self.link.respond(*cmp, msg.clone());
         }

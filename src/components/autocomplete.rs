@@ -208,7 +208,7 @@ impl Component for AutoComplete {
         }
     }
 
-    fn destroy(&mut self, ctx: &Context<Self>) {
+    fn destroy(&mut self, _ctx: &Context<Self>) {
         detach_autocomplete(&JsValue::from(self.id.as_ptr()));
     }
 }
