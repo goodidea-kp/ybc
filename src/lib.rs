@@ -12,11 +12,13 @@
 //! What does it look like to use YBC? The following is a snippet of a component's `view` method
 //! rendering a navbar, a fluid container, and some tiles.
 //!
-//! Please see [this project's README](https://github.com/thedodd/ybc) for the example. **Docs.rs is
+//! Please see [this project's README](https://github.com/goodidea-kp/ybc) for the example. **Docs.rs is
 //! currently (2021.07.26) slightly broken and having trouble including external docs as it has historically.**
 // TODO: add this back in once it is no longer a land mine:
 //  #![cfg_attr(feature = "docinclude", doc = include_str!("../README.md"))]
 #![recursion_limit = "1024"]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(feature = "docinclude", doc = include_str!("../README.md"))]
 
 mod columns;
 mod common;
