@@ -1,3 +1,49 @@
+//! AutoComplete component: a Yew wrapper around the Bulma Tags Input plugin.
+//!
+//! Required static assets
+//! - Add the Bulma TagsInput CSS into your HTML <head>:
+//!   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/css/bulma-tagsinput.min.css" />
+//!
+//! - Add the Bulma TagsInput JS so `BulmaTagsInput` is available on window. Place this before your wasm bootstrap script
+//!   (or ensure it loads before your Yew app mounts):
+//!   <script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/js/bulma-tagsinput.min.js"></script>
+//!
+//! How to configure index.html
+//! - Minimal example (place CSS in <head>, script before the wasm init script):
+//!   ```html
+//!   <!doctype html>
+//!   <html>
+//!   <head>
+//!     <meta charset="utf-8" />
+//!     <meta name="viewport" content="width=device-width,initial-scale=1" />
+//!     <!-- Bulma TagsInput CSS -->
+//!     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/css/bulma-tagsinput.min.css" />
+//!   </head>
+//!   <body>
+//!     <div id="root"></div>
+//!
+//!     <!-- Bulma TagsInput JS: ensure this runs before your wasm bootstrap so `BulmaTagsInput` exists -->
+//!     <script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/js/bulma-tagsinput.min.js"></script>
+//!     <!-- Your wasm/bootstrap script that starts the Yew app -->
+//!     <script type="module">
+//!       import init from './pkg/your_crate.js';
+//!       init();
+//!     </script>
+//!   </body>
+//!   </html>
+//!   ```
+//!
+//! Notes and alternatives
+//! - If you use a bundler (webpack, vite, etc.) you can install bulma-tagsinput from npm and import it in your JS entry:
+//!     npm install @creativebulma/bulma-tagsinput
+//!     // in your entry file
+//!     import '@creativebulma/bulma-tagsinput/dist/css/bulma-tagsinput.min.css';
+//!     import '@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js';
+//!   Ensure the import runs before the Yew bootstrap so `BulmaTagsInput` is available globally (or adapt the setup to pass the module).
+//!
+//! - The important requirement: BulmaTagsInput must be defined on window when setup_static_autocomplete / setup_dynamic_autocomplete are called in rendered().
+//!
+
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;

@@ -1,0 +1,139 @@
+catalog:
+  name: "YBC Component Catalog"
+  css:
+    - "bulma@0.9.4"
+    - "font-awesome@6.x"
+  js: []
+  notes:
+    - "YBC wraps Bulma. No external JS is needed; Yew handles interactivity."
+    - "All examples compile and run via `trunk serve`."
+
+components:
+  - id: "button"
+    name: "Button"
+    file: "src/components/button_example.rs"
+    route: "/component/button"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "classes: Classes"
+      - "onclick: Callback<MouseEvent>"
+      - "children: Html"
+    tags: ["element", "interaction"]
+
+ - id: "navbar"
+    name: "Navbar"
+    file: "src/components/navbar_example.rs"
+    route: "/component/navbar"
+    requires_css: ["bulma", "font-awesome"]
+    requires_js: []
+    props_summary:
+      - "children: Children"
+      - "classes: Classes"
+      - "fixed: Option<NavbarFixed>"
+      - "transparent: bool"
+      - "spaced: bool"
+      - "padded: bool"
+      - "navbrand: Option<Html>"
+      - "navstart: Option<Html>"
+      - "navend: Option<Html>"
+      - "navburger: bool"
+      - "navburger_classes: Classes"
+
+
+  - id: "card"
+    name: "Card"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+  - id: "cardContent"
+    name: "CardContent"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+  - id: "cardFooter"
+    name: "CardFooter"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+  - id: "cardHeader"
+    name: "CardHeader"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+  - id: "cardImage"
+    name: "CardImage"
+    file: "src/components/card_example.rs"
+    route: "/component/card"
+    requires_css: ["bulma"]
+    requires_js: []
+
+
+  - id: "form"
+    name: "Form Controls"
+    file: "src/components/form_example.rs"
+    route: "/component/form"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Input, Textarea, Select, Checkbox, Radio"
+
+  - id: "columns"
+    name: "Columns & Column"
+    file: "src/components/layout_columns_example.rs"
+    route: "/component/columns"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Columns, Column size props"
+
+  - id: "table"
+    name: "Table"
+    file: "src/components/table_example.rs"
+    route: "/component/table"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "striped, bordered, hoverable"
+
+  - id: "modal"
+    name: "Modal"
+    file: "src/components/modal_example.rs"
+    route: "/component/modal"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "active: bool"
+      - "on_close: Callback<()>"
+
+  - id: "tabs"
+    name: "Tabs"
+    file: "src/components/tabs_example.rs"
+    route: "/component/tabs"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "tabs: Vec<(String, Html)>"
+      - "active_idx: usize"
+
+  - id: "tags_notifications"
+    name: "Tag & Notification"
+    file: "src/components/tag_notification_example.rs"
+    route: "/component/tag-notification"
+    requires_css: ["bulma"]
+    requires_js: []
+    props_summary:
+      - "Tag colors, Notification levels"
+
+  - id: "image_icon"
+    name: "Image & Icon"
+    file: "src/components/image_icon_example.rs"
+    route: "/component/image-icon"
+    requires_css: ["bulma", "font-awesome"]
+    requires_js: []
+    props_summary:
+      - "Icon(name=\"fa-solid fa-user\")"

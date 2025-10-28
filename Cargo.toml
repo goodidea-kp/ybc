@@ -1,11 +1,11 @@
 [package]
 name = "ybc"
-version = "0.4.0"
+version = "0.4.1"
 description = "A Yew component library based on the Bulma CSS framework."
 authors = ["Anthony Dodd <dodd.anthonyjosiah@gmail.com>", "Konstantin Pupkov <konstantin.pupkov@fromkos.com>"]
 edition = "2024"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/thedodd/ybc"
+repository = "https://github.com/goodidea-kp/ybc.git"
 readme = "README.md"
 categories = ["wasm", "web-programming"]
 keywords = ["wasm", "web", "bulma", "sass", "yew"]

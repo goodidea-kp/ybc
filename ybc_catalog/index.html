@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta
+            name="viewport"
+            content="width=device-width,initial-scale=1,shrink-to-fit=no"
+    />
+    <title>YBC Component Catalog</title>
+
+    <!-- Tell Trunk which Rust artifact to build (select only the binary to avoid multiple artifacts error) -->
+    <link data-trunk rel="rust" data-bin="ybc-catalog" />
+
+    <!-- hint for the client-side loader: set to pkg/<your_crate>.js produced by wasm-pack --target web -->
+    <meta name="wasm-pkg" content="pkg/ybc_catalog.js" />
+
+    <!-- Bulma (required by YBC) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@latest/css/bulma.min.css"/>
+
+
+    <!-- Font Awesome (icons used by <ybc::Icon>) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.0.0/css/fontawesome.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/css/bulma-calendar.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-accordion@2.0.1/dist/css/bulma-accordion.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/css/bulma-tagsinput.min.css" />
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bulma-accordion@2.0.1/dist/js/bulma-accordion.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/js/bulma-tagsinput.min.js"></script>
+<!--Required for autocomplete-->
+<div id="root"></div>
+
+<!-- Loader moved to external module for reliability/caching -->
+<script type="module" src="/loader.js"></script>
+
+</body>
+</html>
