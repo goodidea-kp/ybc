@@ -3,22 +3,18 @@ name = "ybc-catalog"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
+publish = false
 
 [dependencies]
 yew = { version = "0.21.0", features = ["csr"] }
-ybc = { path = ".." }
+ybc = "0.4.1"
 wasm-bindgen = "0.2"
 gloo = { version = "0.11", features = ["console"] }
 yew-router = "0.18"
 web-sys = { version = "0.3", features = ["Window", "Document", "Element"] }
 gloo-console = "0.3.0"
 
-[profile.release]
-opt-level = "z"
-lto = true
-codegen-units = 1
-
-[lib]
-name = "ybc_catalog"
-path = "src/lib.rs"
-crate-type = ["cdylib", "rlib"]
+# Optional: keep local development override without affecting publish.
+# This section is ignored by downstream users and does not block publishing.
+[patch.crates-io]
+ybc = { path = ".." }
