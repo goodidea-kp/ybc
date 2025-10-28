@@ -8,8 +8,8 @@ pub fn panel_example_page() -> Html {
     let on_click_refresh = Callback::from(|_| web_sys::console::log_1(&"refresh clicked".into()));
 
     html! {
-        <div class="section">
-            <div class="container content">
+        <ybc::Section>
+            <ybc::Container classes={classes!("content")}>
                 <h3>{ "Panel" }</h3>
 
                 <Panel heading={html!{ "Repositories" }}>
@@ -38,8 +38,7 @@ pub fn panel_example_page() -> Html {
                         { "Refresh" }
                     </PanelBlock>
                 </Panel>
-            </div>
-        </div>
+            </ybc::Container>
+        </ybc::Section>
     }
 }
-

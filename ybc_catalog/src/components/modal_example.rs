@@ -5,16 +5,16 @@ pub fn modal_example_page() -> Html {
     const ID: &str = "id";
     const ID2: &str = "id2";
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
         <ModalCloserProvider id={ID}>
            <MyModal id={ID} classes={classes!("is-success")} />
         </ModalCloserProvider>
         <ModalCloserProvider id={ID2}>
            <MyModal id={ID2} classes={classes!("is-danger")} />
         </ModalCloserProvider>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }
 

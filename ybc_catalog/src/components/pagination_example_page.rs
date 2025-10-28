@@ -10,8 +10,8 @@ pub fn pagination_example_page() -> Html {
     let next_link = |to: Route| html! { <Link<Route> to={to} classes={classes!("pagination-next")}>{ "Next page" }</Link<Route>> };
 
     html! {
-        <div class="section">
-            <div class="container content">
+        <ybc::Section>
+            <ybc::Container classes={classes!("content")}>
                 <h3>{ "Pagination" }</h3>
 
                 <h5>{ "Default" }</h5>
@@ -41,8 +41,7 @@ pub fn pagination_example_page() -> Html {
                     <PaginationItem item_type={PaginationItemType::Link} label={"Go to page 10"} current=true>{ "10" }</PaginationItem>
                     <PaginationItem item_type={PaginationItemType::Link} label={"Go to page 11"}>{ "11" }</PaginationItem>
                 </Pagination>
-            </div>
-        </div>
+            </ybc::Container>
+        </ybc::Section>
     }
 }
-

@@ -5,8 +5,8 @@ use crate::router::Route;
 #[function_component(AccordionExamplePage)]
 pub fn accordion_example_page() -> Html {
     html! {
-        <div class="section">
-            <div class="container content">
+        <ybc::Section>
+            <ybc::Container classes={classes!("content")}>
                 <h3>{ "Accordion" }</h3>
 
                 <details open=true>
@@ -27,8 +27,7 @@ pub fn accordion_example_page() -> Html {
                     <summary class="is-size-6">{ "Another section" }</summary>
                     <p>{ "Put any content here." }</p>
                 </details>
-            </div>
-        </div>
+            </ybc::Container>
+        </ybc::Section>
     }
 }
-

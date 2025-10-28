@@ -10,8 +10,8 @@ pub fn button_example_page() -> Html {
     };
 
     html! {
-      <div class="section">
-        <div class="container content">
+      <ybc::Section>
+        <ybc::Container classes={classes!("content")}>
           <h2>{"Button"}</h2>
           <p>{"YBC wraps Bulma buttons. Use classes for colors/sizes."}</p>
 
@@ -23,7 +23,7 @@ pub fn button_example_page() -> Html {
           </Buttons>
 
           <p>{format!("Clicked: {} time(s)", *clicks)}</p>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

@@ -4,8 +4,8 @@ use yew::prelude::*;
 #[function_component(ImageIconExamplePage)]
 pub fn image_icon_example_page() -> Html {
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
           <figure class="image is-128x128">
             <img src="https://picsum.photos/256" alt="random"/>
           </figure>
@@ -15,7 +15,7 @@ pub fn image_icon_example_page() -> Html {
             {" "}
             <Icon classes={classes!("fa-brands","fa-rust","fa-2x")}/>
           </p>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

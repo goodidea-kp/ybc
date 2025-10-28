@@ -32,8 +32,8 @@ pub fn autocomplete_example_page() -> Html {
         .collect::<Vec<_>>();
 
     html! {
-            <div class="section">
-                <div class="container content">
+            <ybc::Section>
+                <ybc::Container classes={classes!("content")}>
                     <h3>{ "Autocomplete" }</h3>
 
                     <p class="is-size-6">{ "Static tags" }</p>
@@ -63,7 +63,7 @@ pub fn autocomplete_example_page() -> Html {
                             }
                         }
                     </div>
-                </div>
-            </div>
+                </ybc::Container>
+            </ybc::Section>
         }
 }

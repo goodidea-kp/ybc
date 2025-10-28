@@ -4,8 +4,8 @@ use yew::prelude::*;
 #[function_component(ColumnsExamplePage)]
 pub fn columns_example_page() -> Html {
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
           <Columns>
             <Column classes={classes!("is-one-third")}>
               <div class="box">{"One third"}</div>
@@ -17,7 +17,7 @@ pub fn columns_example_page() -> Html {
               <div class="box">{"Narrow"}</div>
             </Column>
           </Columns>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

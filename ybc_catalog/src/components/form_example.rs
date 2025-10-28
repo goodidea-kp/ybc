@@ -55,8 +55,8 @@ pub fn form_example_page() -> Html {
     };
 
     html! {
-      <div class="section">
-        <div class="container content">
+      <ybc::Section>
+        <ybc::Container classes={classes!("content")}>
           <h2>{"Form Controls"}</h2>
           <ybc::Field>
             <ybc::Tag tag="Label">{"Username"}</ybc::Tag>
@@ -98,7 +98,7 @@ pub fn form_example_page() -> Html {
               {calendar_departure_date}
             </ybc::Control>
           </ybc::Field>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

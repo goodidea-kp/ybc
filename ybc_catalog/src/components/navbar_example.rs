@@ -6,8 +6,8 @@ use yew_router::prelude::*;
 #[function_component(NavbarExamplePage)]
 pub fn navbar_example_page() -> Html {
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
          <Navbar
                     navbrand={html!{
                         <NavbarItem>
@@ -30,7 +30,7 @@ pub fn navbar_example_page() -> Html {
                 >
                 </Navbar>
           <p class="content">{"Burger toggle is handled by Yew state, no extra JS."}</p>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

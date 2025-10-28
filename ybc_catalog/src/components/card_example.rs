@@ -6,8 +6,8 @@ pub fn card_example_page() -> Html {
     let image_loaded = use_state(|| false);
 
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
           <Card>
             <CardHeader>
               <p>{"My Card"}</p>
@@ -55,7 +55,7 @@ pub fn card_example_page() -> Html {
               <ybc::Button>{"Edit"}</ybc::Button>
             </CardFooter>
           </Card>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

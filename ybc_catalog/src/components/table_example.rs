@@ -4,8 +4,8 @@ use yew::prelude::*;
 #[function_component(TableExamplePage)]
 pub fn table_example_page() -> Html {
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
           <Table classes={classes!("is-striped","is-hoverable","is-fullwidth")}>
             <thead>
               <tr><th>{"ID"}</th><th>{"Name"}</th><th>{"Role"}</th></tr>
@@ -16,7 +16,7 @@ pub fn table_example_page() -> Html {
               <tr><td>{"3"}</td><td>{"Caro"}</td><td>{"Guest"}</td></tr>
             </tbody>
           </Table>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }

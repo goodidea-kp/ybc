@@ -4,8 +4,8 @@ use ybc::components::message::{Message, MessageHeader, MessageBody};
 #[function_component(MessageExamplePage)]
 pub fn message_example_page() -> Html {
     html! {
-        <div class="section">
-            <div class="container content">
+        <ybc::Section>
+            <ybc::Container classes={classes!("content")}>
                 <h3>{ "Message" }</h3>
 
                 <Message>
@@ -67,8 +67,7 @@ pub fn message_example_page() -> Html {
                         { "Large size message." }
                     </MessageBody>
                 </Message>
-            </div>
-        </div>
+            </ybc::Container>
+        </ybc::Section>
     }
 }
-

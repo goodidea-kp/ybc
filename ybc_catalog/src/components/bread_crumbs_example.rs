@@ -16,8 +16,8 @@ pub fn bread_crumbs_example_page() -> Html {
     };
 
     html! {
-        <div class="section">
-            <div class="container content">
+        <ybc::Section>
+            <ybc::Container classes={classes!("content")}>
                 <h3>{ "Breadcrumb" }</h3>
 
                 <h5>{ "Default" }</h5>
@@ -37,7 +37,7 @@ pub fn bread_crumbs_example_page() -> Html {
                 <Breadcrumb separator={Some(BreadcrumbSeparator::Bullet)}>{ items() }</Breadcrumb>
                 <Breadcrumb separator={Some(BreadcrumbSeparator::Dot)}>{ items() }</Breadcrumb>
                 <Breadcrumb separator={Some(BreadcrumbSeparator::Succeeds)}>{ items() }</Breadcrumb>
-            </div>
-        </div>
+            </ybc::Container>
+        </ybc::Section>
     }
 }

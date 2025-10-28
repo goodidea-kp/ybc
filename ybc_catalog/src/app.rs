@@ -52,11 +52,11 @@ pub fn home_page() -> Html {
                 </div>
             </section>
 
-            <section class="section">
-                <div class="container">
+            <ybc::Section>
+                <ybc::Container>
                     <CatalogList/>
-                </div>
-            </section>
+                </ybc::Container>
+            </ybc::Section>
         </>
     }
 }

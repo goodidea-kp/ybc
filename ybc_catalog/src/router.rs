@@ -69,7 +69,7 @@ pub fn switch_routes() -> Html {
                 Route::Pagination => html! { <PaginationExamplePage/> },
                 Route::Accordion => html! { <AccordionExamplePage/> },
                 Route::Autocomplete => html! { <AutocompleteExamplePage/> },
-                Route::NotFound => html! { <div class="section"><div class="container"><h1 class="title">{"404"}</h1></div></div> },
+                Route::NotFound => html! { <ybc::Section><ybc::Container><h1 class="title">{"404"}</h1></ybc::Container></ybc::Section> },
             }
         }}/>
     }

@@ -10,8 +10,8 @@ pub fn tabs_example_page() -> Html {
     };
 
     html! {
-      <div class="section">
-        <div class="container">
+      <ybc::Section>
+        <ybc::Container>
            <ybc::Tabs toggle=true fullwidth=true>
             <ul>
               <li class={ if *idx==0 {"is-active"} else {""} }><a onclick={set_idx(0)}>{"First"}</a></li>
@@ -28,7 +28,7 @@ pub fn tabs_example_page() -> Html {
               }
             }
           </div>
-        </div>
-      </div>
+        </ybc::Container>
+      </ybc::Section>
     }
 }
