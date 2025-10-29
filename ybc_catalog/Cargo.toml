@@ -4,10 +4,14 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 publish = false
+authors = ["Konstantin Pupkov <konstantin.pupkov@fromkos.com>"]
+description = "A catalog of Yew components using the YBC library."
+repository = "https://github.com/goodidea-kp/ybc.git"
+
 
 [dependencies]
 yew = { version = "0.21.0", features = ["csr"] }
-ybc = "0.4.1"
+ybc = { git = "https://github.com/goodidea-kp/ybc.git" }
 wasm-bindgen = "0.2"
 gloo = { version = "0.11", features = ["console"] }
 yew-router = "0.18"
