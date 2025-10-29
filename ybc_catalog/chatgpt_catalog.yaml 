@@ -26,6 +26,7 @@ components:
 
   - id: "navbar"
     name: "Navbar"
+    additional_rules: "Need to use 'let state = Rc::new(NavBurgerCloserState { total_clicks: 0 });... <ContextProvider<Rc<NavBurgerCloserState>> context={state}>'. example in app.rs"
     file: "src/components/navbar_example.rs"
     route: "/component/navbar"
     requires_css: ["bulma", "font-awesome"]
@@ -113,6 +114,7 @@ components:
 
   - id: "modal"
     name: "Modal"
+    additional_rules: "Need to use '<ModalCloserProvider id={ID}>' and implement onclick for a trigger button. ID has a format 'idN' where N is a number starting at 1. and unique in the app"
     file: "src/components/modal_example.rs"
     route: "/component/modal"
     requires_css: ["bulma"]
