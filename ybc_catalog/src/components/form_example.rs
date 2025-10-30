@@ -28,9 +28,9 @@ pub fn form_example_page() -> Html {
         let selected_radio = selected_radio.clone();
         Callback::from(move |value: String| selected_radio.set(value))
     };
-
+    let drop_selection = use_state(|| String::new());
     let on_select_update = {
-        let text = text.clone();
+        let text = drop_selection.clone();
         Callback::from(move |value: String| {
             text.set(value);
         })
@@ -54,6 +54,7 @@ pub fn form_example_page() -> Html {
        <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={on_date_changed} class={vec!["input".to_string()]} />
     };
 
+    let select_value = "B";
     html! {
       <ybc::Section>
         <ybc::Container classes={classes!("content")}>
@@ -76,10 +77,10 @@ pub fn form_example_page() -> Html {
           <ybc::Field>
             <ybc::Tag tag="Label">{"Favorite"}</ybc::Tag>
             <ybc::Control>
-              <ybc::Select name="select" update={on_select_update} loading={false} disabled={false} value={"Rust"}>
-                <option>{"Rust"}</option>
-                <option>{"Yew"}</option>
-                <option>{"Bulma"}</option>
+              <ybc::Select name="select" update={on_select_update} loading={false} disabled={false} value={select_value}>
+                <option value="R" selected={if "R".eq_ignore_ascii_case(select_value) { true } else { false }}>{"Rust"}</option>
+                <option value="Y" selected={if "Y".eq_ignore_ascii_case(select_value) { true } else { false }}>{"Yew"}</option>
+                <option value="B" selected={if "B".eq_ignore_ascii_case(select_value) { true } else { false }}>{"Bulma"}</option>
               </ybc::Select>
             </ybc::Control>
           </ybc::Field>
