@@ -20,7 +20,7 @@ pub fn modal_example_page() -> Html {
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MyModalProps {
-    /// The ID of this modal, used for triggering close events from other parts of the app.
+    /// The ID of this modal, used for triggering close events from other parts of the app. Format is "idN", where N is a unique number in the app.
     #[prop_or_default("id")]
     pub id: String,
     #[prop_or_default]
