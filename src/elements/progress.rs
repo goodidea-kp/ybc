@@ -15,7 +15,7 @@ pub struct ProgressProps {
 /// A native HTML progress bar.
 ///
 /// [https://bulma.io/documentation/elements/progress/](https://bulma.io/documentation/elements/progress/)
-#[function_component(Progress)]
+#[component(Progress)]
 pub fn progress(props: &ProgressProps) -> Html {
     let class = classes!("progress", props.classes.clone());
     let max = props.max.to_string();

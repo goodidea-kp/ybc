@@ -2,7 +2,7 @@ use std::rc::Rc;
 use ybc::components::autocomplete::AutoComplete;
 use yew::prelude::*;
 
-#[function_component(AutocompleteExamplePage)]
+#[component(AutocompleteExamplePage)]
 pub fn autocomplete_example_page() -> Html {
     let selected = use_state(|| Vec::<String>::new());
 

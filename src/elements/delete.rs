@@ -17,7 +17,7 @@ pub struct DeleteProps {
 /// A versatile delete cross.
 ///
 /// [https://bulma.io/documentation/elements/delete/](https://bulma.io/documentation/elements/delete/)
-#[function_component(Delete)]
+#[component(Delete)]
 pub fn delete(props: &DeleteProps) -> Html {
     let class = classes!("delete", props.classes.clone());
     html! {

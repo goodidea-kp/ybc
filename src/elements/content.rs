@@ -14,7 +14,7 @@ pub struct ContentProps {
 /// A single component to wrap WYSIWYG generated content, where only HTML tags are available.
 ///
 /// [https://bulma.io/documentation/elements/content/](https://bulma.io/documentation/elements/content/)
-#[function_component(Content)]
+#[component(Content)]
 pub fn content(props: &ContentProps) -> Html {
     html! {
         <@{props.tag.clone()} class={classes!("content", props.classes.clone())}>

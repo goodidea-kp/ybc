@@ -31,7 +31,7 @@ pub struct TileProps {
 /// A single tile element to build 2-dimensional whatever-you-like grids.
 ///
 /// [https://bulma.io/documentation/layout/tiles/](https://bulma.io/documentation/layout/tiles/)
-#[function_component(Tile)]
+#[component(Tile)]
 pub fn tile(props: &TileProps) -> Html {
     let ctx = props.ctx.as_ref().map(|ctx| ctx.to_string());
     let size = props.size.as_ref().map(|size| size.to_string());

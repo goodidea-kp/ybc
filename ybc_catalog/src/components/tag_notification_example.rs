@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-#[function_component(TagNotificationExamplePage)]
+#[component(TagNotificationExamplePage)]
 pub fn tags_notifications_page() -> Html {
     html! {
       <ybc::Section>

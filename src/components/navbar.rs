@@ -236,7 +236,7 @@ pub struct NavbarItemProps {
 /// A single element of the navbar.
 ///
 /// [https://bulma.io/documentation/components/navbar/](https://bulma.io/documentation/components/navbar/)
-#[function_component(NavbarItem)]
+#[component(NavbarItem)]
 pub fn navbar_item(props: &NavbarItemProps) -> Html {
     let class = classes!(
         "navbar-item",
@@ -281,7 +281,7 @@ pub struct NavbarDividerProps {
 /// An element to display a horizontal rule in a navbar-dropdown.
 ///
 /// [https://bulma.io/documentation/components/navbar/#dropdown-menu](https://bulma.io/documentation/components/navbar/#dropdown-menu)
-#[function_component(NavbarDivider)]
+#[component(NavbarDivider)]
 pub fn navbar_divider(props: &NavbarDividerProps) -> Html {
     html! { <hr class={classes!("navbar-divider", props.classes.clone())} /> }
 }

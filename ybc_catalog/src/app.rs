@@ -5,7 +5,7 @@ use ybc::{NavBurgerCloserState, Navbar, NavbarItem};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-#[function_component(App)]
+#[component(App)]
 pub fn app() -> Html {
     let state = Rc::new(NavBurgerCloserState { total_clicks: 0 });
     html! {
@@ -41,7 +41,7 @@ pub fn app() -> Html {
     }
 }
 
-#[function_component(HomePage)]
+#[component(HomePage)]
 pub fn home_page() -> Html {
     html! {
         <>

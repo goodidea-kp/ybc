@@ -49,7 +49,7 @@ pub struct FieldProps {
 }
 
 /// A container for form controls
-#[function_component(Field)]
+#[component(Field)]
 pub fn field(props: &FieldProps) -> Html {
     let class = classes!(
         "field",

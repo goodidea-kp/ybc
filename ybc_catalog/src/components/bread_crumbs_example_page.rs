@@ -4,7 +4,7 @@ use ybc::components::breadcrumb::{Breadcrumb, BreadcrumbSeparator, BreadcrumbSiz
 use yew_router::prelude::Link;
 use crate::router::Route;
 
-#[function_component(BreadCrumbsExamplePage)]
+#[component(BreadCrumbsExamplePage)]
 pub fn bread_crumbs_example_page() -> Html {
     let items = || html! {
         <>

@@ -14,7 +14,7 @@ pub struct LevelProps {
 /// A multi-purpose horizontal level, which can contain almost any other element.
 ///
 /// [https://bulma.io/documentation/layout/level/](https://bulma.io/documentation/layout/level/)
-#[function_component(Level)]
+#[component(Level)]
 pub fn level(props: &LevelProps) -> Html {
     let class = classes!("level", props.classes.clone());
     html! {
@@ -41,7 +41,7 @@ pub struct LevelLeftProps {
 /// A container for level elements to be grouped to the left of the container.
 ///
 /// [https://bulma.io/documentation/layout/level/](https://bulma.io/documentation/layout/level/)
-#[function_component(LevelLeft)]
+#[component(LevelLeft)]
 pub fn level_left(props: &LevelLeftProps) -> Html {
     let class = classes!("level-left", props.classes.clone());
     html! {
@@ -68,7 +68,7 @@ pub struct LevelRightProps {
 /// A container for level elements to be grouped to the right of the container.
 ///
 /// [https://bulma.io/documentation/layout/level/](https://bulma.io/documentation/layout/level/)
-#[function_component(LevelRight)]
+#[component(LevelRight)]
 pub fn level_right(props: &LevelRightProps) -> Html {
     let class = classes!("level-right", props.classes.clone());
     html! {
@@ -95,7 +95,7 @@ pub struct LevelItemProps {
 /// An individual element of a level container.
 ///
 /// [https://bulma.io/documentation/layout/level/](https://bulma.io/documentation/layout/level/)
-#[function_component(LevelItem)]
+#[component(LevelItem)]
 pub fn level_item(props: &LevelItemProps) -> Html {
     let class = classes!("level-item", props.classes.clone());
     html! {

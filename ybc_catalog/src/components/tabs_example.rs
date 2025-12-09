@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-#[function_component(TabsExamplePage)]
+#[component(TabsExamplePage)]
 pub fn tabs_example_page() -> Html {
     let idx = use_state(|| 0usize);
     let set_idx = |i| {

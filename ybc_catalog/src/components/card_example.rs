@@ -1,7 +1,7 @@
 use ybc::*;
 use yew::prelude::*;
 
-#[function_component(CardExamplePage)]
+#[component(CardExamplePage)]
 pub fn card_example_page() -> Html {
     let image_loaded = use_state(|| false);
 

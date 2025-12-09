@@ -11,7 +11,7 @@ pub struct FooterProps {
 /// A simple responsive footer which can include anything.
 ///
 /// [https://bulma.io/documentation/layout/footer/](https://bulma.io/documentation/layout/footer/)
-#[function_component(Footer)]
+#[component(Footer)]
 pub fn footer(props: &FooterProps) -> Html {
     html! {
         <footer class={classes!("footer", props.classes.clone())}>

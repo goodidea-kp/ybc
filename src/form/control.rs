@@ -17,7 +17,7 @@ pub struct ControlProps {
 /// A container with which you can wrap the form controls.
 ///
 /// [https://bulma.io/documentation/form/general/](https://bulma.io/documentation/form/general/)
-#[function_component(Control)]
+#[component(Control)]
 pub fn control(props: &ControlProps) -> Html {
     let class = classes!("control", props.classes.clone(), props.expanded.then_some("is-expanded"));
     html! {

@@ -50,13 +50,13 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::Element;
 use yew::prelude::*;
 
-#[function_component(AccordionItem)]
+#[component(AccordionItem)]
 pub fn accordion_item(props: &AccordionItemProps) -> Html {
     let accordion_classes = if props.open { "accordion is-active" } else { "accordion" };
     html! {
     <article class={classes!(accordion_classes)}>
         <div class="accordion-header toggle" onclick={props.on_toggle.clone()}>
-            <p>{&props.title}</p>
+            <p>{props.title.to_string()}</p>
         </div>
         <div class="accordion-body">
             <div class="accordion-content">

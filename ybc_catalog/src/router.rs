@@ -48,7 +48,7 @@ pub enum Route {
     NotFound,
 }
 
-#[function_component(SwitchRoutes)]
+#[component(SwitchRoutes)]
 pub fn switch_routes() -> Html {
     html! {
            <Switch<Route> render={move |route| {

@@ -41,7 +41,7 @@ pub struct SelectProps {
 /// **NOTE WELL:** not all browsers will honor the value of the select element's value on initial
 /// load. So if you have an initial `value` set for this component, ensure that the corresponding
 /// option element also has the `selected=true` attribute.
-#[function_component(Select)]
+#[component(Select)]
 pub fn select(props: &SelectProps) -> Html {
     let class = classes!(
         "select",
@@ -110,7 +110,7 @@ pub struct MultiSelectProps {
 /// **NOTE WELL:** not all browsers will honor the value of the select element's value on initial
 /// load. So if you have an initial `value` set for this component, ensure that the corresponding
 /// option element also has the `selected=true` attribute.
-#[function_component(MultiSelect)]
+#[component(MultiSelect)]
 pub fn multi_select(props: &MultiSelectProps) -> Html {
     let class = classes!(
         "select",

@@ -20,7 +20,7 @@ pub struct ColumnsProps {
 /// The container for a set of responsive columns.
 ///
 /// [https://bulma.io/documentation/columns/](https://bulma.io/documentation/columns/)
-#[function_component(Columns)]
+#[component(Columns)]
 pub fn columns(props: &ColumnsProps) -> Html {
     let class = classes!(
         "columns",
@@ -54,7 +54,7 @@ pub struct ColumnProps {
 /// This component has a very large number of valid class combinations which users may want.
 /// Modelling all of these is particularly for this component, so for now you are encouraged to
 /// add classes to this Component manually via the `classes` prop.
-#[function_component(Column)]
+#[component(Column)]
 pub fn column(props: &ColumnProps) -> Html {
     html! {
         <div class={classes!("column", props.classes.clone())}>

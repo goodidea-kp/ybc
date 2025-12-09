@@ -14,7 +14,7 @@ pub struct MediaProps {
 /// A UI element for repeatable and nestable content.
 ///
 /// [https://bulma.io/documentation/layout/media-object/](https://bulma.io/documentation/layout/media-object/)
-#[function_component(Media)]
+#[component(Media)]
 pub fn media(props: &MediaProps) -> Html {
     let class = classes!("media", props.classes.clone());
     html! {
@@ -41,7 +41,7 @@ pub struct MediaLeftProps {
 /// Elements to be grouped to the left of the media container.
 ///
 /// [https://bulma.io/documentation/layout/media-object/](https://bulma.io/documentation/layout/media-object/)
-#[function_component(MediaLeft)]
+#[component(MediaLeft)]
 pub fn media_left(props: &MediaLeftProps) -> Html {
     let class = classes!("media-left", props.classes.clone());
     html! {
@@ -68,7 +68,7 @@ pub struct MediaRightProps {
 /// Elements to be grouped to the right of the media container.
 ///
 /// [https://bulma.io/documentation/layout/media-object/](https://bulma.io/documentation/layout/media-object/)
-#[function_component(MediaRight)]
+#[component(MediaRight)]
 pub fn media_right(props: &MediaRightProps) -> Html {
     let class = classes!("media-right", props.classes.clone());
     html! {
@@ -95,7 +95,7 @@ pub struct MediaContentProps {
 /// Elements to be grouped as the center body of the media container.
 ///
 /// [https://bulma.io/documentation/layout/media-object/](https://bulma.io/documentation/layout/media-object/)
-#[function_component(MediaContent)]
+#[component(MediaContent)]
 pub fn media_content(props: &MediaContentProps) -> Html {
     let class = classes!("media-content", props.classes.clone());
     html! {

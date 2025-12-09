@@ -11,7 +11,7 @@ pub struct MessageProps {
 /// Colored message blocks, to emphasize part of your page.
 ///
 /// [https://bulma.io/documentation/components/message/](https://bulma.io/documentation/components/message/)
-#[function_component(Message)]
+#[component(Message)]
 pub fn message(props: &MessageProps) -> Html {
     html! {
         <article class={classes!("message", props.classes.clone())}>
@@ -34,7 +34,7 @@ pub struct MessageHeaderProps {
 /// An optional message header that can hold a title and a delete element.
 ///
 /// [https://bulma.io/documentation/components/message/](https://bulma.io/documentation/components/message/)
-#[function_component(MessageHeader)]
+#[component(MessageHeader)]
 pub fn message_header(props: &MessageHeaderProps) -> Html {
     html! {
         <div class={classes!("message-header", props.classes.clone())}>
@@ -57,7 +57,7 @@ pub struct MessageBodyProps {
 /// A container for the body of a message.
 ///
 /// [https://bulma.io/documentation/components/message/](https://bulma.io/documentation/components/message/)
-#[function_component(MessageBody)]
+#[component(MessageBody)]
 pub fn message_body(props: &MessageBodyProps) -> Html {
     html! {
         <div class={classes!("message-body", props.classes.clone())}>

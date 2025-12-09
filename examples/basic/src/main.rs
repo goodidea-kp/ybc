@@ -9,7 +9,7 @@ use yew::prelude::*;
 
 use ybc::NavBurgerCloserState;
 
-#[function_component(App)]
+#[component(App)]
 pub fn app() -> Html {
     let state = Rc::new(NavBurgerCloserState { total_clicks: 0 });
     let cb_date_changed = Callback::from(|date: String| {
@@ -197,7 +197,7 @@ fn main() {
 use ybc::ModalCloserContext;
 use ybc::ModalCloserProvider;
 
-#[function_component]
+#[component]
 pub fn MyModal1() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id0-close".to_string().parse().unwrap())) };
@@ -236,7 +236,7 @@ pub fn MyModal1() -> Html {
     }
 }
 
-#[function_component(MyModal2)]
+#[component(MyModal2)]
 pub fn my_modal2() -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id2-close".to_string().parse().unwrap())) };

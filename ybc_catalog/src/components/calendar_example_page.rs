@@ -1,7 +1,7 @@
 use ybc::*;
 use yew::prelude::*;
 
-#[function_component(CalendarExamplePage)]
+#[component(CalendarExamplePage)]
 pub fn calendar_example_page() -> Html {
     let date = use_state(|| Option::<String>::None);
     let on_date_changed = {

@@ -35,7 +35,7 @@ pub struct ModalProps {
 ///
 /// See the docs on the `ModalCloser` agent to be able to close your modal instance from anywhere
 /// in your app for maximum flexibility.
-#[function_component(Modal)]
+#[component(Modal)]
 pub fn modal(props: &ModalProps) -> Html {
     let is_active = use_state(|| false);
     let id = props.id.clone();
@@ -109,7 +109,7 @@ pub struct ModalCardProps {
 ///
 /// See the docs on the `ModalCloser` agent to be able to close your modal instance from anywhere
 /// in your app for maximum flexibility.
-#[function_component(ModalCard)]
+#[component(ModalCard)]
 pub fn modal_card(props: &ModalCardProps) -> Html {
     let id = props.id.clone();
     let closer_ctx = use_context::<ModalCloserContext>().expect("Modal closer in context");
@@ -184,7 +184,7 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     }
 }
 
-#[function_component(ModalCard2)]
+#[component(ModalCard2)]
 pub fn modal_card2(props: &ModalCardProps) -> Html {
     let id = props.id.clone();
     let closer_ctx = use_context::<ModalCloserContext>().expect("Modal closer in context");
@@ -315,7 +315,7 @@ pub struct ModalCloserProviderProps {
     pub id: String,
 }
 
-#[function_component]
+#[component]
 pub fn ModalCloserProvider(props: &ModalCloserProviderProps) -> Html {
     let msg = use_reducer(|| ModalCloseMsg { 0: props.id.clone().into() });
     html! {
