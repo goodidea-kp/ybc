@@ -23,7 +23,7 @@ pub struct IconProps {
 /// A container for any type of icon font.
 ///
 /// [https://bulma.io/documentation/elements/icon/](https://bulma.io/documentation/elements/icon/)
-#[function_component(Icon)]
+#[component(Icon)]
 pub fn icon(props: &IconProps) -> Html {
     let class = classes!(
         "icon",

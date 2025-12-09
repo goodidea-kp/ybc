@@ -1,7 +1,7 @@
 use ybc::*;
 use yew::prelude::*;
 
-#[function_component(TableExamplePage)]
+#[component(TableExamplePage)]
 pub fn table_example_page() -> Html {
     html! {
       <ybc::Section>

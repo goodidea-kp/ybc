@@ -41,7 +41,7 @@ pub struct HeroProps {
 /// An imposing hero banner to showcase something.
 ///
 /// [https://bulma.io/documentation/layout/hero/](https://bulma.io/documentation/layout/hero/)
-#[function_component(Hero)]
+#[component(Hero)]
 pub fn hero(props: &HeroProps) -> Html {
     let class = classes!(
         "hero",

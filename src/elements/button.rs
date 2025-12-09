@@ -16,7 +16,7 @@ pub struct ButtonsProps {
 /// A container for a group of buttons.
 ///
 /// [https://bulma.io/documentation/elements/button/](https://bulma.io/documentation/elements/button/)
-#[function_component(Buttons)]
+#[component(Buttons)]
 pub fn buttons(props: &ButtonsProps) -> Html {
     let class = classes!("buttons", props.classes.clone(), props.size.as_ref().map(ToString::to_string));
     html! {
@@ -68,7 +68,7 @@ pub struct ButtonProps {
 /// A button element.
 ///
 /// [https://bulma.io/documentation/elements/button/](https://bulma.io/documentation/elements/button/)
-#[function_component(Button)]
+#[component(Button)]
 pub fn button(props: &ButtonProps) -> Html {
     let class = classes!(
         "button",
@@ -216,7 +216,7 @@ pub struct ButtonAnchorProps {
 /// An anchor element styled as a button.
 ///
 /// [https://bulma.io/documentation/elements/button/](https://bulma.io/documentation/elements/button/)
-#[function_component(ButtonAnchor)]
+#[component(ButtonAnchor)]
 pub fn button_anchor(props: &ButtonAnchorProps) -> Html {
     let class = classes!(
         "button",
@@ -262,7 +262,7 @@ pub struct ButtonInputSubmitProps {
 /// An input element with `type="submit"` styled as a button.
 ///
 /// [https://bulma.io/documentation/elements/button/](https://bulma.io/documentation/elements/button/)
-#[function_component(ButtonInputSubmit)]
+#[component(ButtonInputSubmit)]
 pub fn button_input_submit(props: &ButtonInputSubmitProps) -> Html {
     let class = classes!(
         "button",
@@ -299,7 +299,7 @@ pub struct ButtonInputResetProps {
 /// An input element with `type="reset"` styled as a button.
 ///
 /// [https://bulma.io/documentation/elements/button/](https://bulma.io/documentation/elements/button/)
-#[function_component(ButtonInputReset)]
+#[component(ButtonInputReset)]
 pub fn button_input_reset(props: &ButtonInputResetProps) -> Html {
     let class = classes!(
         "button",

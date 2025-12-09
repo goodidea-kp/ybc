@@ -11,7 +11,7 @@ pub struct MenuProps {
 /// A simple menu, for any type of vertical navigation.
 ///
 /// [https://bulma.io/documentation/components/menu/](https://bulma.io/documentation/components/menu/)
-#[function_component(Menu)]
+#[component(Menu)]
 pub fn menu(props: &MenuProps) -> Html {
     html! {
         <aside class={classes!("menu", props.classes.clone())}>
@@ -35,7 +35,7 @@ pub struct MenuListProps {
 /// A container for menu list `li` elements.
 ///
 /// [https://bulma.io/documentation/components/menu/](https://bulma.io/documentation/components/menu/)
-#[function_component(MenuList)]
+#[component(MenuList)]
 pub fn menu_list(props: &MenuListProps) -> Html {
     html! {
         <ul class={classes!("menu-list", props.classes.clone())}>
@@ -59,7 +59,7 @@ pub struct MenuLabelProps {
 /// A label for a section of the menu.
 ///
 /// [https://bulma.io/documentation/components/menu/](https://bulma.io/documentation/components/menu/)
-#[function_component(MenuLabel)]
+#[component(MenuLabel)]
 pub fn menu_label(props: &MenuLabelProps) -> Html {
     html! {
         <p class={classes!("menu-label", props.classes.clone())}>

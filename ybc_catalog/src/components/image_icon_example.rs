@@ -1,7 +1,7 @@
 use ybc::Icon;
 use yew::prelude::*;
 
-#[function_component(ImageIconExamplePage)]
+#[component(ImageIconExamplePage)]
 pub fn image_icon_example_page() -> Html {
     html! {
       <ybc::Section>

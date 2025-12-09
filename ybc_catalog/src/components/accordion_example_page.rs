@@ -2,7 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::Link;
 use crate::router::Route;
 
-#[function_component(AccordionExamplePage)]
+#[component(AccordionExamplePage)]
 pub fn accordion_example_page() -> Html {
     html! {
         <ybc::Section>

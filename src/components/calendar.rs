@@ -14,7 +14,7 @@
 //! use yew::prelude::*;
 //! use ybc::components::calendar::Calendar;
 //!
-//! #[function_component(Form)]
+//! #[component(Form)]
 //! fn form() -> Html {
 //!     let date = use_state(|| Option::<String>::None);
 //!     let on_date_changed = {

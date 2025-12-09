@@ -14,7 +14,7 @@ pub struct ContainerProps {
 /// A simple container to center your content horizontally.
 ///
 /// [https://bulma.io/documentation/layout/container/](https://bulma.io/documentation/layout/container/)
-#[function_component(Container)]
+#[component(Container)]
 pub fn container(props: &ContainerProps) -> Html {
     let class = classes!("container", props.classes.clone(), props.fluid.then_some("is-fluid"));
     html! {

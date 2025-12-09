@@ -120,11 +120,11 @@ impl Component for AutoComplete {
             .map(|item| {
                 if item == current_selector.as_str() {
                     html! {
-                         <option value={item.to_string()} selected=true>{&item}</option>
+                         <option value={item.to_string()} selected=true>{item}</option>
                     }
                 } else {
                     html! {
-                         <option value={item.to_string()}>{&item}</option>
+                         <option value={item.to_string()}>{item}</option>
                     }
                 }
             })

@@ -34,7 +34,7 @@ pub struct TabsProps {
 ///
 /// For integration with Yew Router, it is recommended that the `RouterButton` or `RouterAnchor`
 /// components be used as the individual tab elements for this component.
-#[function_component(Tabs)]
+#[component(Tabs)]
 pub fn tabs(props: &TabsProps) -> Html {
     let class = classes!(
         "tabs",

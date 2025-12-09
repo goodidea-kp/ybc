@@ -2,7 +2,7 @@ use crate::router::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-#[function_component(CatalogList)]
+#[component(CatalogList)]
 pub fn catalog_list() -> Html {
     let items: Vec<(&'static str, Route, &'static str)> = vec![
         ("Button", Route::Button, "Primary/Link/Button groups, click handlers"),

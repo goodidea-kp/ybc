@@ -15,7 +15,7 @@ pub struct SectionProps {
 /// A simple container to divide your page into sections.
 ///
 /// [https://bulma.io/documentation/layout/section/](https://bulma.io/documentation/layout/section/)
-#[function_component(Section)]
+#[component(Section)]
 pub fn section(props: &SectionProps) -> Html {
     let size = props.size.as_ref().map(|size| size.to_string());
     html! {

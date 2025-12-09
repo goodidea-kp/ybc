@@ -24,7 +24,7 @@ pub struct CheckboxProps {
 /// All YBC form components are controlled components. This means that the value of the field must
 /// be provided from a parent component, and changes to this component are propagated to the parent
 /// component via callback.
-#[function_component(Checkbox)]
+#[component(Checkbox)]
 pub fn checkbox(props: &CheckboxProps) -> Html {
     let class = classes!("checkbox", props.classes.clone());
     let checked = props.checked;

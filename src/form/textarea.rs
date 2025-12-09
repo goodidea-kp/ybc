@@ -51,7 +51,7 @@ pub struct TextAreaProps {
 /// All YBC form components are controlled components. This means that the value of the field must
 /// be provided from a parent component, and changes to this component are propagated to the parent
 /// component via callback.
-#[function_component(TextArea)]
+#[component(TextArea)]
 pub fn text_area(props: &TextAreaProps) -> Html {
     let class = classes!(
         "textarea",

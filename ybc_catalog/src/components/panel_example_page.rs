@@ -3,7 +3,7 @@ use yew_router::prelude::Link;
 use ybc::components::panel::{Panel, PanelTabs, PanelBlock};
 use crate::router::Route;
 
-#[function_component(PanelExamplePage)]
+#[component(PanelExamplePage)]
 pub fn panel_example_page() -> Html {
     let on_click_refresh = Callback::from(|_| web_sys::console::log_1(&"refresh clicked".into()));
 

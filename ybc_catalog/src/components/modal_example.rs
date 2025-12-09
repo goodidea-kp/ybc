@@ -1,6 +1,6 @@
 use ybc::*;
 use yew::prelude::*;
-#[function_component(ModalExamplePage)]
+#[component(ModalExamplePage)]
 pub fn modal_example_page() -> Html {
     const ID: &str = "id";//Make sure id has format "idN", where N is a unique number in the app.
     const ID2: &str = "id2";
@@ -26,7 +26,7 @@ pub struct MyModalProps {
     #[prop_or_default]
     pub classes: Classes,
 }
-#[function_component(MyModal)]
+#[component(MyModal)]
 pub fn my_modal(props: &MyModalProps) -> Html {
     let msg_ctx = use_context::<ModalCloserContext>().unwrap();
     let id_close = format!("{}-close", props.id);

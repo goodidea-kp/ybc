@@ -1,7 +1,7 @@
 use ybc::*;
 use yew::prelude::*;
 
-#[function_component(FormExamplePage)]
+#[component(FormExamplePage)]
 pub fn form_example_page() -> Html {
     let text = use_state(|| String::new());
     let textinput = use_state(|| "Hello".to_string());

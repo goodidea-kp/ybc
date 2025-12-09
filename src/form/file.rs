@@ -54,7 +54,7 @@ pub struct FileProps {
 /// All YBC form components are controlled components. This means that the value of the field must
 /// be provided from a parent component, and changes to this component are propagated to the parent
 /// component via callback.
-#[function_component(File)]
+#[component(File)]
 pub fn file(props: &FileProps) -> Html {
     let class = classes!(
         "file",

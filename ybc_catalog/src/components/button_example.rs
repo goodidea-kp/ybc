@@ -1,7 +1,7 @@
 use ybc::{Button, Buttons};
 use yew::prelude::*;
 
-#[function_component(ButtonExamplePage)]
+#[component(ButtonExamplePage)]
 pub fn button_example_page() -> Html {
     let clicks = use_state(|| 0);
     let onclick = {

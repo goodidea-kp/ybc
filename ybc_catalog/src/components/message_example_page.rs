@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use ybc::components::message::{Message, MessageHeader, MessageBody};
 
-#[function_component(MessageExamplePage)]
+#[component(MessageExamplePage)]
 pub fn message_example_page() -> Html {
     html! {
         <ybc::Section>

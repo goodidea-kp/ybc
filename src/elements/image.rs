@@ -15,7 +15,7 @@ pub struct ImageProps {
 /// A container for responsive images.
 ///
 /// [https://bulma.io/documentation/elements/image/](https://bulma.io/documentation/elements/image/)
-#[function_component(Image)]
+#[component(Image)]
 pub fn image(props: &ImageProps) -> Html {
     let class = classes!("image", props.classes.clone(), props.size.as_ref().map(|size| size.to_string()));
     html! {

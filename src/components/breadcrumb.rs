@@ -24,7 +24,7 @@ pub struct BreadcrumbProps {
 /// A simple breadcrumb component to improve your navigation experience.
 ///
 /// [https://bulma.io/documentation/components/breadcrumb/](https://bulma.io/documentation/components/breadcrumb/)
-#[function_component(Breadcrumb)]
+#[component(Breadcrumb)]
 pub fn breadcrumb(props: &BreadcrumbProps) -> Html {
     let class = classes!(
         "breadcrumb",

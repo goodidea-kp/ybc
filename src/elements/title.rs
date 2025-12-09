@@ -21,7 +21,7 @@ pub struct TitleProps {
 /// A simple heading to add depth to your page.
 ///
 /// [https://bulma.io/documentation/elements/title/](https://bulma.io/documentation/elements/title/)
-#[function_component(Title)]
+#[component(Title)]
 pub fn title(props: &TitleProps) -> Html {
     let class = classes!(
         "title",
@@ -56,7 +56,7 @@ pub struct SubtitleProps {
 /// A simple heading to add depth to your page.
 ///
 /// [https://bulma.io/documentation/elements/title/](https://bulma.io/documentation/elements/title/)
-#[function_component(Subtitle)]
+#[component(Subtitle)]
 pub fn subtitle(props: &SubtitleProps) -> Html {
     let class = classes!("subtitle", props.classes.clone(), props.size.as_ref().map(|size| size.to_string()));
     html! {

@@ -29,7 +29,7 @@ pub struct TableProps {
 /// An HTML table component.
 ///
 /// [https://bulma.io/documentation/elements/table/](https://bulma.io/documentation/elements/table/)
-#[function_component(Table)]
+#[component(Table)]
 pub fn table(props: &TableProps) -> Html {
     let class = classes!(
         "table",

@@ -4,7 +4,7 @@ use ybc::{Alignment, Size};
 use ybc::components::pagination::{Pagination, PaginationItem, PaginationItemType, PaginationEllipsis};
 use crate::router::Route;
 
-#[function_component(PaginationExamplePage)]
+#[component(PaginationExamplePage)]
 pub fn pagination_example_page() -> Html {
     let prev_link = |to: Route| html! { <Link<Route> to={to} classes={classes!("pagination-previous")}>{ "Previous" }</Link<Route>> };
     let next_link = |to: Route| html! { <Link<Route> to={to} classes={classes!("pagination-next")}>{ "Next page" }</Link<Route>> };

@@ -33,7 +33,7 @@ pub struct RadioProps {
 /// All YBC form components are controlled components. This means that the value of the field must
 /// be provided from a parent component, and changes to this component are propagated to the parent
 /// component via callback.
-#[function_component(Radio)]
+#[component(Radio)]
 pub fn radio(props: &RadioProps) -> Html {
     let class = classes!("radio", props.classes.clone());
     let oninput = props.update.reform(|ev: web_sys::InputEvent| {

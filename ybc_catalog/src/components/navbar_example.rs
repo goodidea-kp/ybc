@@ -3,7 +3,7 @@ use ybc::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-#[function_component(NavbarExamplePage)]
+#[component(NavbarExamplePage)]
 pub fn navbar_example_page() -> Html {
     html! {
       <ybc::Section>
