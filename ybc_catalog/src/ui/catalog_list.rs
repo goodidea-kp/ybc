@@ -11,7 +11,7 @@ pub fn catalog_list() -> Html {
         ("Form Controls", Route::Form, "Input, Textarea, Select, Checkbox, Radio, Calendar"),
         ("Columns", Route::Columns, "Responsive layout with Columns/Column"),
         ("Table", Route::Table, "Striped, hoverable, bordered"),
-        ("Modal", Route::Modal, "Controlled active state; close callbacks"),
+        ("Modal", Route::Modal, "Dialog-backed modals with controller/context open-close"),
         ("Tabs", Route::Tabs, "Controlled active index; content switch"),
         ("Tag & Notification", Route::TagNotification, "Color tags and notification types"),
         ("Image & Icon", Route::ImageIcon, "Bulma Image sizes and Font Awesome icons"),

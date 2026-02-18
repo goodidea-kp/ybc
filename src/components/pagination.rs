@@ -74,8 +74,8 @@ pub struct PaginationItemProps {
 #[component(PaginationItem)]
 pub fn pagination_item(props: &PaginationItemProps) -> Html {
     let effective_class = match props.current {
-        true => format!("{} is-current", props.item_type.to_string()),
-        false => format!("{}", props.item_type.to_string()),
+        true => format!("{} is-current", props.item_type),
+        false => props.item_type.to_string(),
     };
     html! {
         <a class={effective_class} aria-label={props.label.clone()} onclick={props.onclick.clone()}>

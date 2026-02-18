@@ -103,7 +103,7 @@ impl Component for Navbar {
         let mut class = Classes::from("navbar");
         class.push(ctx.props().classes.clone());
         if let Some(fixed) = &ctx.props().fixed {
-            class.push(&fixed.to_string());
+            class.push(fixed.to_string());
         }
 
         // navbar-menu classes

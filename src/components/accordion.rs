@@ -36,10 +36,10 @@
 //!
 //! Notes and alternatives
 //! - If you use a bundler (webpack, vite, etc.) you can install bulma-accordion from npm and import it in your JS entry:
-//!     npm install bulma-accordion
-//!     // in your entry file
-//!     import 'bulma-accordion/dist/css/bulma-accordion.min.css';
-//!     import 'bulma-accordion/dist/js/bulma-accordion.min.js';
+//!   npm install bulma-accordion
+//!   // in your entry file
+//!   import 'bulma-accordion/dist/css/bulma-accordion.min.css';
+//!   import 'bulma-accordion/dist/js/bulma-accordion.min.js';
 //!   Ensure the import runs before the Yew bootstrap so `bulmaAccordion` is available globally (or adapt the setup to pass the module).
 //!
 //! - The important requirement: bulmaAccordion must be defined on window when setup_accordion is called in rendered().
@@ -119,7 +119,7 @@ impl Component for Accordions {
 
             let element = document
                 .get_element_by_id(ctx.props().id.to_string().as_str())
-                .expect(format!("should have #{} on the page", ctx.props().id).as_str());
+                .unwrap_or_else(|| panic!("should have #{} on the page", ctx.props().id));
 
             setup_accordion(&element);
         }
