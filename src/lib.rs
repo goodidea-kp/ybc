@@ -44,8 +44,8 @@ pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::menu::{Menu, MenuLabel, MenuLabelProps, MenuList, MenuListProps, MenuProps};
 pub use components::message::{Message, MessageBody, MessageBodyProps, MessageHeader, MessageHeaderProps, MessageProps};
 pub use components::modal::{
-    Modal, ModalCard, ModalCardProps, ModalCloseMsg, ModalCloser, ModalCloserContext, ModalCloserProvider, ModalCloserProviderProps, ModalMsg,
-    ModalProps,
+    Modal, ModalCard, ModalCard2, ModalCardProps, ModalController, ModalControllerContext, ModalControllerProvider, ModalControllerProviderProps,
+    ModalMsg, ModalProps,
 };
 pub use components::navbar::{
     NavBurgerCloserState, Navbar, NavbarDivider, NavbarDividerProps, NavbarDropdown, NavbarDropdownProps, NavbarFixed, NavbarItem, NavbarItemProps,
@@ -57,7 +57,7 @@ pub use components::pagination::{
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
 pub use components::tabs::{Tabs, TabsProps};
 
-pub use components::calendar::{Calendar, CalendarProps};
+pub use components::calendar::{Calendar, CalendarProps, TestAttr};
 
 // elements
 pub use elements::block::{Block, BlockProps};

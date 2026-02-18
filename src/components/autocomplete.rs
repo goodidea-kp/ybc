@@ -35,10 +35,10 @@
 //!
 //! Notes and alternatives
 //! - If you use a bundler (webpack, vite, etc.) you can install bulma-tagsinput from npm and import it in your JS entry:
-//!     npm install @creativebulma/bulma-tagsinput
-//!     // in your entry file
-//!     import '@creativebulma/bulma-tagsinput/dist/css/bulma-tagsinput.min.css';
-//!     import '@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js';
+//!   npm install @creativebulma/bulma-tagsinput
+//!   // in your entry file
+//!   import '@creativebulma/bulma-tagsinput/dist/css/bulma-tagsinput.min.css';
+//!   import '@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js';
 //!   Ensure the import runs before the Yew bootstrap so `BulmaTagsInput` is available globally (or adapt the setup to pass the module).
 //!
 //! - The important requirement: BulmaTagsInput must be defined on window when setup_static_autocomplete / setup_dynamic_autocomplete are called in rendered().
@@ -129,7 +129,7 @@ impl Component for AutoComplete {
                 }
             })
             .collect::<Html>();
-        if ctx.props().items.len() > 0 && ctx.props().data_item_text.len() == 0 && ctx.props().data_item_value.len() == 0 {
+        if !ctx.props().items.is_empty() && ctx.props().data_item_text.is_empty() && ctx.props().data_item_value.is_empty() {
             html! {
                 <div class={classes!(ctx.props().classes.clone(), "select")}>
                     <select
@@ -141,8 +141,8 @@ impl Component for AutoComplete {
                     </select>
                 </div>
             }
-        } else if ctx.props().data_item_text.len() > 0 && ctx.props().data_item_value.len() > 0 {
-            let has_value = current_selector.len() > 0;
+        } else if !ctx.props().data_item_text.is_empty() && !ctx.props().data_item_value.is_empty() {
+            let has_value = !current_selector.is_empty();
             let value = format!("{{\"{}\":\"{}\"}}", ctx.props().data_item_value, current_selector);
             html! {
                    <input type="text"
@@ -172,25 +172,40 @@ impl Component for AutoComplete {
             let document = window.document().expect("should have a document on window");
 
             let element = document
-                .get_element_by_id(&*self.id)
-                .expect(format!("should have #{} on the page", self.id).as_str());
+                .get_element_by_id(&self.id)
+                .unwrap_or_else(|| panic!("should have #{} on the page", self.id));
 
             // Clone the link from the context
             let link = ctx.link().clone();
 
             // Move the cloned link into the closure
             let callback = Closure::wrap(Box::new(move |tag: JsValue| {
-                // gloo_console::log!("Value changed: {}", tag.clone());
-                let command: js_sys::Object = JSON::parse(tag.as_string().unwrap().as_str()).unwrap().dyn_into().unwrap();
-                let op = Reflect::get(&command, &JsValue::from_str("op")).unwrap();
-                let value = Reflect::get(&command, &JsValue::from_str("value")).unwrap();
-                if op.as_string().unwrap() == "add" {
-                    link.send_message(Msg::Added(value.as_string().unwrap()));
+                let Some(raw) = tag.as_string() else {
+                    return;
+                };
+                let Ok(parsed) = JSON::parse(raw.as_str()) else {
+                    return;
+                };
+                let Ok(command) = parsed.dyn_into::<js_sys::Object>() else {
+                    return;
+                };
+                let Ok(op) = Reflect::get(&command, &JsValue::from_str("op")) else {
+                    return;
+                };
+                let Ok(value) = Reflect::get(&command, &JsValue::from_str("value")) else {
+                    return;
+                };
+                let Some(value) = value.as_string() else {
+                    return;
+                };
+
+                if op.as_string().as_deref() == Some("add") {
+                    link.send_message(Msg::Added(value));
                 } else {
-                    link.send_message(Msg::Removed(value.as_string().unwrap()));
+                    link.send_message(Msg::Removed(value));
                 }
             }) as Box<dyn FnMut(JsValue)>);
-            if _url_for_fetch.len() == 0 {
+            if _url_for_fetch.is_empty() {
                 setup_static_autocomplete(&element, callback.as_ref(), &JsValue::from(_max_items), &JsValue::from(_case_sensitive));
             } else {
                 setup_dynamic_autocomplete(
@@ -209,7 +224,7 @@ impl Component for AutoComplete {
     }
 
     fn destroy(&mut self, _ctx: &Context<Self>) {
-        detach_autocomplete(&JsValue::from(self.id.as_ptr()));
+        detach_autocomplete(&JsValue::from_str(self.id.as_ref()));
     }
 }
 

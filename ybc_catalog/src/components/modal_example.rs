@@ -2,17 +2,16 @@ use ybc::*;
 use yew::prelude::*;
 #[component(ModalExamplePage)]
 pub fn modal_example_page() -> Html {
-    const ID: &str = "id";//Make sure id has format "idN", where N is a unique number in the app.
-    const ID2: &str = "id2";
+    const ID: &str = "modal-example-1";
+    const ID2: &str = "modal-example-2";
     html! {
       <ybc::Section>
         <ybc::Container>
-        <ModalCloserProvider id={ID}>
-           <MyModal id={ID} classes={classes!("is-success")} />
-        </ModalCloserProvider>
-        <ModalCloserProvider id={ID2}>
-           <MyModal id={ID2} classes={classes!("is-danger")} />
-        </ModalCloserProvider>
+          <ModalControllerProvider>
+            <CloseAllModalsButton />
+            <MyModal id={ID} classes={classes!("is-success")} />
+            <MyModal id={ID2} classes={classes!("is-danger")} />
+          </ModalControllerProvider>
         </ybc::Container>
       </ybc::Section>
     }
@@ -20,35 +19,48 @@ pub fn modal_example_page() -> Html {
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MyModalProps {
-    /// The ID of this modal, used for triggering close events from other parts of the app. Format is "idN", where N is a unique number in the app.
+    /// The ID of this modal, used as the controller key and DOM id.
     #[prop_or_default("id")]
     pub id: String,
     #[prop_or_default]
     pub classes: Classes,
 }
+
+#[component(CloseAllModalsButton)]
+pub fn close_all_modals_button() -> Html {
+    let controller = use_context::<ModalControllerContext>().expect("Modal controller in context");
+    let onclick = Callback::from(move |_| controller.close_all());
+
+    html! {
+        <ybc::Button classes={classes!("is-warning", "is-light")} {onclick}>
+            {"Close all modals"}
+        </ybc::Button>
+    }
+}
+
 #[component(MyModal)]
 pub fn my_modal(props: &MyModalProps) -> Html {
-    let msg_ctx = use_context::<ModalCloserContext>().unwrap();
-    let id_close = format!("{}-close", props.id);
+    let controller = use_context::<ModalControllerContext>().expect("Modal controller in context");
+    let id = props.id.clone();
+
     let onclick = {
-        let id = id_close.clone();
-        Callback::from(move |e: MouseEvent| msg_ctx.dispatch(id.clone().parse().unwrap()))
+        let controller = controller.clone();
+        let id = id.clone();
+        Callback::from(move |_| controller.close(&id))
     };
-    let msg_ctx2 = use_context::<ModalCloserContext>().unwrap();
     let onsave = {
-        let id = id_close.clone();
-        Callback::from(move |e: MouseEvent| msg_ctx2.dispatch(id.parse().unwrap()))
+        let controller = controller.clone();
+        let id = id.clone();
+        Callback::from(move |_| controller.close(&id))
     };
-    let on_click_cb = Callback::from(move |e: MouseEvent| {
-        gloo_console::log!(" Button clicked! ID:", id_close.clone());
-    });
+
     html! {
             <ybc::ModalCard
                 classes={classes!("")}
                 id={props.id.clone()}
                 title={"Modal"}
                 trigger={html!{
-                    <ybc::Button classes={&props.classes} onclick={on_click_cb}>
+                    <ybc::Button classes={&props.classes}>
                         {"Open Modal"}
                     </ybc::Button>
                 }}

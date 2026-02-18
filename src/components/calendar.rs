@@ -1,270 +1,353 @@
-//! Calendar component: a thin Yew wrapper around the bulma‑calendar JS date/time picker.
-//!
-//! Summary
-//! - Enhances a plain `<input>` with bulmaCalendar for date and time selection.
-//! - Emits changes through a Yew `Callback<String>` whenever the user selects, validates, or clears.
-//! - Requires bulmaCalendar JS and CSS to be loaded globally (available as `bulmaCalendar`).
-//!
-//! Value format
-//! - The emitted string follows the configured `date_format` and `time_format` patterns understood by bulmaCalendar.
-//! - Clearing the picker emits an empty string.
-//!
-//! Usage
-//! ```rust
-//! use yew::prelude::*;
-//! use ybc::components::calendar::Calendar;
-//!
-//! #[component(Form)]
-//! fn form() -> Html {
-//!     let date = use_state(|| Option::<String>::None);
-//!     let on_date_changed = {
-//!         let date = date.clone();
-//!         Callback::from(move |d: String| {
-//!             date.set(if d.is_empty() { None } else { Some(d) });
-//!         })
-//!     };
-//!
-//!     html! {
-//!         <Calendar
-//!             id="appointment"
-//!             date_format="yyyy-MM-dd"
-//!             time_format="HH:mm"
-//!             date={(*date).clone()}
-//!             on_date_changed={on_date_changed}
-//!             class={vec!["is-small".into()]}
-//!         />
-//!     }
-//! }
-//! ```
-//!
-//! Required static assets
-//! - Add the bulma‑calendar CSS into your HTML <head>:
-//!   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-calendar@6.1.19/dist/css/bulma-calendar.min.css"/>
-//!
-//! - Add the bulma‑calendar JS so `bulmaCalendar` is available on window. Place this before your wasm bootstrap script
-//!   (or ensure it loads before your Yew app mounts):
-//!   <script src="https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js"></script>
-//!
-//! How to configure index.html
-//! - Minimal example (place CSS in <head>, script before the wasm init script):
-//!   ```html
-//!   <!doctype html>
-//!   <html>
-//!   <head>
-//!     <meta charset="utf-8" />
-//!     <meta name="viewport" content="width=device-width,initial-scale=1" />
-//!     <!-- bulma-calendar CSS -->
-//!     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-calendar@6.1.19/dist/css/bulma-calendar.min.css"/>
-//!   </head>
-//!   <body>
-//!     <div id="root"></div>
-//!
-//!     <!-- bulma-calendar JS: ensure this runs before your wasm bootstrap so `bulmaCalendar` exists -->
-//!     <script src="https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js"></script>
-//!
-//!     <!-- Your wasm/bootstrap script that starts the Yew app -->
-//!     <script type="module">
-//!       import init from './pkg/your_crate.js';
-//!       init();
-//!     </script>
-//!   </body>
-//!   </html>
-//!   ```
-//!
-//! Notes and alternatives
-//! - If you use a bundler (webpack, vite, etc.) you can install bulma-calendar from npm and import it in your JS entry:
-//!     npm install bulma-calendar
-//!     // in your entry file
-//!     import 'bulma-calendar/dist/css/bulma-calendar.min.css';
-//!     import bulmaCalendar from 'bulma-calendar';
-//!   Ensure the import runs before the Yew bootstrap so `bulmaCalendar` is available globally (or adapt the setup to pass the module).
-//!
-//! - The important requirement: bulmaCalendar must be defined on window when setup_date_picker is called in the component's rendered() hook.
-//!
-//! - If you prefer loading the script asynchronously, make sure to delay Yew app start until bulmaCalendar is available (e.g. listen for script load).
-//!
-//! Implementation notes
-//! - The `id` must be unique in the DOM; it is used to attach and detach the JS calendar instance.
-//! - The underlying `<input>` uses `type="datetime"` for the JS widget; the plugin drives rendering and value handling.
-//!
-//! ...
+/*!
+Calendar component: a thin Yew wrapper around the bulma-calendar JS date/time picker.
 
-use wasm_bindgen::JsValue;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::Element;
+Summary
+- Enhances a plain `<input>` with bulmaCalendar for date and time selection.
+- Emits changes through a Rust callback whenever the user selects, validates, or clears.
+- Requires bulmaCalendar JS and CSS to be loaded globally (available as `bulmaCalendar`).
+
+Value format
+- The emitted string follows the configured `date_format` and `time_format` patterns understood by bulmaCalendar.
+- Clearing the picker emits an empty string.
+
+Programmatic control
+- To update the picker value from the outside, update the `date` prop.
+- To clear the picker from the outside, set `date` to a single space `" "`.
+
+Required static assets
+- CSS (add in `<head>`):
+  https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/css/bulma-calendar.min.css
+- JS (load before WASM bootstrap so `bulmaCalendar` exists):
+  https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js
+*/
+
 use yew::prelude::*;
-use yew::{Callback, Component, Context, Html};
 
-/// Internal component state for the calendar widget.
-pub struct Calendar {
-    /// Local format placeholder (currently unused by the widget; formats are passed to JS).
-    format: String,
-    /// Current date/time value as a string matching the widget's configured formats.
-    date: Option<String>,
-    /// DOM id of the `<input>` used to attach bulmaCalendar.
-    id: String,
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsCast;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsValue;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::closure::Closure;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::wasm_bindgen;
+#[cfg(target_arch = "wasm32")]
+use web_sys::Element;
+
+#[cfg(target_arch = "wasm32")]
+type CalendarClosure = Closure<dyn FnMut(JsValue)>;
+#[cfg(not(target_arch = "wasm32"))]
+type CalendarClosure = ();
+
+/// Optional test attribute rendered on the input.
+///
+/// Supported keys:
+/// - `data-testid`
+/// - `data-cy`
+#[derive(Clone, Debug, PartialEq)]
+pub struct TestAttr {
+    pub key: AttrValue,
+    pub value: AttrValue,
 }
 
-/// Properties for the `Calendar` component.
-///
-/// - `id`: required, unique DOM id for the input (used to attach/detach the JS widget).
-/// - `date_format`: optional; bulmaCalendar date pattern (default: `yyyy-MM-dd`).
-/// - `time_format`: optional; bulmaCalendar time pattern (default: `HH:mm`).
-/// - `date`: optional initial/current value; will be pushed into the widget on first render.
-/// - `on_date_changed`: invoked on select/validate/clear with the current value (empty on clear).
-/// - `class`: optional extra CSS classes appended to the input, e.g., `vec!["is-small".into()]`.
+impl TestAttr {
+    pub fn test_id(value: impl Into<AttrValue>) -> Self {
+        Self {
+            key: AttrValue::from("data-testid"),
+            value: value.into(),
+        }
+    }
+
+    pub fn data_cy(value: impl Into<AttrValue>) -> Self {
+        Self {
+            key: AttrValue::from("data-cy"),
+            value: value.into(),
+        }
+    }
+}
+
+impl<T> From<T> for TestAttr
+where
+    T: Into<AttrValue>,
+{
+    fn from(value: T) -> Self {
+        Self::test_id(value)
+    }
+}
+
+/// Properties for [`Calendar`].
 #[derive(Clone, PartialEq, Properties)]
 pub struct CalendarProps {
-    /// Unique DOM id of the input element.
+    /// Unique DOM id for the input (used to attach/detach the JS widget).
     pub id: String,
-    /// bulmaCalendar date pattern, e.g., `yyyy-MM-dd`. Falls back to `yyyy-MM-dd` if empty.
+
+    /// Date format understood by bulmaCalendar. Defaults to `yyyy-MM-dd` when empty.
     #[prop_or_default]
-    pub date_format: String,
-    /// bulmaCalendar time pattern, e.g., `HH:mm`. Falls back to `HH:mm` if empty.
+    pub date_format: AttrValue,
+
+    /// Time format understood by bulmaCalendar. Defaults to `HH:mm` when empty.
     #[prop_or_default]
-    pub time_format: String,
-    /// Optional initial/current value for the calendar.
+    pub time_format: AttrValue,
+
+    /// Optional initial/current value to seed or update the widget.
+    #[prop_or_default]
     pub date: Option<String>,
-    /// Callback fired whenever the date/time value changes. Receives empty string on clear.
+
+    /// Callback invoked when the date/time changes; receives empty string on clear.
     pub on_date_changed: Callback<String>,
-    /// Extra CSS classes for the input.
+
+    /// Extra classes appended after Bulma `input`.
+    #[prop_or_default]
     pub class: Vec<String>,
+
+    /// Optional test attribute on the input (`data-testid` or `data-cy`).
+    #[prop_or_default]
+    pub test_attr: Option<TestAttr>,
+
+    /// Picker type (`date`, `time`, `datetime`).
+    /// If empty, defaults to `datetime` when `time_format` is present, otherwise `date`.
+    #[prop_or_default]
+    pub calendar_type: AttrValue,
 }
 
-/// Internal messages for the component update loop.
-pub enum Msg {
-    /// User changed the date/time value through the widget.
-    DateChanged(String),
-}
+/// A date/time input enhanced by bulma-calendar.
+#[function_component(Calendar)]
+pub fn calendar(props: &CalendarProps) -> Html {
+    let input_ref = use_node_ref();
 
-impl Component for Calendar {
-    type Message = Msg;
-    type Properties = CalendarProps;
+    let date_format_raw = props.date_format.trim().to_string();
+    assert!(
+        date_format_raw.is_empty() || date_format_raw == "yyyy-MM-dd",
+        "Calendar date_format must be exactly 'yyyy-MM-dd' (lowercase yyyy-MM-dd). Got '{}'",
+        props.date_format
+    );
 
-    /// Initializes the component with provided props and default format strings.
-    fn create(ctx: &Context<Self>) -> Self {
-        Calendar {
-            format: "%Y-%m-%d %H:%M".to_string(),
-            date: ctx.props().date.clone(),
-            id: ctx.props().id.clone(),
-        }
-    }
+    let date_format = if date_format_raw.is_empty() {
+        "yyyy-MM-dd".to_owned()
+    } else {
+        date_format_raw
+    };
 
-    /// Handles internal messages by updating local state and notifying the parent via callback.
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::DateChanged(date) => {
-                self.date = Some(date.clone());
-                ctx.props().on_date_changed.emit(date);
-                true
+    let time_format_raw = props.time_format.trim().to_string();
+    let time_format = if time_format_raw.is_empty() {
+        "HH:mm".to_owned()
+    } else {
+        time_format_raw.clone()
+    };
+
+    let calendar_type = {
+        let explicit = props.calendar_type.trim();
+        if explicit.is_empty() {
+            if props.time_format.trim().is_empty() {
+                "date".to_owned()
+            } else {
+                "datetime".to_owned()
             }
+        } else {
+            explicit.to_owned()
         }
+    };
+
+    let initial_value = props.date.clone().unwrap_or_default();
+    let class = classes!("input", props.class.clone());
+
+    let (data_testid, data_cy) = match props.test_attr.as_ref() {
+        Some(attr) if attr.key == "data-testid" => (Some(attr.value.clone()), None),
+        Some(attr) if attr.key == "data-cy" => (None, Some(attr.value.clone())),
+        _ => (None, None),
+    };
+
+    let input_type = if props.time_format.trim().is_empty() {
+        AttrValue::from("date")
+    } else {
+        AttrValue::from("datetime")
+    };
+
+    let callback_store = use_mut_ref(|| None::<CalendarClosure>);
+    let on_date_changed_ref = use_mut_ref(|| props.on_date_changed.clone());
+    *on_date_changed_ref.borrow_mut() = props.on_date_changed.clone();
+
+    {
+        let id = props.id.clone();
+        let input_ref = input_ref.clone();
+        let callback_store = callback_store.clone();
+        let on_date_changed_ref = on_date_changed_ref.clone();
+        let date_format = date_format.clone();
+        let time_format = time_format.clone();
+        let calendar_type = calendar_type.clone();
+        let initial_value = initial_value.clone();
+
+        use_effect_with(
+            (id.clone(), date_format.clone(), time_format.clone(), calendar_type.clone()),
+            move |(id, date_format, time_format, calendar_type)| {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    if let Some(element) = input_ref.cast::<Element>() {
+                        let on_date_changed_ref = on_date_changed_ref.clone();
+                        let callback = Closure::wrap(Box::new(move |date: JsValue| {
+                            let s = date.as_string().unwrap_or_default();
+                            on_date_changed_ref.borrow().emit(s);
+                        }) as Box<dyn FnMut(JsValue)>);
+
+                        setup_date_picker(
+                            &element,
+                            callback.as_ref(),
+                            &JsValue::from(initial_value.clone()),
+                            &JsValue::from(date_format.clone()),
+                            &JsValue::from(time_format.clone()),
+                            &JsValue::from(calendar_type.clone()),
+                        );
+
+                        *callback_store.borrow_mut() = Some(callback);
+                    }
+
+                    let callback_store = callback_store.clone();
+                    let id_for_cleanup = id.clone();
+                    return move || {
+                        detach_date_picker(&JsValue::from(id_for_cleanup.as_str()));
+                        callback_store.borrow_mut().take();
+                    };
+                }
+
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let _ = (
+                        &input_ref,
+                        &callback_store,
+                        &on_date_changed_ref,
+                        &initial_value,
+                        id,
+                        date_format,
+                        time_format,
+                        calendar_type,
+                    );
+                    || {}
+                }
+            },
+        );
     }
 
-    /// Renders the backing input element. The bulmaCalendar widget attaches to this element.
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let _value = self.date.clone();
-        let _id = self.id.clone();
-        let classes = classes!("input", ctx.props().class.clone());
-        html! {
-            <input id={_id} class={classes!(classes)} type="datetime" value={_value} />
-        }
+    {
+        let id = props.id.clone();
+        let date = props.date.clone();
+        use_effect_with((id, date), move |(id, date)| {
+            #[cfg(target_arch = "wasm32")]
+            {
+                match date.as_deref() {
+                    Some(" ") | Some("") => {
+                        clear_date(&JsValue::from(id.as_str()));
+                    }
+                    Some(v) => {
+                        update_value(&JsValue::from(id.as_str()), &JsValue::from(v));
+                    }
+                    None => {}
+                }
+            }
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                let _ = (id, date);
+            }
+
+            || {}
+        });
     }
 
-    /// After first render, attaches the bulmaCalendar instance and wires event callbacks.
-    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
-        if first_render {
-            let window = web_sys::window().expect("no global `window` exists");
-            let document = window.document().expect("should have a document on window");
-
-            let element = document
-                .get_element_by_id(self.id.as_str())
-                .expect(format!("should have #{} on the page", self.id.as_str()).as_str());
-
-            // Clone the link for use inside the JS callback closure.
-            let link = ctx.link().clone();
-
-            // JS -> Rust bridge: receive the string value and forward as a Yew message.
-            let callback = Closure::wrap(Box::new(move |date: JsValue| {
-                let date_str = date.as_string().unwrap_or_default();
-                link.send_message(Msg::DateChanged(date_str));
-            }) as Box<dyn FnMut(JsValue)>);
-
-            // Resolve formats, falling back to sensible defaults if props are empty.
-            let _date_format = if ctx.props().date_format.trim().is_empty() {
-                "yyyy-MM-dd".to_string()
-            } else {
-                ctx.props().date_format.trim().to_string()
-            };
-
-            let _time_format = if ctx.props().time_format.trim().is_empty() {
-                "HH:mm".to_string()
-            } else {
-                ctx.props().time_format.trim().to_string()
-            };
-
-            // Attach the JS widget and seed its initial value.
-            setup_date_picker(
-                &element,
-                callback.as_ref(),
-                &JsValue::from(self.date.as_ref().unwrap_or(&"".to_string())),
-                &JsValue::from(_date_format),
-                &JsValue::from(_time_format),
-            );
-
-            // Intentionally leak the closure to keep it alive for the widget's lifetime.
-            callback.forget();
-        }
-    }
-
-    /// Before unmount, detach JS state keyed by the element id.
-    fn destroy(&mut self, _ctx: &Context<Self>) {
-        detach_date_picker(&JsValue::from(self.id.as_str()));
+    html! {
+        <input
+            id={props.id.clone()}
+            class={class}
+            type={input_type}
+            value={initial_value}
+            ref={input_ref}
+            data-testid={data_testid}
+            data-cy={data_cy}
+        />
     }
 }
 
-/// JS bridge that attaches bulmaCalendar to the provided element and wires a change callback.
-///
-/// Safety/expectations:
-/// - `element` must be an `<input>` present in the DOM with a stable `id`.
-/// - `callback` must remain alive for as long as the widget can invoke it (we call `forget()`).
-/// - bulmaCalendar must be globally available.
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(inline_js = r#"
 let init = new Map();
-export function setup_date_picker(element, callback, initial_date, date_format, time_format) {
+
+export function setup_date_picker(element, callback, initial_date, date_format, time_format, picker_type) {
+    if (!element || !element.id) {
+        return;
+    }
+
+    if (typeof bulmaCalendar === 'undefined' || typeof bulmaCalendar.attach !== 'function') {
+        console.warn('bulmaCalendar is not available on window. Calendar will remain a plain input.');
+        return;
+    }
+
     if (!init.has(element.id)) {
-      let calendarInstances = bulmaCalendar.attach(element, {
-            type: 'datetime',
+        const instances = bulmaCalendar.attach(element, {
+            type: picker_type || (String(time_format || '').trim() ? 'datetime' : 'date'),
             color: 'info',
             lang: 'en',
             dateFormat: date_format,
             timeFormat: time_format,
+            showTodayButton: false
         });
-        init.set(element.id, calendarInstances[0]);
-        let calendarInstance = calendarInstances[0];
+
+        if (!instances || !instances.length) {
+            return;
+        }
+
+        const calendarInstance = instances[0];
+        init.set(element.id, calendarInstance);
+
         calendarInstance.on('select', function(datepicker) {
-         callback(datepicker.data.value());
+            callback(datepicker.data.value());
         });
+
         calendarInstance.on('clear', function(_datepicker) {
-         callback('');
+            callback('');
         });
+
         calendarInstance.on('validate', function(datepicker) {
-         callback(datepicker.data.value());
+            callback(datepicker.data.value());
+            if (typeof calendarInstance.hide === 'function') {
+                calendarInstance.hide();
+            }
         });
     }
-    init.get(element.id).value(initial_date);
+
+    if (init.has(element.id)) {
+        init.get(element.id).value(initial_date || '');
+    }
 }
 
 export function detach_date_picker(id) {
-    init.delete(id);
+    if (init.has(id)) {
+        const instance = init.get(id);
+        if (instance && typeof instance.destroy === 'function') {
+            instance.destroy();
+        }
+        init.delete(id);
+    }
+}
+
+export function clear_date(id) {
+    if (init.has(id)) {
+        init.get(id).clear();
+    }
+}
+
+export function update_value(id, value) {
+    if (init.has(id)) {
+        init.get(id).value(value || '');
+    }
 }
 "#)]
+#[allow(improper_ctypes, improper_ctypes_definitions)]
 extern "C" {
-    /// Attach bulmaCalendar to `element`, register `callback`, seed with `initial_date`,
-    /// and apply `date_format`/`time_format`.
-    fn setup_date_picker(element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue);
+    fn setup_date_picker(
+        element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue, picker_type: &JsValue,
+    );
 
-    /// Remove the stored calendar instance keyed by the given `id`.
     fn detach_date_picker(id: &JsValue);
+
+    fn clear_date(id: &JsValue);
+
+    fn update_value(id: &JsValue, value: &JsValue);
 }

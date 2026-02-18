@@ -114,16 +114,17 @@ components:
 
   - id: "modal"
     name: "Modal"
-    additional_rules: "Need to use '<ModalCloserProvider id={ID}>' and implement onclick for a trigger button. ID has a format 'idN' where N is a number starting at 1. and unique in the app"
+    additional_rules: "Wrap modal examples in '<ModalControllerProvider>' and use 'use_context::<ModalControllerContext>()' for open/close/close_all by modal key. Provide a stable id only when you need external controller actions; otherwise id is optional."
     file: "src/components/modal_example.rs"
     route: "/component/modal"
     requires_css: ["bulma"]
     requires_js: []
     props_summary:
-      - "id: String (modal DOM id)"
+      - "id: Option<String> (controller key; auto-generated when omitted)"
       - "children: Children"
       - "trigger: Html"
       - "classes: Classes"
+      - "open: Option<bool>, set_open: Option<Callback<bool>> (controlled mode)"
 
   - id: "tabs"
     name: "Tabs"
@@ -229,6 +230,7 @@ components:
 
   - id: "calendar"
     name: "Calendar"
+    additional_rules: "Set date to \" \" (single space) for programmatic clear; date updates push into existing picker instance."
     file: "src/components/calendar_example_page.rs"
     route: "/component/calendar"
     requires_css: ["bulma", "bulma-calendar@7.1.1"]
@@ -239,3 +241,5 @@ components:
       - "date: Option<String>"
       - "on_date_changed: Callback<String>"
       - "class: Vec<String> (extra input classes)"
+      - "calendar_type: String (date|time|datetime)"
+      - "test_attr: Option<TestAttr> (data-testid or data-cy)"

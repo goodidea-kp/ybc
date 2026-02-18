@@ -86,7 +86,7 @@ pub fn text_area(props: &TextAreaProps) -> Html {
     {
         let gen1 = genai.clone();
         use_effect_with(props.is_genai, move |value_prop| {
-            gen1.set(value_prop.clone());
+            gen1.set(*value_prop);
             || ()
         });
     }

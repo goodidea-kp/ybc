@@ -98,12 +98,10 @@ pub fn app() -> Html {
                                         <p>{"This is the content of the second accordion."}</p>
                                     </ybc::AccordionItem>
                                 </ybc::Accordions>
-                                <ModalCloserProvider id="id0">
-                                       <MyModal1/>
-                                </ModalCloserProvider>
-                                <ModalCloserProvider id="id2">
+                                <ModalControllerProvider>
+                                    <MyModal1/>
                                     <MyModal2/>
-                                </ModalCloserProvider>
+                                </ModalControllerProvider>
                             </ybc::Tile>
                         </ybc::Tile>
                         <ybc::Tile>
@@ -194,16 +192,16 @@ fn main() {
     yew::Renderer::<App>::new().render();
 }
 
-use ybc::ModalCloserContext;
-use ybc::ModalCloserProvider;
+use ybc::ModalControllerContext;
+use ybc::ModalControllerProvider;
 
 #[component]
 pub fn MyModal1() -> Html {
-    let msg_ctx = use_context::<ModalCloserContext>().unwrap();
-    let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id0-close".to_string().parse().unwrap())) };
-    let on_click_cb = Callback::from(move |e: AttrValue| {
-        gloo_console::log!("Button clicked!");
-    });
+    let controller = use_context::<ModalControllerContext>().unwrap();
+    let onclick = {
+        let controller = controller.clone();
+        Callback::from(move |_| controller.close("id0"))
+    };
     html! {
             <ybc::ModalCard
                 classes={classes!("")}
@@ -214,7 +212,6 @@ pub fn MyModal1() -> Html {
                         {"Open Modal"}
                     </ybc::Button>
                 }}
-         // on_clicked={on_click_cb}
                 body={
                     html!{
                     <ybc::Content>
@@ -238,13 +235,15 @@ pub fn MyModal1() -> Html {
 
 #[component(MyModal2)]
 pub fn my_modal2() -> Html {
-    let msg_ctx = use_context::<ModalCloserContext>().unwrap();
-    let onclick = { Callback::from(move |e: MouseEvent| msg_ctx.dispatch("id2-close".to_string().parse().unwrap())) };
-    let msg_ctx2 = use_context::<ModalCloserContext>().unwrap();
-    let onsave = { Callback::from(move |e: MouseEvent| msg_ctx2.dispatch("id2-close".to_string().parse().unwrap())) };
-    let on_click_cb = Callback::from(move |e: AttrValue| {
-        gloo_console::log!("Button clicked!");
-    });
+    let controller = use_context::<ModalControllerContext>().unwrap();
+    let onclick = {
+        let controller = controller.clone();
+        Callback::from(move |_| controller.close("id2"))
+    };
+    let onsave = {
+        let controller = controller.clone();
+        Callback::from(move |_| controller.close("id2"))
+    };
     html! {
             <ybc::ModalCard
                 classes={classes!("")}
@@ -255,7 +254,6 @@ pub fn my_modal2() -> Html {
                         {"Open Modal"}
                     </ybc::Button>
                 }}
-                // on_clicked={on_click_cb}
                 body={
                     html!{
                     <ybc::Content>

@@ -17,12 +17,6 @@ pub fn form_example_page() -> Html {
             text.set(e);
         })
     };
-    let on_radio_update = {
-        let text = text.clone();
-        Callback::from(move |value: String| {
-            text.set(value);
-        })
-    };
     let selected_radio = use_state(|| "A".to_string());
     let on_radio_update = {
         let selected_radio = selected_radio.clone();
