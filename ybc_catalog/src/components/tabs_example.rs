@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(TabsExamplePage)]
 pub fn tabs_example_page() -> Html {
@@ -11,6 +12,7 @@ pub fn tabs_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container>
+           <DemoTitle title={"Tabs"} icon_classes={classes!("fa-solid", "fa-folder-tree")} />
            <ybc::Tabs toggle=true fullwidth=true>
             <ul>
               <li class={ if *idx==0 {"is-active"} else {""} }><a onclick={set_idx(0)}>{"First"}</a></li>

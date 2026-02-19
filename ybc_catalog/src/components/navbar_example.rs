@@ -1,4 +1,5 @@
 use crate::router::Route;
+use crate::ui::DemoTitle;
 use ybc::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
@@ -8,6 +9,7 @@ pub fn navbar_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container>
+         <DemoTitle title={"Navbar"} icon_classes={classes!("fa-solid", "fa-bars")} />
          <Navbar
                     navbrand={html!{
                         <NavbarItem>

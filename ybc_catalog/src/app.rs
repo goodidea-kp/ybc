@@ -1,7 +1,7 @@
 use crate::router::{Route, SwitchRoutes};
 use crate::ui::CatalogList;
 use std::rc::Rc;
-use ybc::{NavBurgerCloserState, Navbar, NavbarItem};
+use ybc::{FaIcon, NavBurgerCloserState, Navbar, NavbarItem};
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -14,7 +14,8 @@ pub fn app() -> Html {
                 <Navbar
                     navbrand={html!{
                         <NavbarItem>
-                            <ybc::Title classes={classes!("has-text-white")} size={ybc::HeaderSize::Is4}>
+                            <ybc::Title classes={classes!("has-text-white", "is-flex", "is-align-items-center")} size={ybc::HeaderSize::Is4}>
+                                <FaIcon classes={classes!("mr-2")} icon_classes={classes!("fa-solid", "fa-cubes")} />
                                 {"Trunk | Yew | YBC"}
                             </ybc::Title>
                         </NavbarItem>
@@ -47,7 +48,10 @@ pub fn home_page() -> Html {
         <>
             <section class="hero is-primary">
                 <div class="hero-body">
-                    <p class="title">{ "YBC Catalog" }</p>
+                    <p class="title is-flex is-align-items-center">
+                        <FaIcon classes={classes!("mr-2")} icon_classes={classes!("fa-solid", "fa-book-open")} />
+                        { "YBC Catalog" }
+                    </p>
                     <p class="subtitle">{ "All examples are live below. Open devtools to inspect HTML." }</p>
                 </div>
             </section>

@@ -1,6 +1,6 @@
 [package]
 name = "ybc"
-version = "0.4.3"
+version = "0.4.4"
 description = "A Yew component library based on the Bulma CSS framework."
 authors = ["Anthony Dodd <dodd.anthonyjosiah@gmail.com>", "Konstantin Pupkov <konstantin.pupkov@fromkos.com>"]
 edition = "2024"

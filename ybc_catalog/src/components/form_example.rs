@@ -1,5 +1,6 @@
 use ybc::*;
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(FormExamplePage)]
 pub fn form_example_page() -> Html {
@@ -52,7 +53,7 @@ pub fn form_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container classes={classes!("content")}>
-          <h2>{"Form Controls"}</h2>
+          <DemoTitle title={"Form Controls"} icon_classes={classes!("fa-solid", "fa-file-lines")} />
           <ybc::Field>
             <ybc::Tag tag="Label">{"Username"}</ybc::Tag>
             <ybc::Control>

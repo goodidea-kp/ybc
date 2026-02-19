@@ -2,6 +2,7 @@ use yew::prelude::*;
 use yew_router::prelude::Link;
 use ybc::components::panel::{Panel, PanelTabs, PanelBlock};
 use crate::router::Route;
+use crate::ui::DemoTitle;
 
 #[component(PanelExamplePage)]
 pub fn panel_example_page() -> Html {
@@ -10,7 +11,7 @@ pub fn panel_example_page() -> Html {
     html! {
         <ybc::Section>
             <ybc::Container classes={classes!("content")}>
-                <h3>{ "Panel" }</h3>
+                <DemoTitle title={"Panel"} icon_classes={classes!("fa-solid", "fa-table-list")} />
 
                 <Panel heading={html!{ "Repositories" }}>
                     <PanelTabs>
@@ -22,7 +23,10 @@ pub fn panel_example_page() -> Html {
                     <PanelBlock>
                         <p class="control has-icons-left">
                             <input class="input" type="text" placeholder="Search"/>
-                            <span class="icon is-left"><i class="fas fa-search" aria-hidden="true"></i></span>
+                            <ybc::FaIcon
+                                classes={classes!("is-left")}
+                                icon_classes={classes!("fa-solid", "fa-magnifying-glass")}
+                            />
                         </p>
                     </PanelBlock>
 

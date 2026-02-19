@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use ybc::components::autocomplete::AutoComplete;
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(AutocompleteExamplePage)]
 pub fn autocomplete_example_page() -> Html {
@@ -34,7 +35,7 @@ pub fn autocomplete_example_page() -> Html {
     html! {
             <ybc::Section>
                 <ybc::Container classes={classes!("content")}>
-                    <h3>{ "Autocomplete" }</h3>
+                    <DemoTitle title={"Autocomplete"} icon_classes={classes!("fa-solid", "fa-magnifying-glass")} />
 
                     <p class="is-size-6">{ "Static tags" }</p>
                     <AutoComplete
