@@ -3,6 +3,7 @@ use yew_router::prelude::Link;
 use ybc::{Alignment, Size};
 use ybc::components::pagination::{Pagination, PaginationItem, PaginationItemType, PaginationEllipsis};
 use crate::router::Route;
+use crate::ui::DemoTitle;
 
 #[component(PaginationExamplePage)]
 pub fn pagination_example_page() -> Html {
@@ -12,7 +13,7 @@ pub fn pagination_example_page() -> Html {
     html! {
         <ybc::Section>
             <ybc::Container classes={classes!("content")}>
-                <h3>{ "Pagination" }</h3>
+                <DemoTitle title={"Pagination"} icon_classes={classes!("fa-solid", "fa-book-open")} />
 
                 <h5>{ "Default" }</h5>
                 <Pagination previous={prev_link(Route::Home)} next={next_link(Route::Home)}>

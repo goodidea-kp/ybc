@@ -3,6 +3,7 @@ use ybc::Alignment;
 use ybc::components::breadcrumb::{Breadcrumb, BreadcrumbSeparator, BreadcrumbSize};
 use yew_router::prelude::Link;
 use crate::router::Route;
+use crate::ui::DemoTitle;
 
 #[component(BreadCrumbsExamplePage)]
 pub fn bread_crumbs_example_page() -> Html {
@@ -18,7 +19,7 @@ pub fn bread_crumbs_example_page() -> Html {
     html! {
         <ybc::Section>
             <ybc::Container classes={classes!("content")}>
-                <h3>{ "Breadcrumb" }</h3>
+                <DemoTitle title={"Breadcrumb"} icon_classes={classes!("fa-solid", "fa-route")} />
 
                 <h5>{ "Default" }</h5>
                 <Breadcrumb>{ items() }</Breadcrumb>

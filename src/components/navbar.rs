@@ -1,9 +1,22 @@
 use derive_more::Display;
 use std::rc::Rc;
 use std::string::ToString;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use yew::events::{KeyboardEvent, MouseEvent};
 use yew::prelude::*;
 
-use crate::components::dropdown::DropdownMsg;
+use crate::Button;
+
+static NAVBAR_AUTO_ID: AtomicUsize = AtomicUsize::new(1);
+static NAVBAR_DROPDOWN_AUTO_ID: AtomicUsize = AtomicUsize::new(1);
+
+fn next_navbar_id() -> String {
+    format!("navbar-menu-{}", NAVBAR_AUTO_ID.fetch_add(1, Ordering::Relaxed))
+}
+
+fn next_navbar_dropdown_id() -> String {
+    format!("navbar-dropdown-{}", NAVBAR_DROPDOWN_AUTO_ID.fetch_add(1, Ordering::Relaxed))
+}
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct NavBurgerCloserState {
@@ -58,116 +71,199 @@ pub struct NavbarProps {
     /// Extra classes for the navbar burger.
     #[prop_or_default]
     pub navburger_classes: Classes,
+    /// Controlled open state for the mobile menu.
+    #[prop_or_default]
+    pub open: Option<bool>,
+    /// Controlled setter for the mobile menu.
+    #[prop_or_default]
+    pub set_open: Option<Callback<bool>>,
+    /// Called when the mobile menu opens.
+    #[prop_or_default]
+    pub on_open: Callback<()>,
+    /// Called when the mobile menu closes.
+    #[prop_or_default]
+    pub on_close: Callback<()>,
+    /// Allow closing the mobile menu with Escape.
+    #[prop_or(true)]
+    pub close_on_escape: bool,
+    /// Optional menu id used by `aria-controls`.
+    #[prop_or_default]
+    pub menu_id: Option<AttrValue>,
+    /// Optional `aria-label` for the nav container.
+    #[prop_or_default]
+    pub aria_label: AttrValue,
 }
 
 /// A responsive horizontal navbar that can support images, links, buttons, and dropdowns.
 ///
 /// [https://bulma.io/documentation/components/navbar/](https://bulma.io/documentation/components/navbar/)
-pub struct Navbar {
-    is_menu_open: bool,
-    _listener: ContextHandle<Rc<NavBurgerCloserState>>,
-    state: Rc<NavBurgerCloserState>,
-}
+#[component(Navbar)]
+pub fn navbar(props: &NavbarProps) -> Html {
+    let internal_open = use_state(|| false);
+    let is_controlled = props.open.is_some() && props.set_open.is_some();
+    let is_menu_open = props.open.unwrap_or(*internal_open);
 
-impl Component for Navbar {
-    type Message = NavbarMsg;
-    type Properties = NavbarProps;
+    let set_local_open = {
+        let internal_open = internal_open.clone();
+        let set_open = props.set_open.clone();
+        Callback::from(move |value: bool| {
+            if is_controlled {
+                if let Some(set_open) = set_open.as_ref() {
+                    set_open.emit(value);
+                }
+            } else {
+                internal_open.set(value);
+            }
+        })
+    };
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        let (state, _listener) = _ctx
-            .link()
-            .context::<Rc<NavBurgerCloserState>>(_ctx.link().callback(NavbarMsg::CloseEvent))
-            .expect("context to be set");
-        Self {
-            is_menu_open: false,
-            _listener,
-            state,
-        }
+    {
+        let on_open = props.on_open.clone();
+        let on_close = props.on_close.clone();
+        let prev_open = use_mut_ref(move || is_menu_open);
+        use_effect_with(is_menu_open, move |is_open| {
+            let mut prev = prev_open.borrow_mut();
+            if *prev != *is_open {
+                if *is_open {
+                    on_open.emit(());
+                } else {
+                    on_close.emit(());
+                }
+                *prev = *is_open;
+            }
+            || {}
+        });
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            NavbarMsg::ToggleMenu => {
-                self.is_menu_open = !self.is_menu_open;
+    let closer_state = use_context::<Rc<NavBurgerCloserState>>();
+    {
+        let set_local_open = set_local_open.clone();
+        let prev_clicks = use_mut_ref(|| closer_state.as_ref().map(|state| state.total_clicks));
+        use_effect_with(closer_state, move |state| {
+            let mut prev = prev_clicks.borrow_mut();
+            let current = state.as_ref().map(|s| s.total_clicks);
+            if prev.is_some() && current != *prev {
+                set_local_open.emit(false);
             }
-            NavbarMsg::CloseEvent(state) => {
-                self.state = state;
-                self.is_menu_open = false;
-            }
-        }
-        true
+            *prev = current;
+            || {}
+        });
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        // navbar classes
-        let mut class = Classes::from("navbar");
-        class.push(ctx.props().classes.clone());
-        if let Some(fixed) = &ctx.props().fixed {
-            class.push(fixed.to_string());
-        }
+    let auto_menu_id = use_state(|| AttrValue::from(next_navbar_id()));
+    let menu_id = props.menu_id.clone().unwrap_or_else(|| (*auto_menu_id).clone());
+    let aria_label = if props.aria_label.is_empty() {
+        AttrValue::from("main navigation")
+    } else {
+        props.aria_label.clone()
+    };
 
-        // navbar-menu classes
-        let mut navclasses = Classes::from("navbar-menu");
-        let mut burgerclasses = Classes::from("navbar-burger");
-        burgerclasses.push(ctx.props().navburger_classes.clone());
-        if self.is_menu_open {
-            navclasses.push("is-active");
-            burgerclasses.push("is-active");
-        }
-        let togglecb = ctx.link().callback(|_| NavbarMsg::ToggleMenu);
-        let navbrand = if let Some(navbrand) = &ctx.props().navbrand {
-            html! {
-                <div class="navbar-brand">
-                    {navbrand.clone()}
-                    {if ctx.props().navburger {
+    let toggle_menu_action = {
+        let set_local_open = set_local_open.clone();
+        let is_menu_open = is_menu_open;
+        Callback::from(move |_| set_local_open.emit(!is_menu_open))
+    };
+
+    let toggle_menu = {
+        let toggle_menu_action = toggle_menu_action.clone();
+        Callback::from(move |_event: MouseEvent| toggle_menu_action.emit(()))
+    };
+
+    let burger_on_keydown = {
+        let toggle_menu_action = toggle_menu_action.clone();
+        let set_local_open = set_local_open.clone();
+        let close_on_escape = props.close_on_escape;
+        Callback::from(move |event: KeyboardEvent| match event.key().as_str() {
+            "Enter" | " " => {
+                event.prevent_default();
+                toggle_menu_action.emit(());
+            }
+            "Escape" if close_on_escape => {
+                event.prevent_default();
+                set_local_open.emit(false);
+            }
+            _ => {}
+        })
+    };
+
+    // navbar classes
+    let class = classes!(
+        "navbar",
+        props.classes.clone(),
+        props.fixed.as_ref().map(ToString::to_string),
+        props.transparent.then_some("is-transparent"),
+        props.spaced.then_some("is-spaced"),
+    );
+
+    // navbar-menu classes
+    let navclasses = classes!("navbar-menu", is_menu_open.then_some("is-active"));
+    let burgerclasses = classes!("navbar-burger", props.navburger_classes.clone(), is_menu_open.then_some("is-active"));
+
+    let navbrand = if let Some(navbrand) = &props.navbrand {
+        html! {
+            <div class="navbar-brand">
+                {navbrand.clone()}
+                {
+                    if props.navburger {
                         html! {
-                            <a class={burgerclasses} onclick={togglecb}
-                                role="button" aria-label="menu"
-                                aria-expanded={if self.is_menu_open { "true" } else { "false" }}
+                            <Button
+                                classes={burgerclasses}
+                                no_button_class={true}
+                                aria_label={"menu"}
+                                aria_controls={menu_id.clone()}
+                                aria_expanded={Some(is_menu_open)}
+                                aria_haspopup={"true"}
+                                onclick={toggle_menu}
+                                onkeydown={burger_on_keydown}
                             >
                                 <span aria-hidden="true"></span>
                                 <span aria-hidden="true"></span>
                                 <span aria-hidden="true"></span>
-                            </a>
+                            </Button>
                         }
                     } else {
-                        html! {}
-                    }}
-                </div>
-            }
-        } else {
-            html! {}
-        };
-        let navstart = if let Some(navstart) = &ctx.props().navstart {
-            html! {<div class="navbar-start">{navstart.clone()}</div>}
-        } else {
-            html! {}
-        };
-        let navend = if let Some(navend) = &ctx.props().navend {
-            html! {<div class="navbar-end">{navend.clone()}</div>}
-        } else {
-            html! {}
-        };
-        let contents = html! {
-            <>
+                        Html::default()
+                    }
+                }
+            </div>
+        }
+    } else {
+        Html::default()
+    };
+
+    let navstart = if let Some(navstart) = &props.navstart {
+        html! {<div class="navbar-start">{navstart.clone()}</div>}
+    } else {
+        Html::default()
+    };
+    let navend = if let Some(navend) = &props.navend {
+        html! {<div class="navbar-end">{navend.clone()}</div>}
+    } else {
+        Html::default()
+    };
+    let contents = html! {
+        <>
             {navbrand}
-            <div class={navclasses}>
+            <div class={navclasses} id={menu_id}>
                 {navstart}
                 {navend}
             </div>
-            </>
-        };
+        </>
+    };
 
-        if ctx.props().padded {
-            html! {
-                <nav {class} role="navigation" aria-label="main navigation">
-                    <div class="container">{contents}</div>
-                </nav>
-            }
-        } else {
-            html! {
-                <nav {class} role="navigation" aria-label="main navigation">{contents}</nav>
-            }
+    if props.padded {
+        html! {
+            <nav {class} role="navigation" aria-label={aria_label}>
+                <div class="container">{contents}</div>
+                {props.children.clone()}
+            </nav>
+        }
+    } else {
+        html! {
+            <nav {class} role="navigation" aria-label={aria_label}>
+                {contents}
+                {props.children.clone()}
+            </nav>
         }
     }
 }
@@ -301,7 +397,7 @@ pub struct NavbarDropdownProps {
     /// Make this dropdown triggerable based on hover.
     #[prop_or_default]
     pub hoverable: bool,
-    /// Configure this manu to be a dropup.
+    /// Configure this menu to be a dropup.
     #[prop_or_default]
     pub dropup: bool,
     /// Render the contents of this dropdown to the right.
@@ -313,6 +409,27 @@ pub struct NavbarDropdownProps {
     /// Use the boxed style for the dropdown, typically coupled with a transparent navbar.
     #[prop_or_default]
     pub boxed: bool,
+    /// Controlled open state.
+    #[prop_or_default]
+    pub open: Option<bool>,
+    /// Controlled open state setter.
+    #[prop_or_default]
+    pub set_open: Option<Callback<bool>>,
+    /// Callback emitted when opened.
+    #[prop_or_default]
+    pub on_open: Callback<()>,
+    /// Callback emitted when closed.
+    #[prop_or_default]
+    pub on_close: Callback<()>,
+    /// Allow closing with Escape.
+    #[prop_or(true)]
+    pub close_on_escape: bool,
+    /// Allow closing by clicking outside.
+    #[prop_or(true)]
+    pub close_on_click_outside: bool,
+    /// Optional id used to build ARIA links.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
 }
 
 /// A navbar dropdown menu, which can include navbar items and dividers.
@@ -321,72 +438,124 @@ pub struct NavbarDropdownProps {
 /// a navbar dropdown component.
 ///
 /// [https://bulma.io/documentation/components/navbar/#dropdown-menu](https://bulma.io/documentation/components/navbar/#dropdown-menu)
-pub struct NavbarDropdown {
-    is_menu_active: bool,
-}
+#[component(NavbarDropdown)]
+pub fn navbar_dropdown(props: &NavbarDropdownProps) -> Html {
+    let internal_open = use_state(|| false);
+    let is_controlled = props.open.is_some() && props.set_open.is_some();
+    let is_menu_active = props.open.unwrap_or(*internal_open);
 
-impl Component for NavbarDropdown {
-    type Message = DropdownMsg;
-    type Properties = NavbarDropdownProps;
+    let set_local_open = {
+        let internal_open = internal_open.clone();
+        let set_open = props.set_open.clone();
+        Callback::from(move |value: bool| {
+            if is_controlled {
+                if let Some(set_open) = set_open.as_ref() {
+                    set_open.emit(value);
+                }
+            } else {
+                internal_open.set(value);
+            }
+        })
+    };
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        Self { is_menu_active: false }
+    {
+        let on_open = props.on_open.clone();
+        let on_close = props.on_close.clone();
+        let prev_open = use_mut_ref(move || is_menu_active);
+        use_effect_with(is_menu_active, move |is_open| {
+            let mut prev = prev_open.borrow_mut();
+            if *prev != *is_open {
+                if *is_open {
+                    on_open.emit(());
+                } else {
+                    on_close.emit(());
+                }
+                *prev = *is_open;
+            }
+            || {}
+        });
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        if ctx.props().hoverable {
-            return false;
-        }
-        match msg {
-            DropdownMsg::Open => self.is_menu_active = true,
-            DropdownMsg::Close => self.is_menu_active = false,
-        }
-        true
-    }
+    let auto_id = use_state(|| AttrValue::from(next_navbar_dropdown_id()));
+    let root_id = props.id.clone().unwrap_or_else(|| (*auto_id).clone());
+    let menu_id = AttrValue::from(format!("{}-menu", root_id));
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        // navbar-item classes
-        let mut class = Classes::from("navbar-item has-dropdown");
-        class.push(ctx.props().classes.clone());
-        if ctx.props().dropup {
-            class.push("has-dropdown-up");
-        }
+    // navbar-item classes
+    let class = classes!(
+        "navbar-item",
+        "has-dropdown",
+        props.classes.clone(),
+        props.dropup.then_some("has-dropdown-up"),
+        props.hoverable.then_some("is-hoverable"),
+        (!props.hoverable && is_menu_active).then_some("is-active"),
+    );
 
-        // navbar-dropdown classes
-        let mut dropclasses = Classes::from("navbar-dropdown");
-        if ctx.props().right {
-            dropclasses.push("is-right");
-        }
-        if ctx.props().boxed {
-            dropclasses.push("is-boxed");
-        }
+    // navbar-dropdown classes
+    let dropclasses = classes!("navbar-dropdown", props.right.then_some("is-right"), props.boxed.then_some("is-boxed"),);
 
-        // navbar-link classes
-        let mut linkclasses = Classes::from("navbar-link");
-        if ctx.props().arrowless {
-            linkclasses.push("is-arrowless");
-        }
+    // navbar-link classes
+    let linkclasses = classes!("navbar-link", props.arrowless.then_some("is-arrowless"));
 
-        let opencb = if ctx.props().hoverable {
-            class.push("is-hoverable");
-            Callback::noop()
-        } else {
-            ctx.link().callback(|_| DropdownMsg::Open)
-        };
-        let overlay = if self.is_menu_active {
-            class.push("is-active");
-            html! {<div onclick={ctx.link().callback(|_| DropdownMsg::Close)} style="z-index:10;background-color:rgba(0,0,0,0);position:fixed;top:0;bottom:0;left:0;right:0;"></div>}
-        } else {
-            html! {}
-        };
+    let on_trigger_click = {
+        let set_local_open = set_local_open.clone();
+        let hoverable = props.hoverable;
+        let is_menu_active = is_menu_active;
+        Callback::from(move |event: MouseEvent| {
+            if hoverable {
+                return;
+            }
+            event.prevent_default();
+            set_local_open.emit(!is_menu_active);
+        })
+    };
+
+    let on_trigger_keydown = {
+        let set_local_open = set_local_open.clone();
+        let hoverable = props.hoverable;
+        let close_on_escape = props.close_on_escape;
+        Callback::from(move |event: KeyboardEvent| match event.key().as_str() {
+            "Enter" | " " | "ArrowDown" if !hoverable => {
+                event.prevent_default();
+                set_local_open.emit(true);
+            }
+            "Escape" if close_on_escape => {
+                event.prevent_default();
+                set_local_open.emit(false);
+            }
+            _ => {}
+        })
+    };
+
+    let overlay = if !props.hoverable && is_menu_active && props.close_on_click_outside {
+        let set_local_open = set_local_open.clone();
         html! {
-            <div {class}>
-                {overlay}
-                <a class={linkclasses} onclick={opencb}>{ctx.props().navlink.clone()}</a>
-                <div class={dropclasses}>
-                    {ctx.props().children.clone()}
-                </div>
-            </div>
+            <div
+                onclick={Callback::from(move |_| set_local_open.emit(false))}
+                style="z-index:10;background-color:rgba(0,0,0,0);position:fixed;top:0;bottom:0;left:0;right:0;"
+            ></div>
         }
+    } else {
+        Html::default()
+    };
+
+    html! {
+        <div id={root_id} {class}>
+            {overlay}
+            <a
+                class={linkclasses}
+                role="button"
+                tabindex="0"
+                aria-haspopup="true"
+                aria-controls={menu_id.clone()}
+                aria-expanded={if is_menu_active { "true" } else { "false" }}
+                onclick={on_trigger_click}
+                onkeydown={on_trigger_keydown}
+            >
+                {props.navlink.clone()}
+            </a>
+            <div id={menu_id} class={dropclasses} role="menu">
+                {props.children.clone()}
+            </div>
+        </div>
     }
 }

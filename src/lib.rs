@@ -44,8 +44,8 @@ pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::menu::{Menu, MenuLabel, MenuLabelProps, MenuList, MenuListProps, MenuProps};
 pub use components::message::{Message, MessageBody, MessageBodyProps, MessageHeader, MessageHeaderProps, MessageProps};
 pub use components::modal::{
-    Modal, ModalCard, ModalCard2, ModalCardProps, ModalController, ModalControllerContext, ModalControllerProvider, ModalControllerProviderProps,
-    ModalMsg, ModalProps,
+    Modal, ModalCard, ModalCard2, ModalCardProps, ModalCloseReason, ModalController, ModalControllerContext, ModalControllerProvider,
+    ModalControllerProviderProps, ModalMsg, ModalProps, ModalShouldClose,
 };
 pub use components::navbar::{
     NavBurgerCloserState, Navbar, NavbarDivider, NavbarDividerProps, NavbarDropdown, NavbarDropdownProps, NavbarFixed, NavbarItem, NavbarItemProps,
@@ -55,7 +55,7 @@ pub use components::pagination::{
     Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemRouter, PaginationItemType, PaginationProps,
 };
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
-pub use components::tabs::{Tabs, TabsProps};
+pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps};
 
 pub use components::calendar::{Calendar, CalendarProps, TestAttr};
 
@@ -63,12 +63,13 @@ pub use components::calendar::{Calendar, CalendarProps, TestAttr};
 pub use elements::block::{Block, BlockProps};
 pub use elements::r#box::{Box, BoxProps};
 pub use elements::button::{
-    Button, ButtonAnchor, ButtonAnchorProps, ButtonAnchorRouter, ButtonGroupSize, ButtonInputReset, ButtonInputResetProps, ButtonInputSubmit,
-    ButtonInputSubmitProps, ButtonProps, ButtonRouter, ButtonRouterProps, Buttons, ButtonsProps,
+    Button, ButtonAnchor, ButtonAnchorProps, ButtonAnchorRouter, ButtonColor, ButtonGroupSize, ButtonInputReset, ButtonInputResetProps,
+    ButtonInputSubmit, ButtonInputSubmitProps, ButtonProps, ButtonRouter, ButtonRouterProps, ButtonSize, ButtonType, ButtonVariant, Buttons,
+    ButtonsProps, IconButton, IconButtonProps,
 };
 pub use elements::content::{Content, ContentProps};
 pub use elements::delete::{Delete, DeleteProps};
-pub use elements::icon::{Icon, IconProps};
+pub use elements::icon::{FaIcon, FaIconProps, Icon, IconProps};
 pub use elements::image::{Image, ImageProps, ImageSize};
 pub use elements::notification::{Notification, NotificationProps};
 pub use elements::progress::{Progress, ProgressProps};

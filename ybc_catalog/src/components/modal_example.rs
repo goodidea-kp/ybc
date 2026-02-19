@@ -1,5 +1,6 @@
 use ybc::*;
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 #[component(ModalExamplePage)]
 pub fn modal_example_page() -> Html {
     const ID: &str = "modal-example-1";
@@ -7,6 +8,7 @@ pub fn modal_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container>
+          <DemoTitle title={"Modal"} icon_classes={classes!("fa-solid", "fa-window-maximize")} />
           <ModalControllerProvider>
             <CloseAllModalsButton />
             <MyModal id={ID} classes={classes!("is-success")} />

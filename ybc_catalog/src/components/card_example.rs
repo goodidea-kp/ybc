@@ -1,5 +1,6 @@
 use ybc::*;
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(CardExamplePage)]
 pub fn card_example_page() -> Html {
@@ -8,6 +9,7 @@ pub fn card_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container>
+          <DemoTitle title={"Card"} icon_classes={classes!("fa-solid", "fa-id-card")} />
           <Card>
             <CardHeader>
               <p>{"My Card"}</p>

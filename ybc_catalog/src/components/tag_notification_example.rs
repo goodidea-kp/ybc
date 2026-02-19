@@ -1,10 +1,12 @@
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(TagNotificationExamplePage)]
 pub fn tags_notifications_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container classes={classes!("content")}>
+          <DemoTitle title={"Tag & Notification"} icon_classes={classes!("fa-solid", "fa-tags")} />
           <h2>{"Tags"}</h2>
           <ybc::Tags>
             <ybc::Tag classes={classes!("is-primary")}>{"Primary"}</ybc::Tag>

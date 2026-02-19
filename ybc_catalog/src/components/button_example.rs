@@ -1,5 +1,6 @@
 use ybc::{Button, Buttons};
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(ButtonExamplePage)]
 pub fn button_example_page() -> Html {
@@ -12,7 +13,7 @@ pub fn button_example_page() -> Html {
     html! {
       <ybc::Section>
         <ybc::Container classes={classes!("content")}>
-          <h2>{"Button"}</h2>
+          <DemoTitle title={"Button"} icon_classes={classes!("fa-solid", "fa-hand-pointer")} />
           <p>{"YBC wraps Bulma buttons. Use classes for colors/sizes."}</p>
 
           <Buttons>

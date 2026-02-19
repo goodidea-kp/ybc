@@ -1,17 +1,18 @@
 use yew::prelude::*;
 use ybc::components::message::{Message, MessageHeader, MessageBody};
+use crate::ui::DemoTitle;
 
 #[component(MessageExamplePage)]
 pub fn message_example_page() -> Html {
     html! {
         <ybc::Section>
             <ybc::Container classes={classes!("content")}>
-                <h3>{ "Message" }</h3>
+                <DemoTitle title={"Message"} icon_classes={classes!("fa-solid", "fa-envelope-open-text")} />
 
                 <Message>
                     <MessageHeader>
                         { "Default" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "A simple message with a header and a body." }
@@ -21,7 +22,7 @@ pub fn message_example_page() -> Html {
                 <Message classes={classes!("is-primary")}>
                     <MessageHeader>
                         { "Primary" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "Primary color message body." }
@@ -31,7 +32,7 @@ pub fn message_example_page() -> Html {
                 <Message classes={classes!("is-link")}>
                     <MessageHeader>
                         { "Link" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "Link color message body." }
@@ -41,7 +42,7 @@ pub fn message_example_page() -> Html {
                 <Message classes={classes!("is-success", "is-small")}>
                     <MessageHeader>
                         { "Success (small)" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "Small size message." }
@@ -51,7 +52,7 @@ pub fn message_example_page() -> Html {
                 <Message classes={classes!("is-warning", "is-medium")}>
                     <MessageHeader>
                         { "Warning (medium)" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "Medium size message." }
@@ -61,7 +62,7 @@ pub fn message_example_page() -> Html {
                 <Message classes={classes!("is-danger", "is-large")}>
                     <MessageHeader>
                         { "Danger (large)" }
-                        <button class="delete" aria-label="delete"></button>
+                        <ybc::Button classes={classes!("delete")} no_button_class={true} aria_label={"delete"} />
                     </MessageHeader>
                     <MessageBody>
                         { "Large size message." }

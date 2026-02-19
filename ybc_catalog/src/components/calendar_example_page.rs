@@ -1,5 +1,6 @@
 use ybc::*;
 use yew::prelude::*;
+use crate::ui::DemoTitle;
 
 #[component(CalendarExamplePage)]
 pub fn calendar_example_page() -> Html {
@@ -14,7 +15,7 @@ pub fn calendar_example_page() -> Html {
     html! {
         <ybc::Section>
           <ybc::Container classes={classes!("content")}> 
-            <h3>{"Calendar"}</h3>
+            <DemoTitle title={"Calendar"} icon_classes={classes!("fa-solid", "fa-calendar-days")} />
             <p class="is-size-6">{"bulma-calendar date/time picker wrapped in Yew."}</p>
 
             <ybc::Field>
@@ -37,4 +38,3 @@ pub fn calendar_example_page() -> Html {
         </ybc::Section>
     }
 }
-

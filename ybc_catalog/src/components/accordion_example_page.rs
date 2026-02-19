@@ -1,13 +1,14 @@
 use yew::prelude::*;
 use yew_router::prelude::Link;
 use crate::router::Route;
+use crate::ui::DemoTitle;
 
 #[component(AccordionExamplePage)]
 pub fn accordion_example_page() -> Html {
     html! {
         <ybc::Section>
             <ybc::Container classes={classes!("content")}>
-                <h3>{ "Accordion" }</h3>
+                <DemoTitle title={"Accordion"} icon_classes={classes!("fa-solid", "fa-list")} />
 
                 <details open=true>
                     <summary class="is-size-5">{ "Overview" }</summary>
