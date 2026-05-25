@@ -51,9 +51,9 @@ pub use components::navbar::{
     NavBurgerCloserState, Navbar, NavbarDivider, NavbarDividerProps, NavbarDropdown, NavbarDropdownProps, NavbarFixed, NavbarItem, NavbarItemProps,
     NavbarItemTag, NavbarMsg, NavbarProps,
 };
-pub use components::pagination::{
-    Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemRouter, PaginationItemType, PaginationProps,
-};
+#[cfg(feature = "router")]
+pub use components::pagination::PaginationItemRouter;
+pub use components::pagination::{Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemType, PaginationProps};
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
 pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps};
 
@@ -63,10 +63,11 @@ pub use components::calendar::{Calendar, CalendarProps, TestAttr};
 pub use elements::block::{Block, BlockProps};
 pub use elements::r#box::{Box, BoxProps};
 pub use elements::button::{
-    Button, ButtonAnchor, ButtonAnchorProps, ButtonAnchorRouter, ButtonColor, ButtonGroupSize, ButtonInputReset, ButtonInputResetProps,
-    ButtonInputSubmit, ButtonInputSubmitProps, ButtonProps, ButtonRouter, ButtonRouterProps, ButtonSize, ButtonType, ButtonVariant, Buttons,
-    ButtonsProps, IconButton, IconButtonProps,
+    Button, ButtonAnchor, ButtonAnchorProps, ButtonColor, ButtonGroupSize, ButtonInputReset, ButtonInputResetProps, ButtonInputSubmit,
+    ButtonInputSubmitProps, ButtonProps, ButtonSize, ButtonType, ButtonVariant, Buttons, ButtonsProps, IconButton, IconButtonProps,
 };
+#[cfg(feature = "router")]
+pub use elements::button::{ButtonAnchorRouter, ButtonRouter, ButtonRouterProps};
 pub use elements::content::{Content, ContentProps};
 pub use elements::delete::{Delete, DeleteProps};
 pub use elements::icon::{FaIcon, FaIconProps, Icon, IconProps};
