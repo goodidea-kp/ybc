@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{Button, FaIcon};
+use crate::{Button, Delete};
 use wasm_bindgen::JsCast;
 use web_sys::{Event, HtmlDialogElement, HtmlElement, MouseEvent};
 use yew::prelude::*;
@@ -158,16 +158,6 @@ dialog.modal::backdrop {
     background: rgba(10, 10, 10, 0.86);
 }
 
-/* Use a Font Awesome icon instead of Bulma's pseudo-element cross. */
-dialog.modal .ybc-modal-icon-close::before,
-dialog.modal .ybc-modal-icon-close::after {
-    display: none !important;
-}
-
-dialog.modal .ybc-modal-icon-close .icon {
-    color: #fff;
-    font-size: 1.1rem;
-}
 "#;
 
 fn base_class(extra: &Classes, is_active: bool) -> Classes {
@@ -194,12 +184,6 @@ fn close_dialog(dialog_ref: &NodeRef) {
         && dialog.open()
     {
         dialog.close();
-    }
-}
-
-fn close_icon() -> Html {
-    html! {
-        <FaIcon icon_classes={classes!("fa-solid", "fa-xmark")} />
     }
 }
 
@@ -461,6 +445,7 @@ pub fn modal(props: &ModalProps) -> Html {
         let close_action = close_action.clone();
         Callback::from(move |_| close_action.emit(ModalCloseReason::CloseButton))
     };
+
     let escape_close = {
         let close_action = close_action.clone();
         Callback::from(move |_| close_action.emit(ModalCloseReason::Escape))
@@ -488,13 +473,11 @@ pub fn modal(props: &ModalProps) -> Html {
                 </div>
 
                 <Button
-                    classes={classes!("modal-close", "is-large", "ybc-modal-icon-close")}
+                    classes={classes!("modal-close", "is-large")}
                     no_button_class={true}
                     aria_label={"close"}
                     onclick={close_btn_close}
-                >
-                    {close_icon()}
-                </Button>
+                />
             </DialogShell>
         </>
     }
@@ -672,10 +655,6 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
         let close_action = close_action.clone();
         Callback::from(move |_| close_action.emit(ModalCloseReason::CloseButton))
     };
-    let close_btn_close = {
-        let close_action = close_action.clone();
-        Callback::from(move |_| close_action.emit(ModalCloseReason::CloseButton))
-    };
     let escape_close = {
         let close_action = close_action.clone();
         Callback::from(move |_| close_action.emit(ModalCloseReason::Escape))
@@ -701,12 +680,7 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
                 <div class="modal-card">
                     <header class="modal-card-head">
                         <p class="modal-card-title" tabindex="-1" data-ybc-dialog-focus="true">{props.title.clone()}</p>
-                        <Button
-                            classes={classes!("delete")}
-                            no_button_class={true}
-                            aria_label={"close"}
-                            onclick={delete_btn_close}
-                        />
+                        <Delete aria_label={"close"} onclick={delete_btn_close} />
                     </header>
                     <section class="modal-card-body">
                         {props.body.clone()}
@@ -715,15 +689,6 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
                         {props.footer.clone()}
                     </footer>
                 </div>
-
-                <Button
-                    classes={classes!("modal-close", "is-large", "ybc-modal-icon-close")}
-                    no_button_class={true}
-                    aria_label={"close"}
-                    onclick={close_btn_close}
-                >
-                    {close_icon()}
-                </Button>
             </DialogShell>
         </>
     }

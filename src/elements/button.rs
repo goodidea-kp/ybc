@@ -157,6 +157,12 @@ pub struct ButtonProps {
     /// Optional `aria-label` attribute.
     #[prop_or_default]
     pub aria_label: AttrValue,
+    /// Optional `role` attribute.
+    #[prop_or_default]
+    pub role: AttrValue,
+    /// Optional `tabindex` attribute.
+    #[prop_or_default]
+    pub tabindex: Option<i32>,
     /// Optional `aria-controls` attribute.
     #[prop_or_default]
     pub aria_controls: AttrValue,
@@ -166,6 +172,12 @@ pub struct ButtonProps {
     /// Optional `aria-expanded` attribute.
     #[prop_or_default]
     pub aria_expanded: Option<bool>,
+    /// Optional `aria-selected` attribute.
+    #[prop_or_default]
+    pub aria_selected: Option<bool>,
+    /// Optional `aria-pressed` attribute.
+    #[prop_or_default]
+    pub aria_pressed: Option<bool>,
     /// Skip adding the default `button` Bulma class.
     #[prop_or_default]
     pub no_button_class: bool,
@@ -179,9 +191,13 @@ pub struct ButtonProps {
 #[component(Button)]
 pub fn button(props: &ButtonProps) -> Html {
     let aria_label = (!props.aria_label.is_empty()).then_some(props.aria_label.clone());
+    let role = (!props.role.is_empty()).then_some(props.role.clone());
+    let tabindex = props.tabindex.map(|value| value.to_string());
     let aria_controls = (!props.aria_controls.is_empty()).then_some(props.aria_controls.clone());
     let aria_haspopup = (!props.aria_haspopup.is_empty()).then_some(props.aria_haspopup.clone());
     let aria_expanded = props.aria_expanded.map(|value| if value { "true" } else { "false" });
+    let aria_selected = props.aria_selected.map(|value| if value { "true" } else { "false" });
+    let aria_pressed = props.aria_pressed.map(|value| if value { "true" } else { "false" });
     let class = classes!(
         (!props.no_button_class).then_some("button"),
         props.classes.clone(),
@@ -200,9 +216,13 @@ pub fn button(props: &ButtonProps) -> Html {
             {class}
             type={props.button_type.to_string()}
             aria-label={aria_label}
+            role={role}
+            tabindex={tabindex}
             aria-controls={aria_controls}
             aria-haspopup={aria_haspopup}
             aria-expanded={aria_expanded}
+            aria-selected={aria_selected}
+            aria-pressed={aria_pressed}
             onclick={props.onclick.clone()}
             onkeydown={props.onkeydown.clone()}
             disabled={props.disabled}

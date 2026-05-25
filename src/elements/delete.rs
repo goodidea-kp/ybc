@@ -12,6 +12,9 @@ pub struct DeleteProps {
     /// The click handler to use for this component.
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
+    /// Optional `aria-label` attribute.
+    #[prop_or_default]
+    pub aria_label: AttrValue,
 }
 
 /// A versatile delete cross.
@@ -20,8 +23,9 @@ pub struct DeleteProps {
 #[component(Delete)]
 pub fn delete(props: &DeleteProps) -> Html {
     let class = classes!("delete", props.classes.clone());
+    let aria_label = (!props.aria_label.is_empty()).then_some(props.aria_label.clone());
     html! {
-        <@{props.tag.clone()} {class} onclick={props.onclick.clone()}>
+        <@{props.tag.clone()} {class} aria-label={aria_label} onclick={props.onclick.clone()}>
             {props.children.clone()}
         </@>
     }

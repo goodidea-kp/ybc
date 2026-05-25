@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use yew::events::{KeyboardEvent, MouseEvent};
 use yew::prelude::*;
 
-use crate::{Alignment, Size};
+use crate::{Alignment, Button, Size};
 
 static TABS_AUTO_ID: AtomicUsize = AtomicUsize::new(1);
 
@@ -201,21 +201,21 @@ pub fn tab_item(props: &TabItemProps) -> Html {
 
     html! {
         <li class={classes!(props.classes.clone(), is_active.then_some("is-active"))} role="presentation">
-            <button
-                id={tab_id}
-                class="ybc-tab-button"
-                type="button"
-                role="tab"
-                aria-selected={if is_active { "true" } else { "false" }}
-                aria-controls={panel_id}
-                aria-label={aria_label}
-                tabindex={if is_active { "0" } else { "-1" }}
+            <Button
+                id={tab_id.to_string()}
+                classes={classes!("ybc-tab-button")}
+                no_button_class={true}
+                role={"tab"}
+                aria_selected={Some(is_active)}
+                aria_controls={panel_id.unwrap_or_default()}
+                aria_label={aria_label.unwrap_or_default()}
+                tabindex={Some(if is_active { 0 } else { -1 })}
                 disabled={props.disabled}
                 onclick={on_click}
                 onkeydown={on_keydown}
             >
                 {props.children.clone()}
-            </button>
+            </Button>
         </li>
     }
 }
