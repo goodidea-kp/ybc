@@ -158,10 +158,13 @@ dialog.modal::backdrop {
     background: rgba(10, 10, 10, 0.86);
 }
 
-/* Bulma's .modal-card-title has flex-shrink:0 with no min-width override,
-   so a long unbroken string (a hostname, an ARN) in the title forces
-   modal-card-head wider than the card instead of wrapping, pushing the
-   whole dialog off-screen once centered. */
+/* Bulma's .modal-card-title has flex-shrink:0, which is an explicit "never
+   shrink below content width" declaration — min-width:0 alone does NOT
+   override it (that only fixes the *default* min-width:auto floor on a
+   shrinkable item). With flex-shrink:0 the title just clips instead of
+   wrapping once it's long enough (a hostname, an ARN) to not fit next to
+   the close button. Override flex-shrink itself so the item can actually
+   shrink and wrap. */
 .modal-card-head,
 .modal-card-title {
     min-width: 0;
@@ -169,10 +172,27 @@ dialog.modal::backdrop {
 
 .modal-card-title {
     overflow-wrap: anywhere;
+    flex-shrink: 1;
 }
 
 .modal-card-body {
     overflow-x: auto;
+}
+
+/* Bulma centers .modal-card/.modal-content via `margin: 0 auto` (desktop)
+   or `margin: 0 <mobile-margin>` (mobile) — but this dialog centers via its
+   own flexbox (align-items/justify-content above). The two centering
+   mechanisms fight: a non-zero margin on a flex item skews it off the
+   flexbox-computed center once the item can't shrink to fit, which is what
+   pushed the whole card off-screen instead of just letting it wrap. Reset
+   the margin to 0 so flexbox is the only thing positioning the card, and
+   cap width with max-width (not width) so it can never exceed the
+   viewport regardless of which Bulma breakpoint is active. */
+dialog.modal[open] .modal-card,
+dialog.modal[open] .modal-content {
+    margin: 0 !important;
+    max-width: calc(100vw - 2rem) !important;
+    max-height: calc(100vh - 2rem) !important;
 }
 
 "#;
