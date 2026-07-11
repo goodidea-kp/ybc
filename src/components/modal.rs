@@ -158,6 +158,23 @@ dialog.modal::backdrop {
     background: rgba(10, 10, 10, 0.86);
 }
 
+/* Bulma's .modal-card-title has flex-shrink:0 with no min-width override,
+   so a long unbroken string (a hostname, an ARN) in the title forces
+   modal-card-head wider than the card instead of wrapping, pushing the
+   whole dialog off-screen once centered. */
+.modal-card-head,
+.modal-card-title {
+    min-width: 0;
+}
+
+.modal-card-title {
+    overflow-wrap: anywhere;
+}
+
+.modal-card-body {
+    overflow-x: auto;
+}
+
 "#;
 
 fn base_class(extra: &Classes, is_active: bool) -> Classes {
