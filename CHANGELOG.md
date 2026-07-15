@@ -6,6 +6,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## Unreleased
 
+## 0.4.7
+### fixed
+- `PanelTabs` no longer emits `role="tablist"`. Bulma `.panel-tabs` is filter
+  navigation, not a WAI-ARIA tablist widget, so the role tripped axe
+  `aria-required-children` (its children are links, not `role="tab"`). It now
+  renders as a labelled `role="navigation"` region. The accessible tablist widget
+  remains available via `Tabs`/`TabItem`/`TabPanel`.
+
 ## 0.4.0
 ### added
 - Configurable character of PaginationEllipsis.

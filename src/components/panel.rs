@@ -48,7 +48,12 @@ pub struct PanelTabsProps {
 #[component(PanelTabs)]
 pub fn panel_tabs(props: &PanelTabsProps) -> Html {
     let aria_label = (!props.aria_label.is_empty()).then_some(props.aria_label.clone());
-    html! { <p class="panel-tabs" role="tablist" aria-label={aria_label}>{props.children.clone()}</p> }
+    // Bulma `.panel-tabs` is filter navigation, not a WAI-ARIA tablist widget
+    // (no roving tabindex / arrow-key contract, no linked tabpanels). Claiming
+    // role="tablist" requires role="tab" children and trips axe
+    // `aria-required-children`; expose it as a labelled navigation region instead.
+    // The accessible tablist widget lives in `tabs.rs` (`Tabs`/`TabItem`/`TabPanel`).
+    html! { <p class="panel-tabs" role="navigation" aria-label={aria_label}>{props.children.clone()}</p> }
 }
 
 //////////////////////////////////////////////////////////////////////////////
