@@ -13,6 +13,7 @@
   </strong>
 </div>
 <br/>
+ 
 
 YBC encapsulates all of the structure, style and functionality of the Bulma CSS framework as a set of Yew components. YBC also ships with support for the Yew Router, adding Bulma-styled components which wrap the Yew Router components for clean integration.
 
