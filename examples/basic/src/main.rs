@@ -104,6 +104,39 @@ pub fn app() -> Html {
                                 </ModalControllerProvider>
                             </ybc::Tile>
                         </ybc::Tile>
+                        <ybc::Tile ctx={Parent}>
+                            <ybc::Tile ctx={Child} classes={classes!("notification", "is-light")}>
+                                <ybc::Subtitle size={ybc::HeaderSize::Is3} classes={classes!("has-text-dark")}>{"Tabs"}</ybc::Subtitle>
+                                <ybc::TabsProvider>
+                                    <ybc::Tabs boxed=true>
+                                        <ybc::TabItem index={0}>
+                                            <span>{"Pictures"}</span>
+                                        </ybc::TabItem>
+                                        <ybc::TabItem index={1}>
+                                            <span>{"Music"}</span>
+                                        </ybc::TabItem>
+                                        <ybc::TabItem index={2}>
+                                            <span>{"Videos"}</span>
+                                        </ybc::TabItem>
+                                    </ybc::Tabs>
+                                    <ybc::TabPanel index={0}>
+                                        <ybc::Box>
+                                            <p class="has-text-black">{"Pictures Content: Standard Bulma tabs component demonstration."}</p>
+                                        </ybc::Box>
+                                    </ybc::TabPanel>
+                                    <ybc::TabPanel index={1}>
+                                        <ybc::Box>
+                                            <p class="has-text-black">{"Music Content: Standard Bulma tabs component demonstration."}</p>
+                                        </ybc::Box>
+                                    </ybc::TabPanel>
+                                    <ybc::TabPanel index={2}>
+                                        <ybc::Box>
+                                            <p class="has-text-black">{"Videos Content: Standard Bulma tabs component demonstration."}</p>
+                                        </ybc::Box>
+                                    </ybc::TabPanel>
+                                </ybc::TabsProvider>
+                            </ybc::Tile>
+                        </ybc::Tile>
                         <ybc::Tile>
                             <ybc::Tile>
                                 <ybc::Field label={Some("Departure to Mars")} help={"Enter desired departure date"}>
