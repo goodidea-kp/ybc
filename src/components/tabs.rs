@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use yew::events::{KeyboardEvent, MouseEvent};
 use yew::prelude::*;
 
-use crate::{Alignment, Button, Size};
+use crate::{Alignment, Size};
 
 static TABS_AUTO_ID: AtomicUsize = AtomicUsize::new(1);
 
@@ -69,6 +69,104 @@ pub struct TabsProps {
 /// pair this component with [`TabItem`] and optionally [`TabPanel`].
 #[component(Tabs)]
 pub fn tabs(props: &TabsProps) -> Html {
+    let parent_ctx = use_context::<TabsContext>();
+    let has_parent = parent_ctx.is_some();
+
+    let internal_active = use_state(|| props.default_active);
+    let is_controlled = props.active.is_some() && props.set_active.is_some();
+    let active = parent_ctx.as_ref().map(|ctx| ctx.active).unwrap_or_else(|| props.active.unwrap_or(*internal_active));
+
+    let set_active = if let Some(ref ctx) = parent_ctx {
+        ctx.set_active.clone()
+    } else {
+        let internal_active = internal_active.clone();
+        let set_active = props.set_active.clone();
+        Callback::from(move |value: usize| {
+            if is_controlled {
+                if let Some(set_active) = set_active.as_ref() {
+                    set_active.emit(value);
+                }
+            } else {
+                internal_active.set(value);
+            }
+        })
+    };
+
+    let on_change = props.on_change.clone();
+    let prev_active = use_mut_ref(move || active);
+    use_effect_with(active, move |active| {
+        if !has_parent {
+            let mut prev = prev_active.borrow_mut();
+            if *prev != *active {
+                on_change.emit(*active);
+                *prev = *active;
+            }
+        }
+        || {}
+    });
+
+    let class = classes!(
+        "tabs",
+        props.classes.clone(),
+        props.alignment.as_ref().map(ToString::to_string),
+        props.size.as_ref().map(ToString::to_string),
+        props.boxed.then_some("is-boxed"),
+        props.toggle.then_some("is-toggle"),
+        props.rounded.then_some("is-rounded"),
+        props.fullwidth.then_some("is-fullwidth"),
+    );
+
+    let auto_id = use_state(|| AttrValue::from(next_tabs_id()));
+    let list_id = props.id.clone().unwrap_or_else(|| (*auto_id).clone());
+    let aria_label = (!props.aria_label.is_empty()).then_some(props.aria_label.clone());
+
+    if has_parent {
+        html! {
+            <div {class}>
+                <ul id={list_id} role="tablist" aria-label={aria_label}>
+                    {props.children.clone()}
+                </ul>
+            </div>
+        }
+    } else {
+        let context = TabsContext {
+            active,
+            set_active,
+        };
+        html! {
+            <ContextProvider<TabsContext> {context}>
+                <div {class}>
+                    <ul id={list_id} role="tablist" aria-label={aria_label}>
+                        {props.children.clone()}
+                    </ul>
+                </div>
+            </ContextProvider<TabsContext>>
+        }
+    }
+}
+
+#[derive(Clone, Debug, Properties, PartialEq)]
+pub struct TabsProviderProps {
+    #[prop_or_default]
+    pub children: Children,
+    /// Controlled active tab index.
+    #[prop_or_default]
+    pub active: Option<usize>,
+    /// Controlled active tab index setter.
+    #[prop_or_default]
+    pub set_active: Option<Callback<usize>>,
+    /// Default active index for uncontrolled mode.
+    #[prop_or_default]
+    pub default_active: usize,
+    /// Callback emitted when the active tab index changes.
+    #[prop_or_default]
+    pub on_change: Callback<usize>,
+}
+
+/// A wrapper component providing state context for [`Tabs`], [`TabItem`] and [`TabPanel`].
+/// Use this component to separate the tab list navigation from the tab panel contents.
+#[component(TabsProvider)]
+pub fn tabs_provider(props: &TabsProviderProps) -> Html {
     let internal_active = use_state(|| props.default_active);
     let is_controlled = props.active.is_some() && props.set_active.is_some();
     let active = props.active.unwrap_or(*internal_active);
@@ -100,32 +198,14 @@ pub fn tabs(props: &TabsProps) -> Html {
         });
     }
 
-    let class = classes!(
-        "tabs",
-        props.classes.clone(),
-        props.alignment.as_ref().map(ToString::to_string),
-        props.size.as_ref().map(ToString::to_string),
-        props.boxed.then_some("is-boxed"),
-        props.toggle.then_some("is-toggle"),
-        props.rounded.then_some("is-rounded"),
-        props.fullwidth.then_some("is-fullwidth"),
-    );
-
-    let auto_id = use_state(|| AttrValue::from(next_tabs_id()));
-    let list_id = props.id.clone().unwrap_or_else(|| (*auto_id).clone());
-    let aria_label = (!props.aria_label.is_empty()).then_some(props.aria_label.clone());
     let context = TabsContext {
         active,
-        set_active: set_active.clone(),
+        set_active,
     };
 
     html! {
         <ContextProvider<TabsContext> {context}>
-            <div {class}>
-                <ul id={list_id} role="tablist" aria-label={aria_label}>
-                    {props.children.clone()}
-                </ul>
-            </div>
+            {props.children.clone()}
         </ContextProvider<TabsContext>>
     }
 }
@@ -201,21 +281,19 @@ pub fn tab_item(props: &TabItemProps) -> Html {
 
     html! {
         <li class={classes!(props.classes.clone(), is_active.then_some("is-active"))} role="presentation">
-            <Button
+            <a
                 id={tab_id.to_string()}
-                classes={classes!("ybc-tab-button")}
-                no_button_class={true}
-                role={"tab"}
-                aria_selected={Some(is_active)}
-                aria_controls={panel_id.unwrap_or_default()}
-                aria_label={aria_label.unwrap_or_default()}
-                tabindex={Some(if is_active { 0 } else { -1 })}
-                disabled={props.disabled}
+                class="ybc-tab-button"
+                role="tab"
+                aria-selected={if is_active { Some("true") } else { Some("false") }}
+                aria-controls={panel_id}
+                aria-label={aria_label}
+                tabindex={if is_active { Some("0") } else { Some("-1") }}
                 onclick={on_click}
                 onkeydown={on_keydown}
             >
                 {props.children.clone()}
-            </Button>
+            </a>
         </li>
     }
 }

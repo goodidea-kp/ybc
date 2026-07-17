@@ -4,6 +4,7 @@ use yew_router::prelude::*;
 use crate::app::HomePage;
 use crate::components::{ButtonExamplePage, CardExamplePage, ColumnsExamplePage, FormExamplePage, ImageIconExamplePage, ModalExamplePage, NavbarExamplePage, TableExamplePage, TabsExamplePage, TagNotificationExamplePage,
                         BreadCrumbsExamplePage, MessageExamplePage, PanelExamplePage, PaginationExamplePage, AccordionExamplePage, AutocompleteExamplePage, CalendarExamplePage};
+use crate::components::repro_example::{ReproRoute, repro_switch};
 
 #[derive(Routable, Clone, PartialEq, Debug)]
 pub enum Route {
@@ -43,6 +44,8 @@ pub enum Route {
     Autocomplete,
     #[at("/component/calendar")]
     Calendar,
+    #[at("/repro/:k")]
+    Repro,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -71,6 +74,7 @@ pub fn switch_routes() -> Html {
                 Route::Accordion => html! { <AccordionExamplePage/> },
                 Route::Autocomplete => html! { <AutocompleteExamplePage/> },
                 Route::Calendar => html! { <CalendarExamplePage/> },
+                Route::Repro => html! { <Switch<ReproRoute> render={repro_switch} /> },
                 Route::NotFound => html! { <ybc::Section><ybc::Container><h1 class="title">{"404"}</h1></ybc::Container></ybc::Section> },
             }
         }}/>

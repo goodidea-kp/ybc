@@ -8,3 +8,22 @@ html {}
   right:0;
   z-index:1;
 }
+
+/* Custom tabs styling to guarantee high contrast and readability */
+.tabs {
+  li {
+    a {
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    &.is-active {
+      a {
+        background-color: #363636 !important; /* Charcoal dark background */
+        color: #ffffff !important;            /* Pure white text for excellent legibility */
+        border-color: #363636 !important;     /* Uniform borders matching background */
+        font-weight: 600;
+        border-radius: 4px 4px 0 0;           /* Clean rounded corners on top */
+      }
+    }
+  }
+}

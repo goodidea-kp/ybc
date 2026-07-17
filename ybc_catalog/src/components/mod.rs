@@ -15,6 +15,7 @@ pub mod pagination_example_page;
 pub mod accordion_example_page;
 pub mod autocomplete_example_page;
 pub mod calendar_example_page;
+pub mod repro_example;
 
 pub use button_example::ButtonExamplePage;
 pub use card_example::CardExamplePage;
