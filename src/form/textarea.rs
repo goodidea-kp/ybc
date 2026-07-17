@@ -42,6 +42,10 @@ pub struct TextAreaProps {
 
     #[prop_or_default]
     pub is_genai: bool,
+    /// The `maxlength` attribute for this form element. `None` omits the
+    /// attribute (no limit); `Some(n)` caps input to `n` characters.
+    #[prop_or_default]
+    pub maxlength: Option<u32>,
 }
 
 /// A multiline textarea component.
@@ -109,6 +113,7 @@ pub fn text_area(props: &TextAreaProps) -> Html {
                     disabled={props.disabled}
                     readonly={props.readonly}
                     ref={input_ref}
+                    maxlength={props.maxlength.map(|m| m.to_string())}
                     />
             </div>
         } else {
@@ -122,6 +127,7 @@ pub fn text_area(props: &TextAreaProps) -> Html {
                 disabled={props.disabled}
                 readonly={props.readonly}
                 ref={input_ref}
+                maxlength={props.maxlength.map(|m| m.to_string())}
                 />
         }
     }

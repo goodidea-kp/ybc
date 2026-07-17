@@ -43,6 +43,10 @@ pub struct InputProps {
 
     #[prop_or_default]
     pub step: f32,
+    /// The `maxlength` attribute for this form element. `None` omits the
+    /// attribute (no limit); `Some(n)` caps input to `n` characters.
+    #[prop_or_default]
+    pub maxlength: Option<u32>,
 }
 
 /// A text input element.
@@ -109,6 +113,7 @@ pub fn input(props: &InputProps) -> Html {
                 readonly={props.readonly}
                 step={props.step.to_string()}
                 pattern="[0-9]+([.][0-9]{0,2})?"
+                maxlength={props.maxlength.map(|m| m.to_string())}
                 />
         } else {
             <input
@@ -120,6 +125,7 @@ pub fn input(props: &InputProps) -> Html {
                 placeholder={props.placeholder.clone()}
                 disabled={props.disabled}
                 readonly={props.readonly}
+                maxlength={props.maxlength.map(|m| m.to_string())}
                 />
         }
     }
