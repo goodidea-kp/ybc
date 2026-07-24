@@ -74,7 +74,10 @@ pub fn tabs(props: &TabsProps) -> Html {
 
     let internal_active = use_state(|| props.default_active);
     let is_controlled = props.active.is_some() && props.set_active.is_some();
-    let active = parent_ctx.as_ref().map(|ctx| ctx.active).unwrap_or_else(|| props.active.unwrap_or(*internal_active));
+    let active = parent_ctx
+        .as_ref()
+        .map(|ctx| ctx.active)
+        .unwrap_or_else(|| props.active.unwrap_or(*internal_active));
 
     let set_active = if let Some(ref ctx) = parent_ctx {
         ctx.set_active.clone()
@@ -129,10 +132,7 @@ pub fn tabs(props: &TabsProps) -> Html {
             </div>
         }
     } else {
-        let context = TabsContext {
-            active,
-            set_active,
-        };
+        let context = TabsContext { active, set_active };
         html! {
             <ContextProvider<TabsContext> {context}>
                 <div {class}>
@@ -198,10 +198,7 @@ pub fn tabs_provider(props: &TabsProviderProps) -> Html {
         });
     }
 
-    let context = TabsContext {
-        active,
-        set_active,
-    };
+    let context = TabsContext { active, set_active };
 
     html! {
         <ContextProvider<TabsContext> {context}>
