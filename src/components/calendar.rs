@@ -24,8 +24,6 @@ Required static assets
 use yew::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::JsCast;
-#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::JsValue;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::closure::Closure;
@@ -321,7 +319,18 @@ export function detach_date_picker(id) {
     if (init.has(id)) {
         const instance = init.get(id);
         if (instance && typeof instance.destroy === 'function') {
-            instance.destroy();
+            // bulma-calendar's destroy() does document.getElementById(id).remove().
+            // When a Yew component that hosts a Calendar unmounts, Yew tears down
+            // the DOM node before this cleanup effect runs, so getElementById
+            // returns null and .remove() throws an uncaught TypeError. The
+            // instance is being discarded anyway, so swallow a teardown failure
+            // rather than surface it (observed navigating away from a page with a
+            // date picker, e.g. the keys dashboard -> another route).
+            try {
+                instance.destroy();
+            } catch (_) {
+                /* element already removed by the framework on unmount */
+            }
         }
         init.delete(id);
     }
