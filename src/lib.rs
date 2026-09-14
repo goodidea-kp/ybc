@@ -40,6 +40,7 @@ pub use components::breadcrumb::{Breadcrumb, BreadcrumbProps, BreadcrumbSeparato
 pub use components::card::{
     Card, CardContent, CardContentProps, CardFooter, CardFooterProps, CardHeader, CardHeaderProps, CardImage, CardImageProps, CardProps,
 };
+pub use components::chart::{PieChart, PieChartProps, PieSegment};
 pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::menu::{Menu, MenuLabel, MenuLabelProps, MenuList, MenuListProps, MenuProps};
 pub use components::message::{Message, MessageBody, MessageBodyProps, MessageHeader, MessageHeaderProps, MessageProps};
@@ -81,10 +82,10 @@ pub use elements::title::{HeaderSize, Subtitle, SubtitleProps, Title, TitleProps
 // form
 pub use form::checkbox::{Checkbox, CheckboxProps};
 pub use form::control::{Control, ControlProps};
-pub use form::field::{AddonsAlign, Field, FieldProps, GroupedAlign, LabelSize};
+pub use form::field::{AddonsAlign, Field, FieldContext, FieldProps, GroupedAlign, LabelSize};
 pub use form::file::{File, FileProps};
-pub use form::input::{Input, InputProps, InputType};
-pub use form::radio::{Radio, RadioProps};
+pub use form::input::{Input, InputMode, InputProps, InputType};
+pub use form::radio::{Radio, RadioGroup, RadioGroupProps, RadioProps};
 pub use form::select::{MultiSelect, MultiSelectProps, Select, SelectProps};
 pub use form::textarea::{TextArea, TextAreaProps};
 

@@ -1,3 +1,4 @@
+use crate::form::field::use_field_context;
 use crate::{Icon, Size};
 use wasm_bindgen::UnwrapThrowExt;
 use web_sys::HtmlTextAreaElement;
@@ -5,6 +6,12 @@ use yew::prelude::*;
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TextAreaProps {
+    /// The `id` attribute for this form element.
+    ///
+    /// Defaults to the id minted by the enclosing `Field`, so a labelled field needs no explicit
+    /// id. Set it to bind a label by hand or to give tests a stable target.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The `name` attribute for this form element.
     pub name: String,
     /// The controlled value of this form element.
@@ -39,6 +46,13 @@ pub struct TextAreaProps {
     /// Make this component static.
     #[prop_or_default]
     pub r#static: bool,
+    /// Mark this component as required for form submission.
+    #[prop_or_default]
+    pub required: bool,
+    /// Mark this component as invalid: adds `is-danger` and `aria-invalid="true"`.
+    /// Also set automatically when the enclosing `Field` has `help_has_error`.
+    #[prop_or_default]
+    pub invalid: bool,
 
     #[prop_or_default]
     pub is_genai: bool,
@@ -57,6 +71,9 @@ pub struct TextAreaProps {
 /// component via callback.
 #[component(TextArea)]
 pub fn text_area(props: &TextAreaProps) -> Html {
+    let field = use_field_context();
+    let id = props.id.clone().or(field.control_id);
+    let invalid = props.invalid || field.has_error;
     let class = classes!(
         "textarea",
         props.classes.clone(),
@@ -64,6 +81,7 @@ pub fn text_area(props: &TextAreaProps) -> Html {
         props.loading.then_some("is-loading"),
         props.r#static.then_some("is-static"),
         props.fixed_size.then_some("has-fixed-size"),
+        invalid.then_some("is-danger"),
     );
     let genai = use_state(|| props.is_genai);
     let value = use_state(|| props.value.clone());
@@ -104,6 +122,7 @@ pub fn text_area(props: &TextAreaProps) -> Html {
                     </Icon>
                 }
                 <textarea
+                    {id}
                     name={props.name.clone()}
                     value={(*value).clone()}
                     {oninput}
@@ -112,12 +131,16 @@ pub fn text_area(props: &TextAreaProps) -> Html {
                     placeholder={props.placeholder.clone()}
                     disabled={props.disabled}
                     readonly={props.readonly}
+                    required={props.required}
+                    aria-invalid={invalid.then_some("true")}
+                    aria-describedby={field.help_id}
                     ref={input_ref}
                     maxlength={props.maxlength.map(|m| m.to_string())}
                     />
             </div>
         } else {
             <textarea
+                {id}
                 name={props.name.clone()}
                 value={props.value.clone()}
                 {oninput}
@@ -126,6 +149,9 @@ pub fn text_area(props: &TextAreaProps) -> Html {
                 placeholder={props.placeholder.clone()}
                 disabled={props.disabled}
                 readonly={props.readonly}
+                required={props.required}
+                aria-invalid={invalid.then_some("true")}
+                aria-describedby={field.help_id}
                 ref={input_ref}
                 maxlength={props.maxlength.map(|m| m.to_string())}
                 />

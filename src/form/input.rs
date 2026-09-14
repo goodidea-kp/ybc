@@ -4,9 +4,16 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 use crate::Size;
+use crate::form::field::use_field_context;
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct InputProps {
+    /// The `id` attribute for this form element.
+    ///
+    /// Defaults to the id minted by the enclosing `Field`, so a labelled field needs no explicit
+    /// id. Set it to bind a label by hand or to give tests a stable target.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The `name` attribute for this form element.
     pub name: String,
     /// The controlled value of this form element.
@@ -22,6 +29,13 @@ pub struct InputProps {
     /// The placeholder value for this component.
     #[prop_or_default]
     pub placeholder: String,
+    /// The `autocomplete` token, e.g. `"email"`, `"username"`, `"current-password"`,
+    /// `"one-time-code"`. Drives browser autofill; `None` leaves it to the browser.
+    #[prop_or_default]
+    pub autocomplete: Option<AttrValue>,
+    /// The virtual keyboard to show on touch devices. `None` leaves it to the browser.
+    #[prop_or_default]
+    pub inputmode: Option<InputMode>,
     /// The size of this component.
     #[prop_or_default]
     pub size: Option<Size>,
@@ -40,6 +54,13 @@ pub struct InputProps {
     /// Make this component static.
     #[prop_or_default]
     pub r#static: bool,
+    /// Mark this component as required for form submission.
+    #[prop_or_default]
+    pub required: bool,
+    /// Mark this component as invalid: adds `is-danger` and `aria-invalid="true"`.
+    /// Also set automatically when the enclosing `Field` has `help_has_error`.
+    #[prop_or_default]
+    pub invalid: bool,
 
     #[prop_or_default]
     pub step: f32,
@@ -58,6 +79,9 @@ pub struct InputProps {
 /// component via callback.
 #[component(Input)]
 pub fn input(props: &InputProps) -> Html {
+    let field = use_field_context();
+    let id = props.id.clone().or(field.control_id);
+    let invalid = props.invalid || field.has_error;
     let class = classes!(
         "input",
         props.classes.clone(),
@@ -65,7 +89,9 @@ pub fn input(props: &InputProps) -> Html {
         props.rounded.then_some("is-rounded"),
         props.loading.then_some("is-loading"),
         props.r#static.then_some("is-static"),
+        invalid.then_some("is-danger"),
     );
+    let inputmode = props.inputmode.as_ref().map(|mode| mode.to_string());
     let oninput_text = props.update.reform(|ev: web_sys::InputEvent| {
         let input: HtmlInputElement = ev.target_dyn_into().expect_throw("event target should be an input");
         input.value()
@@ -101,6 +127,7 @@ pub fn input(props: &InputProps) -> Html {
     html! {
         if props.r#type == InputType::Number {
             <input
+                {id}
                 name={props.name.clone()}
                 value={props.value.clone()}
                 {class}
@@ -109,22 +136,33 @@ pub fn input(props: &InputProps) -> Html {
                 oninput={oninput_number}
                 oninvalid={oninvalid}
                 placeholder={props.placeholder.clone()}
+                autocomplete={props.autocomplete.clone()}
+                {inputmode}
                 disabled={props.disabled}
                 readonly={props.readonly}
+                required={props.required}
+                aria-invalid={invalid.then_some("true")}
+                aria-describedby={field.help_id}
                 step={props.step.to_string()}
                 pattern="[0-9]+([.][0-9]{0,2})?"
                 maxlength={props.maxlength.map(|m| m.to_string())}
                 />
         } else {
             <input
+                {id}
                 name={props.name.clone()}
                 value={props.value.clone()}
                 oninput={oninput_text}
                 {class}
                 type={props.r#type.to_string()}
                 placeholder={props.placeholder.clone()}
+                autocomplete={props.autocomplete.clone()}
+                {inputmode}
                 disabled={props.disabled}
                 readonly={props.readonly}
+                required={props.required}
+                aria-invalid={invalid.then_some("true")}
+                aria-describedby={field.help_id}
                 maxlength={props.maxlength.map(|m| m.to_string())}
                 />
         }
@@ -146,4 +184,31 @@ pub enum InputType {
     Tel,
     #[display("number")]
     Number,
+}
+
+/// The `inputmode` hint: which virtual keyboard a touch device should show.
+///
+/// https://html.spec.whatwg.org/multipage/interaction.html#attr-inputmode
+#[derive(Clone, Debug, Display, PartialEq, Eq)]
+pub enum InputMode {
+    /// No virtual keyboard; the page draws its own input UI.
+    #[display("none")]
+    None,
+    #[display("text")]
+    Text,
+    /// Digits plus the locale's decimal separator.
+    #[display("decimal")]
+    Decimal,
+    /// Digits only, e.g. a PIN or one-time code.
+    #[display("numeric")]
+    Numeric,
+    #[display("tel")]
+    Tel,
+    /// Text keyboard with a "search" action key.
+    #[display("search")]
+    Search,
+    #[display("email")]
+    Email,
+    #[display("url")]
+    Url,
 }

@@ -5,3 +5,4 @@ target
 
 # file ignores
 Cargo.lock
+/.claude/

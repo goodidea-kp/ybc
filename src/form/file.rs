@@ -2,10 +2,17 @@ use wasm_bindgen::UnwrapThrowExt;
 use web_sys::{File as SysFile, HtmlInputElement};
 use yew::prelude::*;
 
+use crate::form::field::use_field_context;
 use crate::{Alignment, Size};
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct FileProps {
+    /// The `id` attribute for the inner `input type="file"` element.
+    ///
+    /// Defaults to the id minted by the enclosing `Field`, so a labelled field needs no explicit
+    /// id. Set it to bind a label by hand or to give tests a stable target.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The `name` attribute for this form element.
     pub name: String,
     /// The controlled form value for the currently selected files.
@@ -39,6 +46,13 @@ pub struct FileProps {
     /// Allow multiple files to be selected.
     #[prop_or_default]
     pub multiple: bool,
+    /// Mark this component as required for form submission.
+    #[prop_or_default]
+    pub required: bool,
+    /// Mark this component as invalid: adds `is-danger` and `aria-invalid="true"`.
+    /// Also set automatically when the enclosing `Field` has `help_has_error`.
+    #[prop_or_default]
+    pub invalid: bool,
     /// The size of this component.
     #[prop_or_default]
     pub size: Option<Size>,
@@ -56,6 +70,9 @@ pub struct FileProps {
 /// component via callback.
 #[component(File)]
 pub fn file(props: &FileProps) -> Html {
+    let field = use_field_context();
+    let id = props.id.clone().or(field.control_id);
+    let invalid = props.invalid || field.has_error;
     let class = classes!(
         "file",
         props.classes.clone(),
@@ -63,6 +80,7 @@ pub fn file(props: &FileProps) -> Html {
         props.right.then_some("is-right"),
         props.fullwidth.then_some("is-fullwidth"),
         props.boxed.then_some("is-boxed"),
+        invalid.then_some("is-danger"),
         props.size.as_ref().map(|size| size.to_string()),
         props.alignment.as_ref().map(|alignment| alignment.to_string()),
     );
@@ -80,10 +98,14 @@ pub fn file(props: &FileProps) -> Html {
         <div {class}>
             <label class="file-label">
                 <input
+                    {id}
                     type="file"
                     class="file-input"
                     name={props.name.clone()}
                     multiple={props.multiple}
+                    required={props.required}
+                    aria-invalid={invalid.then_some("true")}
+                    aria-describedby={field.help_id}
                     {onchange}
                     />
                 <span class="file-cta">
