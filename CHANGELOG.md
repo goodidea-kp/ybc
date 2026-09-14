@@ -25,6 +25,12 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   selected while `value` is empty, so `required` rejects the untouched select.
 - `RadioGroup` component: a `fieldset` + `legend` wrapper that gives a set of
   `Radio` buttons one accessible name and a single `disabled` switch.
+- `PieChart` component (`PieSegment` data): an inline-SVG donut (or pie with
+  `hole={0.0}`) whose centre shows the total and, on hover or focus, the active
+  segment. Segments and legend entries are keyboard-reachable hit targets, render
+  as real links when given an `href`, and emit `on_select` for router
+  navigation. Colours come from `--ybc-chart-1..8` custom properties with
+  colour-vision-safe fallbacks; segments past `max_segments` fold into "Other".
 
 ### changed
 - `Field` help text renders as `<p class="help">` (Bulma's own markup) instead

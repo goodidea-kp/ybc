@@ -8,9 +8,156 @@ use ybc::TileCtx::{Ancestor, Child, Parent};
 use yew::prelude::*;
 
 use ybc::NavBurgerCloserState;
+use ybc::PieSegment;
+use yew_router::prelude::*;
+
+#[derive(Clone, Routable, PartialEq)]
+enum Route {
+    #[at("/")]
+    Home,
+    #[at("/language/:key")]
+    Language { key: String },
+    #[not_found]
+    #[at("/404")]
+    NotFound,
+}
 
 #[component(App)]
 pub fn app() -> Html {
+    html! {
+        <BrowserRouter>
+            <Switch<Route> render={switch} />
+        </BrowserRouter>
+    }
+}
+
+fn switch(route: Route) -> Html {
+    match route {
+        Route::Home | Route::NotFound => html! { <Home /> },
+        Route::Language { key } => html! { <LanguagePage language_key={key} /> },
+    }
+}
+
+/// A language in the demo codebase: key, name, lines of code, and a blurb for its page.
+struct Language {
+    key: &'static str,
+    name: &'static str,
+    lines_of_code: f64,
+    blurb: &'static str,
+}
+
+const LANGUAGES: [Language; 8] = [
+    Language {
+        key: "rust",
+        name: "Rust",
+        lines_of_code: 48_210.0,
+        blurb: "Core services and the WASM front end.",
+    },
+    Language {
+        key: "typescript",
+        name: "TypeScript",
+        lines_of_code: 21_930.0,
+        blurb: "Browser glue and the design-system playground.",
+    },
+    Language {
+        key: "go",
+        name: "Go",
+        lines_of_code: 12_400.0,
+        blurb: "Deployment tooling and the CLI.",
+    },
+    Language {
+        key: "python",
+        name: "Python",
+        lines_of_code: 7_850.0,
+        blurb: "Data pipelines and one-off analysis.",
+    },
+    Language {
+        key: "sql",
+        name: "SQL",
+        lines_of_code: 3_120.0,
+        blurb: "Migrations and reporting views.",
+    },
+    Language {
+        key: "shell",
+        name: "Shell",
+        lines_of_code: 1_480.0,
+        blurb: "CI scripts.",
+    },
+    Language {
+        key: "yaml",
+        name: "YAML",
+        lines_of_code: 960.0,
+        blurb: "Pipeline and Kubernetes manifests.",
+    },
+    Language {
+        key: "css",
+        name: "CSS",
+        lines_of_code: 410.0,
+        blurb: "Overrides on top of Bulma.",
+    },
+];
+
+fn language_segments() -> Vec<PieSegment> {
+    LANGUAGES
+        .iter()
+        .map(|language| PieSegment::new(language.key, language.name, language.lines_of_code).with_href(format!("/language/{}", language.key)))
+        .collect()
+}
+
+#[derive(Clone, Properties, PartialEq)]
+struct LanguagePageProps {
+    language_key: String,
+}
+
+/// The detail page a chart segment routes to.
+#[component(LanguagePage)]
+fn language_page(props: &LanguagePageProps) -> Html {
+    let language = LANGUAGES.iter().find(|language| language.key == props.language_key);
+    let total: f64 = LANGUAGES.iter().map(|language| language.lines_of_code).sum();
+    let body = match language {
+        Some(language) => {
+            let share = format!(
+                "{:.0} lines of code, {:.0}% of the codebase",
+                language.lines_of_code,
+                language.lines_of_code / total * 100.0
+            );
+            html! {
+                <>
+                    <ybc::Title><>{language.name}</></ybc::Title>
+                    <ybc::Subtitle><>{share}</></ybc::Subtitle>
+                    <p>{language.blurb}</p>
+                </>
+            }
+        }
+        None => html! {
+            <>
+                <ybc::Title>{"Unknown language"}</ybc::Title>
+                <p>{format!("Nothing is recorded for '{}'.", props.language_key)}</p>
+            </>
+        },
+    };
+    html! {
+        <ybc::Section>
+            <ybc::Container>
+                <ybc::Box>
+                    {body}
+                    <Link<Route> to={Route::Home} classes={classes!("button", "is-link", "is-light", "mt-4")}>{"Back to the chart"}</Link<Route>>
+                </ybc::Box>
+            </ybc::Container>
+        </ybc::Section>
+    }
+}
+
+#[component(Home)]
+pub fn home() -> Html {
+    let navigator = use_navigator();
+    let go_to_language = Callback::from(move |segment: PieSegment| match &navigator {
+        Some(navigator) => navigator.push(&Route::Language {
+            key: segment.key.to_string(),
+        }),
+        None => gloo_console::warn!("no router in scope; cannot open", segment.key.to_string()),
+    });
+    let language_segments = language_segments();
     let state = Rc::new(NavBurgerCloserState { total_clicks: 0 });
     let cb_date_changed = Callback::from(|date: String| {
         gloo_console::log!("Date changed: {}", date);
@@ -152,6 +299,31 @@ pub fn app() -> Html {
                                         </ybc::Box>
                                     </ybc::TabPanel>
                                 </ybc::TabsProvider>
+                            </ybc::Tile>
+                        </ybc::Tile>
+                        <ybc::Tile ctx={Parent}>
+                            <ybc::Tile ctx={Child} classes={classes!("box")}>
+                                <ybc::Subtitle size={ybc::HeaderSize::Is4}>{"Donut chart"}</ybc::Subtitle>
+                                <p class="mb-4">{"Click or focus a segment, or its legend entry, to open that language's page. Segments past the sixth fold into \"Other\"."}</p>
+                                <ybc::PieChart
+                                    title={"Lines of code by language"}
+                                    total_label={"lines total"}
+                                    segments={language_segments.clone()}
+                                    follow_href={false}
+                                    on_select={go_to_language.clone()}
+                                />
+                            </ybc::Tile>
+                            <ybc::Tile ctx={Child} classes={classes!("box")}>
+                                <ybc::Subtitle size={ybc::HeaderSize::Is4}>{"Pie variant"}</ybc::Subtitle>
+                                <p class="mb-4">{"The same data with hole={0.0} and max_segments={4}; the readout moves beside the chart."}</p>
+                                <ybc::PieChart
+                                    segments={language_segments}
+                                    hole={0.0}
+                                    max_segments={4}
+                                    size={"11rem"}
+                                    follow_href={false}
+                                    on_select={go_to_language}
+                                />
                             </ybc::Tile>
                         </ybc::Tile>
                         <ybc::Tile>

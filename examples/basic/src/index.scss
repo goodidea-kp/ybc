@@ -2,6 +2,29 @@
 
 html {}
 
+/* ybc::PieChart palette: the light fallbacks are built in; these are the dark-surface steps. */
+@mixin ybc-chart-dark-palette {
+  --ybc-chart-1: #3987e5;
+  --ybc-chart-2: #d95926;
+  --ybc-chart-3: #199e70;
+  --ybc-chart-4: #c98500;
+  --ybc-chart-5: #d55181;
+  --ybc-chart-6: #008300;
+  --ybc-chart-7: #9085e9;
+  --ybc-chart-8: #e66767;
+  --ybc-chart-other: #8a8a8a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    @include ybc-chart-dark-palette;
+  }
+}
+
+:root[data-theme="dark"] {
+  @include ybc-chart-dark-palette;
+}
+
 .ribbon {
   position:absolute;
   top:0;

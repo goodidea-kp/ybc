@@ -3,6 +3,7 @@ pub mod autocomplete;
 pub mod breadcrumb;
 pub mod calendar;
 pub mod card;
+pub mod chart;
 pub mod dropdown;
 pub mod menu;
 pub mod message;

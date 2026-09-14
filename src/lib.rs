@@ -40,6 +40,7 @@ pub use components::breadcrumb::{Breadcrumb, BreadcrumbProps, BreadcrumbSeparato
 pub use components::card::{
     Card, CardContent, CardContentProps, CardFooter, CardFooterProps, CardHeader, CardHeaderProps, CardImage, CardImageProps, CardProps,
 };
+pub use components::chart::{PieChart, PieChartProps, PieSegment};
 pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::menu::{Menu, MenuLabel, MenuLabelProps, MenuList, MenuListProps, MenuProps};
 pub use components::message::{Message, MessageBody, MessageBodyProps, MessageHeader, MessageHeaderProps, MessageProps};
