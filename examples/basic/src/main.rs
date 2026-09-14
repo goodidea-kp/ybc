@@ -30,6 +30,23 @@ pub fn app() -> Html {
     });
     let items: UseStateHandle<Vec<String>> = use_state(|| vec!["Apple".to_string(), "Banana".to_string(), "Cherry".to_string()]);
 
+    let fruit = use_state(String::new);
+    let on_fruit_change = {
+        let fruit = fruit.clone();
+        Callback::from(move |value: String| fruit.set(value))
+    };
+    let email = use_state(String::new);
+    let on_email_change = {
+        let email = email.clone();
+        Callback::from(move |value: String| email.set(value))
+    };
+    let email_is_invalid = !email.is_empty() && !email.contains('@');
+    let shipping = use_state(|| None::<String>);
+    let on_shipping_change = {
+        let shipping = shipping.clone();
+        Callback::from(move |value: String| shipping.set(Some(value)))
+    };
+
     html! {
         <>
         <ContextProvider<Rc<NavBurgerCloserState>> context={state}>
@@ -189,9 +206,44 @@ pub fn app() -> Html {
                                     </ybc::Control>
                                 </ybc::Field>
                                 <ybc::Progress value={-1.0} max={100.0} classes={classes!("is-primary")} />
-                                <ybc::TextArea update={cb_on_text_update} rows={3} name={String::from("textarea")} value={String::from("Hello, ChatGpt!")} placeholder={String::from("Enter some text")}
-                                   is_genai={true}
-                                />
+                                <ybc::Field label={Some("Prompt")} help={"The label is bound to the textarea through the field's auto-generated id"}>
+                                    <ybc::Control>
+                                        <ybc::TextArea update={cb_on_text_update} rows={3} name={String::from("textarea")} value={String::from("Hello, ChatGpt!")} placeholder={String::from("Enter some text")}
+                                           is_genai={true}
+                                        />
+                                    </ybc::Control>
+                                </ybc::Field>
+                                <ybc::Field label={Some("Favourite fruit")} help={"Required; the placeholder option cannot be re-selected"}>
+                                    <ybc::Control>
+                                        <ybc::Select name="fruit" value={(*fruit).clone()} update={on_fruit_change} placeholder={"Choose a fruit"} required={true}>
+                                            <option value="apple">{"Apple"}</option>
+                                            <option value="banana">{"Banana"}</option>
+                                            <option value="cherry">{"Cherry"}</option>
+                                        </ybc::Select>
+                                    </ybc::Control>
+                                </ybc::Field>
+                                <ybc::Field
+                                    label={Some("Email")}
+                                    help={if email_is_invalid { "Enter an address containing '@'" } else { "Autofill and the email keyboard are enabled" }}
+                                    help_has_error={email_is_invalid}
+                                >
+                                    <ybc::Control>
+                                        <ybc::Input
+                                            name="email"
+                                            r#type={ybc::InputType::Email}
+                                            value={(*email).clone()}
+                                            update={on_email_change}
+                                            placeholder={String::from("you@example.com")}
+                                            autocomplete={"email"}
+                                            inputmode={ybc::InputMode::Email}
+                                            required={true}
+                                        />
+                                    </ybc::Control>
+                                </ybc::Field>
+                                <ybc::RadioGroup legend={"Shipping speed"}>
+                                    <ybc::Radio name="shipping" value="standard" checked_value={(*shipping).clone()} update={on_shipping_change.clone()} required={true}>{" Standard"}</ybc::Radio>
+                                    <ybc::Radio name="shipping" value="express" checked_value={(*shipping).clone()} update={on_shipping_change}>{" Express"}</ybc::Radio>
+                                </ybc::RadioGroup>
                             </ybc::Tile>
                        </ybc::Tile>
                     </ybc::Tile>

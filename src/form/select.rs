@@ -3,9 +3,16 @@ use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
 use crate::Size;
+use crate::form::field::use_field_context;
 
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct SelectProps {
+    /// The `id` attribute for the inner `select` element.
+    ///
+    /// Defaults to the id minted by the enclosing `Field`, so a labelled field needs no explicit
+    /// id. Set it to bind a label by hand or to give tests a stable target.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The `name` attribute for this form element.
     pub name: String,
     /// The controlled value of this form element.
@@ -19,6 +26,13 @@ pub struct SelectProps {
     #[prop_or_default]
     pub classes: Classes,
 
+    /// A prompt shown while nothing is chosen, e.g. `"Choose a country"`.
+    ///
+    /// Rendered as a disabled first option with an empty value. It is selected while `value` is
+    /// empty and cannot be re-chosen, so combined with `required` the browser rejects the form
+    /// until the user picks a real option.
+    #[prop_or_default]
+    pub placeholder: Option<AttrValue>,
     /// The size of this component.
     #[prop_or_default]
     pub size: Option<Size>,
@@ -28,6 +42,13 @@ pub struct SelectProps {
     /// Disable this component.
     #[prop_or_default]
     pub disabled: bool,
+    /// Mark this component as required for form submission.
+    #[prop_or_default]
+    pub required: bool,
+    /// Mark this component as invalid: adds `is-danger` and `aria-invalid="true"`.
+    /// Also set automatically when the enclosing `Field` has `help_has_error`.
+    #[prop_or_default]
+    pub invalid: bool,
 }
 
 /// A wrapper around an HTML `select` tag.
@@ -40,27 +61,42 @@ pub struct SelectProps {
 ///
 /// **NOTE WELL:** not all browsers will honor the value of the select element's value on initial
 /// load. So if you have an initial `value` set for this component, ensure that the corresponding
-/// option element also has the `selected=true` attribute.
+/// option element also has the `selected=true` attribute. When `placeholder` is set and `value`
+/// is empty, the placeholder option is selected for you.
 #[component(Select)]
 pub fn select(props: &SelectProps) -> Html {
+    let field = use_field_context();
+    let id = props.id.clone().or(field.control_id);
+    let invalid = props.invalid || field.has_error;
     let class = classes!(
         "select",
         props.classes.clone(),
         props.size.as_ref().map(|size| size.to_string()),
         props.loading.then_some("is-loading"),
+        invalid.then_some("is-danger"),
     );
     let onchange = props.update.reform(|ev: web_sys::Event| {
         let select: HtmlSelectElement = ev.target_dyn_into().expect_throw("event target should be a select");
         select.value()
     });
+    let placeholder_option = props.placeholder.as_ref().map(|placeholder| {
+        html! {
+            <option value="" disabled=true selected={props.value.is_empty()}>{placeholder.clone()}</option>
+        }
+    });
     html! {
         <div {class}>
             <select
+                {id}
                 name={props.name.clone()}
                 value={props.value.clone()}
                 disabled={props.disabled}
+                required={props.required}
+                aria-invalid={invalid.then_some("true")}
+                aria-describedby={field.help_id}
                 {onchange}
             >
+                {placeholder_option}
                 {props.children.clone()}
             </select>
         </div>
@@ -72,6 +108,12 @@ pub fn select(props: &SelectProps) -> Html {
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct MultiSelectProps {
+    /// The `id` attribute for the inner `select` element.
+    ///
+    /// Defaults to the id minted by the enclosing `Field`, so a labelled field needs no explicit
+    /// id. Set it to bind a label by hand or to give tests a stable target.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The `name` attribute for this form element.
     pub name: String,
     /// The controlled value of this form element.
@@ -97,6 +139,13 @@ pub struct MultiSelectProps {
     /// Disable this component.
     #[prop_or_default]
     pub disabled: bool,
+    /// Mark this component as required for form submission.
+    #[prop_or_default]
+    pub required: bool,
+    /// Mark this component as invalid: adds `is-danger` and `aria-invalid="true"`.
+    /// Also set automatically when the enclosing `Field` has `help_has_error`.
+    #[prop_or_default]
+    pub invalid: bool,
 }
 
 /// A wrapper around an HTML `select` tag with the `multiple=true` attribute.
@@ -112,12 +161,16 @@ pub struct MultiSelectProps {
 /// option element also has the `selected=true` attribute.
 #[component(MultiSelect)]
 pub fn multi_select(props: &MultiSelectProps) -> Html {
+    let field = use_field_context();
+    let id = props.id.clone().or(field.control_id);
+    let invalid = props.invalid || field.has_error;
     let class = classes!(
         "select",
         "is-multiple",
         props.classes.clone(),
         props.size.as_ref().map(|size| size.to_string()),
         props.loading.then_some("is-loading"),
+        invalid.then_some("is-danger"),
     );
     let size = props.list_size.to_string();
     let onchange = props.update.reform(|ev: web_sys::Event| {
@@ -131,11 +184,15 @@ pub fn multi_select(props: &MultiSelectProps) -> Html {
     html! {
         <div {class}>
             <select
+                {id}
                 multiple=true
                 size={size}
                 name={props.name.clone()}
                 value={props.value.join(",")}
                 disabled={props.disabled}
+                required={props.required}
+                aria-invalid={invalid.then_some("true")}
+                aria-describedby={field.help_id}
                 {onchange}
             >
                 {props.children.clone()}
