@@ -38,7 +38,7 @@ pub fn form_example_page() -> Html {
         })
     };
     // Calendar state and callback
-    let date = use_state(|| Option::<String>::None);
+    let date = use_state(|| Some("12/31/2030 01:02".to_owned()));
     let on_date_changed = {
         let date = date.clone();
         Callback::from(move |d: String| {
@@ -46,7 +46,7 @@ pub fn form_example_page() -> Html {
         })
     };
     let calendar_departure_date = html! {
-       <Calendar id="my-calendar" date={"2030-01-01 01:02"} on_date_changed={on_date_changed} class={vec!["input".to_string()]} />
+       <Calendar id="my-calendar" date_format="mm/dd/yyyy" time_format="HH:mm" date={(*date).clone()} on_date_changed={on_date_changed} />
     };
 
     let select_value = "B";

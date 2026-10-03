@@ -32,7 +32,16 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   navigation. Colours come from `--ybc-chart-1..8` custom properties with
   colour-vision-safe fallbacks; segments past `max_segments` fold into "Other".
 
+- `Calendar` supports native `disabled` controls and `mm/dd/yyyy` form values.
+
 ### changed
+- `Calendar` enhances a native date/time fallback with bulma-calendar 7.1.1
+  when its JS and CSS assets are loaded. Each component owns its picker DOM and
+  removes document listeners on unmount, without shared ID registries.
+  ISO values remain the default; unsupported date formats fall back to ISO
+  without panics. `None` clears the input, `disabled` locks both controls, and
+  `display_mode` supports dropdown, dialog and inline pickers. Time values use
+  24-hour `HH:mm`; custom time patterns are not applied.
 - `Field` help text renders as `<p class="help">` (Bulma's own markup) instead
   of an orphan `<label>`, which assistive technology could not attach to any control.
 

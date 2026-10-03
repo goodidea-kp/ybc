@@ -102,7 +102,6 @@ async function init() {
   section.appendChild(container);
   root.appendChild(section);
 
-  try { if (window.bulmaCalendar && typeof window.bulmaCalendar.attach === 'function') window.bulmaCalendar.attach(); } catch (e) {}
   try { if (window.bulmaAccordion && typeof window.bulmaAccordion.attach === 'function') window.bulmaAccordion.attach(); } catch (e) {}
   try { if (window.bulmaTagsInput && typeof window.bulmaTagsInput.attach === 'function') window.bulmaTagsInput.attach(); } catch (e) {}
 }

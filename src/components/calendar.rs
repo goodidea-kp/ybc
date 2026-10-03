@@ -1,41 +1,31 @@
-/*!
-Calendar component: a thin Yew wrapper around the bulma-calendar JS date/time picker.
+//! Bulma Calendar with a working native date/time fallback when JavaScript is unavailable.
+//!
+//! `date` and callbacks use `date_format`: `yyyy-MM-dd` (default) or
+//! `mm/dd/yyyy` (also `MM/dd/yyyy`). Unsupported formats safely fall back to ISO.
+//! Date/time values use a space separator and 24-hour `HH:mm` time.
+//! Empty values, whitespace and `None` clear the input. `disabled` prevents edits.
+//! Load bulma-calendar 7.1.1 JS and CSS before mounting the app to enable the picker.
+//! The widget uses ISO dates internally; form value conversion stays inside this component.
+//! CSS: `https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/css/bulma-calendar.min.css`
+//! JS: `https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js`
 
-Summary
-- Enhances a plain `<input>` with bulmaCalendar for date and time selection.
-- Emits changes through a Rust callback whenever the user selects, validates, or clears.
-- Requires bulmaCalendar JS and CSS to be loaded globally (available as `bulmaCalendar`).
-
-Value format
-- The emitted string follows the configured `date_format` and `time_format` patterns understood by bulmaCalendar.
-- Clearing the picker emits an empty string.
-
-Programmatic control
-- To update the picker value from the outside, update the `date` prop.
-- To clear the picker from the outside, set `date` to a single space `" "`.
-
-Required static assets
-- CSS (add in `<head>`):
-  https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/css/bulma-calendar.min.css
-- JS (load before WASM bootstrap so `bulmaCalendar` exists):
-  https://cdn.jsdelivr.net/npm/bulma-calendar@7.1.1/dist/js/bulma-calendar.min.js
-*/
-
+use super::calendar_value::{from_native, to_native};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::JsValue;
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::closure::Closure;
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::wasm_bindgen;
-#[cfg(target_arch = "wasm32")]
-use web_sys::Element;
+use wasm_bindgen::{closure::Closure, prelude::*};
 
 #[cfg(target_arch = "wasm32")]
-type CalendarClosure = Closure<dyn FnMut(JsValue)>;
-#[cfg(not(target_arch = "wasm32"))]
-type CalendarClosure = ();
+#[wasm_bindgen(module = "/src/components/calendar.js")]
+extern "C" {
+    #[wasm_bindgen(js_name = mountCalendar)]
+    fn mount_calendar(host: &web_sys::Element, fallback: &HtmlInputElement, callback: &JsValue, kind: &str, mode: &str) -> JsValue;
+    #[wasm_bindgen(js_name = syncCalendar)]
+    fn sync_calendar(state: &JsValue, value: &str, disabled: bool);
+    #[wasm_bindgen(js_name = unmountCalendar)]
+    fn unmount_calendar(state: &JsValue);
+}
 
 /// Optional test attribute rendered on the input.
 ///
@@ -76,18 +66,20 @@ where
 /// Properties for [`Calendar`].
 #[derive(Clone, PartialEq, Properties)]
 pub struct CalendarProps {
-    /// Unique DOM id for the input (used to attach/detach the JS widget).
+    /// DOM id for labels and accessibility; not used to track picker instances.
     pub id: String,
 
-    /// Date format understood by bulmaCalendar. Defaults to `yyyy-MM-dd` when empty.
+    /// Form value format: `yyyy-MM-dd` (default) or `mm/dd/yyyy`.
+    /// Unsupported formats fall back to `yyyy-MM-dd` without panicking.
     #[prop_or_default]
     pub date_format: AttrValue,
 
-    /// Time format understood by bulmaCalendar. Defaults to `HH:mm` when empty.
+    /// A nonempty value enables date/time mode unless `calendar_type` is explicit.
+    /// Both picker and fallback use 24-hour time; custom patterns are ignored.
     #[prop_or_default]
     pub time_format: AttrValue,
 
-    /// Optional initial/current value to seed or update the widget.
+    /// Current form value. `None`, empty strings and whitespace clear the input.
     #[prop_or_default]
     pub date: Option<String>,
 
@@ -106,48 +98,78 @@ pub struct CalendarProps {
     /// If empty, defaults to `datetime` when `time_format` is present, otherwise `date`.
     #[prop_or_default]
     pub calendar_type: AttrValue,
+
+    /// Bulma display mode: `default`, `dialog` (for modals), or `inline`.
+    /// Unsupported modes fall back to `default`; native fallback ignores this prop.
+    #[prop_or_default]
+    pub display_mode: AttrValue,
+
+    /// Locks the input and the picker: nothing opens, nothing changes.
+    #[prop_or_default]
+    pub disabled: bool,
 }
 
-/// A date/time input enhanced by bulma-calendar.
+/// A Bulma picker with native fallback and conversion at the form boundary.
 #[function_component(Calendar)]
 pub fn calendar(props: &CalendarProps) -> Html {
     let input_ref = use_node_ref();
-
-    let date_format_raw = props.date_format.trim().to_string();
-    assert!(
-        date_format_raw.is_empty() || date_format_raw == "yyyy-MM-dd",
-        "Calendar date_format must be exactly 'yyyy-MM-dd' (lowercase yyyy-MM-dd). Got '{}'",
-        props.date_format
-    );
-
-    let date_format = if date_format_raw.is_empty() {
-        "yyyy-MM-dd".to_owned()
-    } else {
-        date_format_raw
+    let host_ref = use_node_ref();
+    let input_type = match props.calendar_type.trim() {
+        "time" => "time",
+        "datetime" | "datetime-local" => "datetime-local",
+        "date" => "date",
+        _ if !props.time_format.trim().is_empty() => "datetime-local",
+        _ => "date",
     };
-
-    let time_format_raw = props.time_format.trim().to_string();
-    let time_format = if time_format_raw.is_empty() {
-        "HH:mm".to_owned()
-    } else {
-        time_format_raw.clone()
-    };
-
-    let calendar_type = {
-        let explicit = props.calendar_type.trim();
-        if explicit.is_empty() {
-            if props.time_format.trim().is_empty() {
-                "date".to_owned()
-            } else {
-                "datetime".to_owned()
-            }
-        } else {
-            explicit.to_owned()
-        }
-    };
-
-    let initial_value = props.date.clone().unwrap_or_default();
+    let value = to_native(props.date.as_deref().unwrap_or_default(), &props.date_format, input_type);
     let class = classes!("input", props.class.clone());
+
+    #[cfg(target_arch = "wasm32")]
+    {
+        let state = use_mut_ref(|| JsValue::NULL);
+        let current = use_mut_ref(|| props.clone());
+        *current.borrow_mut() = props.clone();
+        {
+            let state = state.clone();
+            let current = current.clone();
+            let input_ref = input_ref.clone();
+            let host_ref = host_ref.clone();
+            use_effect_with(
+                (
+                    input_type,
+                    props.display_mode.clone(),
+                    props.class.clone(),
+                    props.id.clone(),
+                    props.test_attr.clone(),
+                ),
+                move |(kind, mode, _, _, _)| {
+                    let kind = *kind;
+                    let callback = Closure::wrap(Box::new(move |value: String| {
+                        let props = current.borrow().clone();
+                        if !props.disabled {
+                            props
+                                .on_date_changed
+                                .emit(from_native(&value.replace(' ', "T"), &props.date_format, kind));
+                        }
+                    }) as Box<dyn FnMut(String)>);
+                    if let (Some(host), Some(input)) = (host_ref.cast::<web_sys::Element>(), input_ref.cast::<HtmlInputElement>()) {
+                        *state.borrow_mut() = mount_calendar(&host, &input, callback.as_ref(), kind, mode);
+                    }
+                    move || {
+                        unmount_calendar(&state.borrow());
+                        *state.borrow_mut() = JsValue::NULL;
+                        drop(callback);
+                    }
+                },
+            );
+        }
+        let value = value.clone();
+        let disabled = props.disabled;
+        use_effect(move || {
+            sync_calendar(&state.borrow(), &value, disabled);
+            || {}
+        });
+    }
 
     let (data_testid, data_cy) = match props.test_attr.as_ref() {
         Some(attr) if attr.key == "data-testid" => (Some(attr.value.clone()), None),
@@ -155,208 +177,33 @@ pub fn calendar(props: &CalendarProps) -> Html {
         _ => (None, None),
     };
 
-    let input_type = if props.time_format.trim().is_empty() {
-        AttrValue::from("date")
-    } else {
-        AttrValue::from("datetime")
+    let onchange = {
+        let callback = props.on_date_changed.clone();
+        let format = props.date_format.clone();
+        let disabled = props.disabled;
+        Callback::from(move |event: Event| {
+            if !disabled {
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    callback.emit(from_native(&input.value(), &format, input_type));
+                }
+            }
+        })
     };
 
-    let callback_store = use_mut_ref(|| None::<CalendarClosure>);
-    let on_date_changed_ref = use_mut_ref(|| props.on_date_changed.clone());
-    *on_date_changed_ref.borrow_mut() = props.on_date_changed.clone();
-
-    {
-        let id = props.id.clone();
-        let input_ref = input_ref.clone();
-        let callback_store = callback_store.clone();
-        let on_date_changed_ref = on_date_changed_ref.clone();
-        let date_format = date_format.clone();
-        let time_format = time_format.clone();
-        let calendar_type = calendar_type.clone();
-        let initial_value = initial_value.clone();
-
-        use_effect_with(
-            (id.clone(), date_format.clone(), time_format.clone(), calendar_type.clone()),
-            move |(id, date_format, time_format, calendar_type)| {
-                #[cfg(target_arch = "wasm32")]
-                {
-                    if let Some(element) = input_ref.cast::<Element>() {
-                        let on_date_changed_ref = on_date_changed_ref.clone();
-                        let callback = Closure::wrap(Box::new(move |date: JsValue| {
-                            let s = date.as_string().unwrap_or_default();
-                            on_date_changed_ref.borrow().emit(s);
-                        }) as Box<dyn FnMut(JsValue)>);
-
-                        setup_date_picker(
-                            &element,
-                            callback.as_ref(),
-                            &JsValue::from(initial_value.clone()),
-                            &JsValue::from(date_format.clone()),
-                            &JsValue::from(time_format.clone()),
-                            &JsValue::from(calendar_type.clone()),
-                        );
-
-                        *callback_store.borrow_mut() = Some(callback);
-                    }
-
-                    let callback_store = callback_store.clone();
-                    let id_for_cleanup = id.clone();
-                    return move || {
-                        detach_date_picker(&JsValue::from(id_for_cleanup.as_str()));
-                        callback_store.borrow_mut().take();
-                    };
-                }
-
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    let _ = (
-                        &input_ref,
-                        &callback_store,
-                        &on_date_changed_ref,
-                        &initial_value,
-                        id,
-                        date_format,
-                        time_format,
-                        calendar_type,
-                    );
-                    || {}
-                }
-            },
-        );
-    }
-
-    {
-        let id = props.id.clone();
-        let date = props.date.clone();
-        use_effect_with((id, date), move |(id, date)| {
-            #[cfg(target_arch = "wasm32")]
-            {
-                match date.as_deref() {
-                    Some(" ") | Some("") => {
-                        clear_date(&JsValue::from(id.as_str()));
-                    }
-                    Some(v) => {
-                        update_value(&JsValue::from(id.as_str()), &JsValue::from(v));
-                    }
-                    None => {}
-                }
-            }
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                let _ = (id, date);
-            }
-
-            || {}
-        });
-    }
-
     html! {
+        <>
         <input
+            ref={input_ref}
             id={props.id.clone()}
             class={class}
             type={input_type}
-            value={initial_value}
-            ref={input_ref}
+            value={value}
+            onchange={onchange}
+            disabled={props.disabled}
             data-testid={data_testid}
             data-cy={data_cy}
         />
+        <div ref={host_ref} />
+        </>
     }
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen(inline_js = r#"
-let init = new Map();
-
-export function setup_date_picker(element, callback, initial_date, date_format, time_format, picker_type) {
-    if (!element || !element.id) {
-        return;
-    }
-
-    if (typeof bulmaCalendar === 'undefined' || typeof bulmaCalendar.attach !== 'function') {
-        console.warn('bulmaCalendar is not available on window. Calendar will remain a plain input.');
-        return;
-    }
-
-    if (!init.has(element.id)) {
-        const instances = bulmaCalendar.attach(element, {
-            type: picker_type || (String(time_format || '').trim() ? 'datetime' : 'date'),
-            color: 'info',
-            lang: 'en',
-            dateFormat: date_format,
-            timeFormat: time_format,
-            showTodayButton: false
-        });
-
-        if (!instances || !instances.length) {
-            return;
-        }
-
-        const calendarInstance = instances[0];
-        init.set(element.id, calendarInstance);
-
-        calendarInstance.on('select', function(datepicker) {
-            callback(datepicker.data.value());
-        });
-
-        calendarInstance.on('clear', function(_datepicker) {
-            callback('');
-        });
-
-        calendarInstance.on('validate', function(datepicker) {
-            callback(datepicker.data.value());
-            if (typeof calendarInstance.hide === 'function') {
-                calendarInstance.hide();
-            }
-        });
-    }
-
-    if (init.has(element.id)) {
-        init.get(element.id).value(initial_date || '');
-    }
-}
-
-export function detach_date_picker(id) {
-    if (init.has(id)) {
-        const instance = init.get(id);
-        if (instance && typeof instance.destroy === 'function') {
-            // bulma-calendar's destroy() does document.getElementById(id).remove().
-            // When a Yew component that hosts a Calendar unmounts, Yew tears down
-            // the DOM node before this cleanup effect runs, so getElementById
-            // returns null and .remove() throws an uncaught TypeError. The
-            // instance is being discarded anyway, so swallow a teardown failure
-            // rather than surface it (observed navigating away from a page with a
-            // date picker, e.g. the keys dashboard -> another route).
-            try {
-                instance.destroy();
-            } catch (_) {
-                /* element already removed by the framework on unmount */
-            }
-        }
-        init.delete(id);
-    }
-}
-
-export function clear_date(id) {
-    if (init.has(id)) {
-        init.get(id).clear();
-    }
-}
-
-export function update_value(id, value) {
-    if (init.has(id)) {
-        init.get(id).value(value || '');
-    }
-}
-"#)]
-#[allow(improper_ctypes, improper_ctypes_definitions)]
-extern "C" {
-    fn setup_date_picker(
-        element: &Element, callback: &JsValue, initial_date: &JsValue, date_format: &JsValue, time_format: &JsValue, picker_type: &JsValue,
-    );
-
-    fn detach_date_picker(id: &JsValue);
-
-    fn clear_date(id: &JsValue);
-
-    fn update_value(id: &JsValue, value: &JsValue);
 }
