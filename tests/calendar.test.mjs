@@ -105,3 +105,30 @@ test('the fallback stays hidden under Bulma, the picker keeps its look and takes
     assert.equal(fallback.getAttribute('data-cy'), 'day-cy');
     dom.window.close();
 });
+
+
+test('Cancel closes the picker and leaves the value as it was', () => {
+    assert.ok(process.env.BULMA_CALENDAR_JS, 'Provide the actual bulma-calendar 7.1.1 bundle');
+    const dom = new JSDOM('<input id="day" type="date" class="input"><div></div>', { runScripts: 'outside-only' });
+    dom.window.matchMedia = () => ({ matches: false });
+    dom.window.eval(readFileSync(process.env.BULMA_CALENDAR_JS, 'utf8'));
+    globalThis.document = dom.window.document;
+    globalThis.bulmaCalendar = dom.window.bulmaCalendar;
+    const values = [];
+    const state = mountCalendar(document.querySelector('div'), document.querySelector('#day'),
+        value => values.push(value), 'date', 'dialog');
+    syncCalendar(state, '2026-10-03', false);
+    // bulma's own Cancel handler, which does not close in a real browser, is
+    // taken out so this checks the adapter's.
+    const ownCancel = state.cancel.cloneNode(true);
+    state.cancel.replaceWith(ownCancel);
+    ownCancel.addEventListener('click', state.onCancel);
+    state.picker.show();
+    assert.equal(state.picker.isOpen(), true);
+    ownCancel.click();
+    assert.equal(state.picker.isOpen(), false, 'Cancel closes the picker');
+    assert.equal(state.picker.value(), '2026-10-03');
+    assert.deepEqual(values, [], 'and changes nothing');
+    unmountCalendar(state);
+    dom.window.close();
+});

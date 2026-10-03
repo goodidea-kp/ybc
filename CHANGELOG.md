@@ -46,6 +46,10 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   of an orphan `<label>`, which assistive technology could not attach to any control.
 
 ### fixed
+- `Calendar`: Cancel closes the picker. bulma-calendar 7.1.1's own Cancel does
+  not close it in a real browser, though it does under jsdom, so a person who
+  pressed Cancel stayed stuck with the picker open. The adapter now closes it
+  and leaves the value as it was.
 - `Calendar`: the hidden native fallback no longer shows beside the picker under
   Bulma, whose `.input { display: inline-flex }` beat the `hidden` attribute.
   The picker's input keeps its own class (the room for its icon) and takes only

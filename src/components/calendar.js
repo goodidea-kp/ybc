@@ -53,6 +53,12 @@ export function mountCalendar(host, fallback, callback, kind, mode) {
             if (state.active && !state.syncing && !state.disabled) callback('');
         });
         state.picker.on('validate', () => { emit(); state.picker.hide(); });
+        // bulma-calendar 7.1.1's own Cancel does not close a picker in a real
+        // browser (it does under jsdom): a person pressing Cancel stayed stuck
+        // with the picker open. Close it here; the value is left as it was.
+        state.cancel = state.picker._ui.footer && state.picker._ui.footer.cancel;
+        state.onCancel = () => { if (state.picker) state.picker.hide(); };
+        if (state.cancel) state.cancel.addEventListener('click', state.onCancel);
         const visible = state.picker._ui.dummy.dummy_1;
         visible.classList.add(...modifierClasses(fallback));
         const labels = Array.from(fallback.labels || []);
@@ -109,6 +115,7 @@ export function unmountCalendar(state) {
     state.active = false;
     state.callback = null;
     (state.labels || []).forEach(label => label.removeEventListener('click', state.onLabelClick));
+    if (state.cancel) state.cancel.removeEventListener('click', state.onCancel);
     const picker = state.picker;
     if (picker) {
         // The upstream destroy() uses document.getElementById and does not unbind
