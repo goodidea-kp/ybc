@@ -77,3 +77,31 @@ test('real Bulma picker: sync, clear, disable, isolation and detached teardown',
     }
     dom.window.close();
 });
+test('the fallback stays hidden under Bulma, the picker keeps its look and takes the test hooks', () => {
+    assert.ok(process.env.BULMA_CALENDAR_JS, 'Provide the actual bulma-calendar 7.1.1 bundle');
+    // Bulma's `.input { display: inline-flex }` beats the `hidden` attribute's user-agent rule.
+    const dom = new JSDOM('<style>.input { display: inline-flex; }</style><label for="day">Day</label>'
+        + '<input id="day" type="date" class="input is-small" data-testid="day" data-cy="day-cy"><div></div>',
+        { runScripts: 'outside-only' });
+    dom.window.matchMedia = () => ({ matches: false });
+    dom.window.eval(readFileSync(process.env.BULMA_CALENDAR_JS, 'utf8'));
+    globalThis.document = dom.window.document;
+    globalThis.bulmaCalendar = dom.window.bulmaCalendar;
+    const fallback = document.querySelector('#day');
+    const state = mountCalendar(document.querySelector('div'), fallback, () => {}, 'date', 'dialog');
+    assert.ok(state);
+    assert.equal(dom.window.getComputedStyle(fallback).display, 'none');
+
+    const visible = state.picker._ui.dummy.dummy_1;
+    assert.ok(visible.classList.contains('datetimepicker-dummy-input'), visible.className);
+    assert.ok(visible.classList.contains('is-small'), visible.className);
+    assert.ok(!visible.classList.contains('input'), visible.className);
+    assert.deepEqual(Array.from(document.querySelectorAll('[data-testid="day"]')), [visible]);
+    assert.deepEqual(Array.from(document.querySelectorAll('[data-cy="day-cy"]')), [visible]);
+
+    unmountCalendar(state);
+    assert.equal(dom.window.getComputedStyle(fallback).display, 'inline-flex');
+    assert.equal(fallback.getAttribute('data-testid'), 'day');
+    assert.equal(fallback.getAttribute('data-cy'), 'day-cy');
+    dom.window.close();
+});

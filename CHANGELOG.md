@@ -45,6 +45,14 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - `Field` help text renders as `<p class="help">` (Bulma's own markup) instead
   of an orphan `<label>`, which assistive technology could not attach to any control.
 
+### fixed
+- `Calendar`: the hidden native fallback no longer shows beside the picker under
+  Bulma, whose `.input { display: inline-flex }` beat the `hidden` attribute.
+  The picker's input keeps its own class (the room for its icon) and takes only
+  the fallback's modifiers (`is-small`, `is-danger`, ...), not `input`. Test hooks
+  (`data-testid`, `data-cy`) move to the picker's input while it is mounted, so a
+  test finds one control, and return to the fallback when it unmounts.
+
 ## 0.4.7
 ### fixed
 - `PanelTabs` no longer emits `role="tablist"`. Bulma `.panel-tabs` is filter
