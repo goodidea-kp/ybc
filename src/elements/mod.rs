@@ -1,12 +1,16 @@
 pub mod block;
 pub mod r#box;
 pub mod button;
+pub mod callout;
 pub mod content;
+pub mod copy_button;
 pub mod delete;
 pub mod icon;
+pub mod icon_text;
 pub mod image;
 pub mod notification;
 pub mod progress;
+pub mod reasoned_button;
 pub mod table;
 pub mod tag;
 pub mod title;

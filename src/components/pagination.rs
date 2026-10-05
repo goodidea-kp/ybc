@@ -78,9 +78,11 @@ pub fn pagination_item(props: &PaginationItemProps) -> Html {
         false => props.item_type.to_string(),
     };
     html! {
-        <a class={effective_class} aria-label={props.label.clone()} onclick={props.onclick.clone()}>
+        // A <button>, not an <a> without href: that is not reachable by keyboard.
+        <button type="button" class={effective_class} aria-label={props.label.clone()}
+                aria-current={props.current.then_some("page")} onclick={props.onclick.clone()}>
             {props.children.clone()}
-        </a>
+        </button>
     }
 }
 

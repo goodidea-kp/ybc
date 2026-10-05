@@ -69,12 +69,16 @@ pub use elements::button::{
 };
 #[cfg(feature = "router")]
 pub use elements::button::{ButtonAnchorRouter, ButtonRouter, ButtonRouterProps};
+pub use elements::callout::{Callout, CalloutProps, CalloutSeverity};
 pub use elements::content::{Content, ContentProps};
+pub use elements::copy_button::{CopyButton, CopyButtonProps};
 pub use elements::delete::{Delete, DeleteProps};
 pub use elements::icon::{FaIcon, FaIconProps, Icon, IconProps};
+pub use elements::icon_text::{IconText, IconTextProps};
 pub use elements::image::{Image, ImageProps, ImageSize};
 pub use elements::notification::{Notification, NotificationProps};
 pub use elements::progress::{Progress, ProgressProps};
+pub use elements::reasoned_button::{ReasonedButton, ReasonedButtonProps};
 pub use elements::table::{Table, TableProps};
 pub use elements::tag::{Tag, TagProps, Tags, TagsProps};
 pub use elements::title::{HeaderSize, Subtitle, SubtitleProps, Title, TitleProps};
