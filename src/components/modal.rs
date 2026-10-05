@@ -179,6 +179,40 @@ dialog.modal::backdrop {
     overflow-x: auto;
 }
 
+/* A body that scrolls must say so. macOS hides overlay scrollbars until the
+   pointer moves, so a long form looked complete and a marked field below the
+   fold read as a Save that did nothing (Bastion BASTION-108). Scroll shadows,
+   CSS only: two covers in the body's own colour scroll WITH the content
+   (`local`) and two shadows stay put at the edges (`scroll`). While there is
+   more below, the bottom cover is still below the fold and the bottom shadow
+   shows; at the end the cover slides over it. The top pair does the same once
+   scrolled down. A body that fits shows neither, with no script and no
+   resize listener. Colours are Bulma's scheme variables, so dark mode follows;
+   forced colours drop backgrounds, and with them the shadows, which is the
+   system's call in that mode. */
+.modal-card-body {
+    --ybc-scroll-cover: var(--bulma-modal-card-body-background-color, #fff);
+    --ybc-scroll-shadow: hsla(var(--bulma-scheme-h, 221), var(--bulma-scheme-s, 14%),
+                              var(--bulma-scheme-invert-l, 4%), 0.28);
+    background:
+        linear-gradient(var(--ybc-scroll-cover) 30%, transparent) center top / 100% 2.5rem no-repeat local,
+        linear-gradient(transparent, var(--ybc-scroll-cover) 70%) center bottom / 100% 2.5rem no-repeat local,
+        radial-gradient(farthest-side at 50% 0, var(--ybc-scroll-shadow), transparent) center top / 100% 0.85rem no-repeat scroll,
+        radial-gradient(farthest-side at 50% 100%, var(--ybc-scroll-shadow), transparent) center bottom / 100% 0.85rem no-repeat scroll,
+        var(--ybc-scroll-cover);
+}
+
+/* Dark: Bulma darkens the surface but keeps the scheme's invert near black, so
+   a dark shadow on a 9% surface is invisible. A soft light edge reads instead. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme=light]) .modal-card-body {
+        --ybc-scroll-shadow: hsla(0, 0%, 100%, 0.16);
+    }
+}
+[data-theme=dark] .modal-card-body {
+    --ybc-scroll-shadow: hsla(0, 0%, 100%, 0.16);
+}
+
 /* Bulma centers .modal-card/.modal-content via `margin: 0 auto` (desktop)
    or `margin: 0 <mobile-margin>` (mobile) — but this dialog centers via its
    own flexbox (align-items/justify-content above). The two centering
