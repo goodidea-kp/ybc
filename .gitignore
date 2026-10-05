@@ -5,4 +5,6 @@ target
 
 # file ignores
 Cargo.lock
-/.claude/
+# Local Claude state stays local; the skills are shared (Kostya, 2026-10-05).
+/.claude/*
+!/.claude/skills/
