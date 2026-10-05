@@ -21,6 +21,8 @@ fn callout(severity: CalloutSeverity, title: Option<&str>) -> CalloutProps {
         title: title.map(AttrValue::from),
         compact: false,
         testid: Some("note".into()),
+        id: None,
+        quiet: false,
         classes: Classes::new(),
         children: Children::new(vec![html! { "Body text." }]),
     }
@@ -60,6 +62,7 @@ fn reasoned(reason: Option<&str>) -> ReasonedButtonProps {
         classes: Classes::new(),
         testid: Some("assign-btn".into()),
         reason_testid: Some("assign-why-not".into()),
+        reason_elsewhere: None,
         children: Children::new(vec![html! { "Assign" }]),
     }
 }
@@ -151,4 +154,23 @@ async fn a_notification_carries_the_role_it_is_given() {
     .await;
 
     assert!(html.contains(r#"role="status""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_reason_shown_elsewhere_is_pointed_to_not_repeated() {
+    let mut props = reasoned(Some("Select a certificate first."));
+    props.reason_elsewhere = Some("toolbar-why-not".into());
+    let html = render::<ReasonedButton>(props).await;
+
+    assert!(html.contains(r#"aria-describedby="toolbar-why-not""#), "{html}");
+    assert!(!html.contains("Select a certificate first."), "said once, by the toolbar: {html}");
+}
+
+#[tokio::test]
+async fn a_quiet_callout_leaves_the_announcing_to_its_live_region() {
+    let mut props = callout(CalloutSeverity::Success, None);
+    props.quiet = true;
+    let html = render::<Callout>(props).await;
+
+    assert!(!html.contains("role="), "{html}");
 }

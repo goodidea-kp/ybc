@@ -14,9 +14,14 @@ pub struct ReasonedButtonProps {
     pub classes: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
-    /// `data-testid` of the reason's paragraph.
+    /// `data-testid` of the reason's line.
     #[prop_or_default]
     pub reason_testid: Option<AttrValue>,
+    /// The id of an element on the page that already shows the reason -- one
+    /// line for a whole toolbar, or a notice beside the button. The button then
+    /// points to it instead of repeating the reason under itself.
+    #[prop_or_default]
+    pub reason_elsewhere: Option<AttrValue>,
     #[prop_or_default]
     pub children: Children,
 }
@@ -29,7 +34,12 @@ pub struct ReasonedButtonProps {
 /// with `aria-describedby`; a click while disabled does nothing.
 #[component(ReasonedButton)]
 pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
-    let reason_id = format!("{}-why-not", props.id);
+    let reason_id = props
+        .reason_elsewhere
+        .as_ref()
+        .map(|id| id.to_string())
+        .unwrap_or_else(|| format!("{}-why-not", props.id));
+    let shown_here = props.reason_elsewhere.is_none();
     let disabled = props.disabled_reason.is_some();
     let onclick = {
         let onclick = props.onclick.clone();
@@ -55,8 +65,9 @@ pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
                     data-testid={props.testid.clone()}>
                 { props.children.clone() }
             </button>
-            if let Some(reason) = &props.disabled_reason {
-                <p class="help" id={reason_id} data-testid={props.reason_testid.clone()}>{ reason.clone() }</p>
+            if let (Some(reason), true) = (&props.disabled_reason, shown_here) {
+                // A <span>, not a <p>: the button often sits in a phrasing-only parent.
+                <span class="help" style="display: block" id={reason_id} data-testid={props.reason_testid.clone()}>{ reason.clone() }</span>
             }
         </>
     }

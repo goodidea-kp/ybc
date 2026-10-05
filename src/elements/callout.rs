@@ -45,6 +45,13 @@ pub struct CalloutProps {
     pub compact: bool,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Inside a live region that already announces it (`aria-live` on a wrapper
+    /// that stays on the page): no role of its own, so it is not read twice.
+    #[prop_or_default]
+    pub quiet: bool,
+    /// For `aria-describedby` from elsewhere, e.g. a [`crate::ReasonedButton`]'s `reason_elsewhere`.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     #[prop_or_default]
     pub classes: Classes,
     #[prop_or_default]
@@ -66,7 +73,7 @@ pub fn callout(props: &CalloutProps) -> Html {
         props.classes.clone()
     );
     html! {
-        <div {class} role={props.severity.role()} data-testid={props.testid.clone()}
+        <div {class} id={props.id.clone()} role={(!props.quiet).then_some(props.severity.role())} data-testid={props.testid.clone()}
              style="display: flex; gap: 0.75rem; align-items: flex-start">
             <span class="icon" style="flex: none">
                 <i class={classes!("fas", props.severity.icon())} aria-hidden="true"></i>
