@@ -6,6 +6,12 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## Unreleased
 ### added
+- `Table` takes `id`, `testid`, `aria_label`, `aria_labelledby` and
+  `aria_describedby`. Each is rendered on the `<table>` element, also when
+  `scrollable` wraps it in the one `div.table-container`, and omitted when
+  `None`, so existing call sites render exactly as before. `classes` and the
+  modifiers stay on the `<table>` too; the wrapper carries only
+  `table-container`.
 - `id: Option<AttrValue>` prop on every form control (`Select`, `MultiSelect`,
   `Input`, `TextArea`, `Checkbox`, `Radio`, `File`). It is rendered on the
   native control (not the Bulma wrapper) and omitted when `None`, so existing
