@@ -23,6 +23,14 @@ pub struct TagProps {
     /// The size for this component.
     #[prop_or_default]
     pub size: Option<Size>,
+    /// Font Awesome classes of an icon before the text, e.g. `"fas fa-check"`.
+    /// It is `aria-hidden`: the text says the same.
+    #[prop_or_default]
+    pub icon: Option<AttrValue>,
+    /// A Bulma 1.x skeleton placeholder (`is-skeleton`, `aria-busy`) while the
+    /// value is on its way. Keep a short text inside so the size matches.
+    #[prop_or_default]
+    pub skeleton: bool,
 }
 
 /// A small tag label to insert anywhere.
@@ -36,10 +44,20 @@ pub fn tag(props: &TagProps) -> Html {
         props.rounded.then_some("is-rounded"),
         props.delete.then_some("is-delete"),
         props.size.as_ref().map(|size| size.to_string()),
+        props.skeleton.then_some("is-skeleton"),
     );
+    let content = match &props.icon {
+        Some(icon) => html! {
+            <>
+                <span class="icon"><i class={icon.clone()} aria-hidden="true"></i></span>
+                <span>{ props.children.clone() }</span>
+            </>
+        },
+        None => html! { { props.children.clone() } },
+    };
     html! {
-        <@{props.tag.clone()} {class} onclick={props.onclick.clone()}>
-            {props.children.clone()}
+        <@{props.tag.clone()} {class} onclick={props.onclick.clone()} aria-busy={props.skeleton.then_some("true")}>
+            { content }
         </@>
     }
 }

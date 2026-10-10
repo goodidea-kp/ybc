@@ -16,6 +16,11 @@ pub struct TitleProps {
     /// The size of this component.
     #[prop_or_default]
     pub size: Option<HeaderSize>,
+    /// A Bulma 1.x skeleton placeholder (`is-skeleton`, `aria-busy`) while the
+    /// heading's text is on its way. Keep a placeholder text inside so the
+    /// heading keeps its height and a screen reader hears something.
+    #[prop_or_default]
+    pub skeleton: bool,
 }
 
 /// A simple heading to add depth to your page.
@@ -28,9 +33,10 @@ pub fn title(props: &TitleProps) -> Html {
         props.classes.clone(),
         props.size.as_ref().map(|size| size.to_string()),
         props.is_spaced.then_some("is-spaced"),
+        props.skeleton.then_some("is-skeleton"),
     );
     html! {
-        <@{props.tag.clone()} {class}>
+        <@{props.tag.clone()} {class} aria-busy={props.skeleton.then_some("true")}>
             {props.children.clone()}
         </@>
     }

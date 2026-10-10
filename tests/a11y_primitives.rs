@@ -63,6 +63,7 @@ fn reasoned(reason: Option<&str>) -> ReasonedButtonProps {
         testid: Some("assign-btn".into()),
         reason_testid: Some("assign-why-not".into()),
         reason_elsewhere: None,
+        style: None,
         children: Children::new(vec![html! { "Assign" }]),
     }
 }
