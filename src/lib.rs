@@ -26,6 +26,7 @@ pub mod components;
 mod elements;
 mod form;
 mod layout;
+pub mod theme;
 
 // columns
 pub use columns::{Column, ColumnProps, Columns, ColumnsProps};
@@ -92,6 +93,9 @@ pub use form::input::{Input, InputMode, InputProps, InputType};
 pub use form::radio::{Radio, RadioGroup, RadioGroupProps, RadioProps};
 pub use form::select::{MultiSelect, MultiSelectProps, Select, SelectProps};
 pub use form::textarea::{TextArea, TextAreaProps};
+
+// theme
+pub use theme::{Theme, ThemeToggle, ThemeToggleProps, UseThemeHandle, use_theme};
 
 // layout
 pub use layout::container::{Container, ContainerProps};

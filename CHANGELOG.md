@@ -6,6 +6,21 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## Unreleased
 ### added
+- `ybc::theme`: light and dark colour schemes on top of Bulma 1.x.
+  `Theme { System, Light, Dark }` (`#[non_exhaustive]`, room for a
+  high-contrast variant); `apply` sets `data-theme` on `<html>` and removes it
+  for `System`, so Bulma's `prefers-color-scheme` query decides again;
+  `store` / `stored` keep the choice in `localStorage` under
+  `THEME_STORAGE_KEY` (`ybc.theme`); the `use_theme()` hook applies, stores
+  and re-renders. Outside a browser `stored()` is `System` and `apply` does
+  nothing, so server-side rendering and host tests never touch the DOM. The
+  module docs carry the inline `<head>` script that applies the stored choice
+  before the WASM loads (no flash of the wrong scheme).
+- `ThemeToggle`: a named `role="group"` of three buttons -- System, Light,
+  Dark -- with visible text, an `aria-hidden` icon and `aria-pressed` on the
+  current choice; never a colour-only switch. `testid` names the group and
+  each button (`<testid>-system|light|dark`); `onchange` fires after a choice
+  is applied and stored.
 - `Table` takes `id`, `testid`, `aria_label`, `aria_labelledby` and
   `aria_describedby`. Each is rendered on the `<table>` element, also when
   `scrollable` wraps it in the one `div.table-container`, and omitted when
