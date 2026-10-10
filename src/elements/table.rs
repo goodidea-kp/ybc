@@ -4,6 +4,7 @@ use yew::prelude::*;
 pub struct TableProps {
     #[prop_or_default]
     pub children: Children,
+    /// Extra classes for the `<table>` element (never for the scroll container).
     #[prop_or_default]
     pub classes: Classes,
     /// Add borders to all the cells.
@@ -22,11 +23,32 @@ pub struct TableProps {
     #[prop_or_default]
     pub fullwidth: bool,
     /// Make the table scrollable, wrapping the table in a `div.table-container`.
+    ///
+    /// The wrapper is the only scroll container; every attribute below stays on
+    /// the `<table>` itself either way.
     #[prop_or_default]
     pub scrollable: bool,
+    /// `id` of the `<table>` element.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
+    /// `data-testid` of the `<table>` element.
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    /// Accessible name, when no `<caption>` or visible heading names the table.
+    #[prop_or_default]
+    pub aria_label: Option<AttrValue>,
+    /// `id` of a visible heading that names the table.
+    #[prop_or_default]
+    pub aria_labelledby: Option<AttrValue>,
+    /// `id` of text that describes the table.
+    #[prop_or_default]
+    pub aria_describedby: Option<AttrValue>,
 }
 
 /// An HTML table component.
+///
+/// It only styles and labels the table: sorting, paging and selection stay with
+/// the caller, which renders `caption`/`thead`/`tbody` as children.
 ///
 /// [https://bulma.io/documentation/elements/table/](https://bulma.io/documentation/elements/table/)
 #[component(Table)]
@@ -40,19 +62,19 @@ pub fn table(props: &TableProps) -> Html {
         props.hoverable.then_some("is-hoverable"),
         props.fullwidth.then_some("is-fullwidth"),
     );
+    let table = html! {
+        <table {class}
+            id={props.id.clone()}
+            data-testid={props.testid.clone()}
+            aria-label={props.aria_label.clone()}
+            aria-labelledby={props.aria_labelledby.clone()}
+            aria-describedby={props.aria_describedby.clone()}>
+            {props.children.clone()}
+        </table>
+    };
     if props.scrollable {
-        html! {
-            <div class="table-container">
-                <table {class}>
-                    {props.children.clone()}
-                </table>
-            </div>
-        }
+        html! { <div class="table-container">{table}</div> }
     } else {
-        html! {
-            <table {class}>
-                {props.children.clone()}
-            </table>
-        }
+        table
     }
 }
