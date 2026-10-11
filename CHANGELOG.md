@@ -6,6 +6,53 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## Unreleased
 ### added
+- List controls (Bastion BASTION-105), generalised from the Bastion console's
+  shared listing markup. They hold no list state: the page owns the query.
+  - `SortHeader<C>` (`SortHeaderProps { column, label, direction, on_sort,
+    testid, classes }`, `SortDirection { Ascending, Descending }`): a `<th>`
+    with `aria-sort` (`none` when unsorted) around a real `<button>` that
+    emits its column.
+  - `Pager` (`PagerProps { current, last, on_page, aria_label, testid,
+    classes }`, zero-based pages): a named `role="navigation"` of buttons,
+    `aria-current="page"` on the current one, ellipses past seven pages
+    (`page_links`), nothing for a single page. At an end Previous/Next stay
+    focusable with `aria-disabled` and point to one "This is the first/last/
+    only page." line.
+  - `ListToolbar` (`ListToolbarProps { filter, on_filter, on_clear,
+    filter_label, placeholder, size, sizes, on_size, range_text, testid }`,
+    `PAGE_SIZES = [25, 50, 100]`): a named search box with Clear while it has
+    text, the range sentence as a polite live region (a busy skeleton line
+    while `range_text` is `None`) and a labelled rows-per-page select.
+  - Test ids follow the console's: `<testid>-sort-*` is the caller's,
+    `-pagination`, `-page-prev|next|<n>|edge`, `-filter-name|clear`,
+    `-range`, `-page-size`.
+- `StatusTag` (`tone: StatusTone`, `icon`, `title`, `light`, `size`, `id`,
+  `testid`, `classes`, children): a status chip that never relies on colour
+  alone. With text its icon is `aria-hidden`; without text it is
+  `role="img"` named by `title` (or the tone's word) and shows the tone's
+  icon when given none.
+- `Tag` takes `icon` (an `aria-hidden` icon before the text) and `skeleton`.
+- Bulma 1.x skeletons: a `skeleton` prop on `Title`, `Button` and `Tag`
+  (`is-skeleton` + `aria-busy="true"`; a skeleton `Button` is also disabled)
+  and `SkeletonBlock { lines, label, testid, classes }` (`skeleton-lines`, or
+  one `skeleton-block` for `lines = 0`, with a visually hidden "Loading…").
+- `Remote<T, E = String> { Idle, Loading, Loaded(T), Failed(E) }` with
+  `is_loading`, `loaded`, `failure`, `map`, `as_ref` and `From<Result<T, E>>`;
+  `RemoteView<T, E>` (`remote`, `render`, `skeleton`, `idle`,
+  `render_failure`, `on_retry`, `testid`, `classes`) gives every state a face
+  inside an `aria-busy` wrapper: a skeleton, the data, or a danger `Callout`
+  with "Try again".
+- `Disclosure` (`summary`, `open`, `on_toggle`, `id`, `testid`, `classes`,
+  children) over native `<details>`/`<summary>`.
+- `Theme::HighContrast` (Bastion BASTION-103): Bulma's light scheme plus
+  `data-contrast="more"` (`CONTRAST_ATTRIBUTE`, `Theme::contrast_value`) for
+  the page's own high-contrast CSS; stored as `high-contrast`. `ThemeToggle`
+  offers it as a fourth button with visible text ("High contrast",
+  `<testid>-high-contrast`). The no-flash head script in the module docs now
+  handles it.
+- `ReasonedButton` takes `style`; the disabled look is appended to it.
+- `MIN_TARGET_STYLE`: every new list button, the pager's buttons and the
+  disclosure summary are at least 24×24 CSS px (WCAG 2.2, 2.5.8).
 - `ybc::theme`: light and dark colour schemes on top of Bulma 1.x.
   `Theme { System, Light, Dark }` (`#[non_exhaustive]`, room for a
   high-contrast variant); `apply` sets `data-theme` on `<html>` and removes it
@@ -56,6 +103,11 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 - `Calendar` supports native `disabled` controls and `mm/dd/yyyy` form values.
 
 ### changed
+- A `Modal`/`ModalCard` `<dialog>` gives focus back to the control that
+  opened it when it closes, also when the page removes it while open
+  (WCAG 2.4.3; Bastion BASTION-104). Focus that already moved elsewhere on
+  purpose is left alone.
+- `Theme::ALL` has four entries.
 - `Calendar` enhances a native date/time fallback with bulma-calendar 7.1.1
   when its JS and CSS assets are loaded. Each component owns its picker DOM and
   removes document listeners on unmount, without shared ID registries.

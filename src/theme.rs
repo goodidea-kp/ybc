@@ -1,16 +1,23 @@
-//! Light and dark colour schemes for Bulma 1.x.
+//! Light, dark and high-contrast colour schemes for Bulma 1.x.
 //!
 //! Bulma 1.x already follows the operating system: under
 //! `prefers-color-scheme: dark` it redefines its `--bulma-*` variables. It also
 //! honours `data-theme="light"` / `data-theme="dark"` on any ancestor, which
 //! wins over the OS. This module is the one place that attribute is written:
 //!
-//! - [`Theme`] is the choice: follow the system, or force light or dark.
+//! - [`Theme`] is the choice: follow the system, or force light, dark or high
+//!   contrast.
 //! - [`apply`] puts the choice on `<html>`; [`Theme::System`] removes the
 //!   attribute so Bulma's media query decides again.
+//! - [`Theme::HighContrast`] is Bulma's light scheme (`data-theme="light"`)
+//!   plus `data-contrast="more"` ([`CONTRAST_ATTRIBUTE`]). Bulma has no
+//!   high-contrast scheme and ybc ships no colours, so the page's own
+//!   stylesheet raises the contrast under `:root[data-contrast=more]`, and
+//!   should state the same rules under `@media (prefers-contrast: more)` for a
+//!   user who asked the operating system rather than the toggle.
 //! - [`store`] / [`stored`] keep the choice in `localStorage` under
 //!   [`THEME_STORAGE_KEY`], per browser.
-//! - [`use_theme`] is the hook; [`ThemeToggle`] the control: three buttons with
+//! - [`use_theme`] is the hook; [`ThemeToggle`] the control: four buttons with
 //!   visible text and `aria-pressed`, never a colour-only switch.
 //!
 //! To avoid a flash of the wrong scheme before the WASM loads, the page applies
@@ -20,8 +27,12 @@
 //! <script>
 //!   try {
 //!     var theme = localStorage.getItem("ybc.theme");
+//!     var root = document.documentElement;
 //!     if (theme === "light" || theme === "dark") {
-//!       document.documentElement.setAttribute("data-theme", theme);
+//!       root.setAttribute("data-theme", theme);
+//!     } else if (theme === "high-contrast") {
+//!       root.setAttribute("data-theme", "light");
+//!       root.setAttribute("data-contrast", "more");
 //!     }
 //!   } catch (ignored) {}
 //! </script>
@@ -39,6 +50,10 @@ pub const THEME_STORAGE_KEY: &str = "ybc.theme";
 /// The attribute Bulma 1.x reads on `<html>`.
 pub const THEME_ATTRIBUTE: &str = "data-theme";
 
+/// The attribute [`Theme::HighContrast`] adds on `<html>`, with the value
+/// `more`, for the page's own high-contrast rules. Every other choice removes it.
+pub const CONTRAST_ATTRIBUTE: &str = "data-contrast";
+
 /// Which colour scheme the page shows.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[non_exhaustive]
@@ -48,25 +63,42 @@ pub enum Theme {
     System,
     Light,
     Dark,
+    /// Bulma's light scheme with `data-contrast="more"` for the page's own
+    /// high-contrast rules (WCAG 1.4.3, 1.4.11).
+    HighContrast,
 }
 
 impl Theme {
     /// Every choice, in the order a toggle offers them.
-    pub const ALL: [Theme; 3] = [Theme::System, Theme::Light, Theme::Dark];
+    pub const ALL: [Theme; 4] = [Theme::System, Theme::Light, Theme::Dark, Theme::HighContrast];
 
     /// The value written to `data-theme`; `None` for [`Theme::System`], whose
-    /// attribute is removed instead.
+    /// attribute is removed instead. High contrast builds on Bulma's light scheme.
     pub fn attribute_value(self) -> Option<&'static str> {
         match self {
             Theme::System => None,
-            Theme::Light => Some("light"),
+            Theme::Light | Theme::HighContrast => Some("light"),
             Theme::Dark => Some("dark"),
+        }
+    }
+
+    /// The value written to `data-contrast`: `more` for
+    /// [`Theme::HighContrast`]; `None` (attribute removed) for the rest.
+    pub fn contrast_value(self) -> Option<&'static str> {
+        match self {
+            Theme::HighContrast => Some("more"),
+            Theme::System | Theme::Light | Theme::Dark => None,
         }
     }
 
     /// The value kept in `localStorage`.
     pub fn storage_value(self) -> &'static str {
-        self.attribute_value().unwrap_or("system")
+        match self {
+            Theme::System => "system",
+            Theme::Light => "light",
+            Theme::Dark => "dark",
+            Theme::HighContrast => "high-contrast",
+        }
     }
 
     /// Reads a stored value back. Anything unknown (a value from a newer
@@ -75,6 +107,7 @@ impl Theme {
         match value {
             "light" => Theme::Light,
             "dark" => Theme::Dark,
+            "high-contrast" => Theme::HighContrast,
             _ => Theme::System,
         }
     }
@@ -85,6 +118,7 @@ impl Theme {
             Theme::System => "System",
             Theme::Light => "Light",
             Theme::Dark => "Dark",
+            Theme::HighContrast => "High contrast",
         }
     }
 
@@ -94,14 +128,17 @@ impl Theme {
             Theme::System => "fa-circle-half-stroke",
             Theme::Light => "fa-sun",
             Theme::Dark => "fa-moon",
+            Theme::HighContrast => "fa-eye",
         }
     }
 }
 
 /// Puts `theme` on `<html>`: sets `data-theme`, or removes it for
-/// [`Theme::System`]. Does nothing outside a browser.
+/// [`Theme::System`], and sets or removes `data-contrast` the same way.
+/// Does nothing outside a browser.
 pub fn apply(theme: Theme) {
-    browser::set_root_attribute(theme.attribute_value());
+    browser::set_root_attribute(THEME_ATTRIBUTE, theme.attribute_value());
+    browser::set_root_attribute(CONTRAST_ATTRIBUTE, theme.contrast_value());
 }
 
 /// Remembers `theme` in `localStorage`. A browser that refuses storage
@@ -151,12 +188,13 @@ pub struct ThemeToggleProps {
     /// Extra classes on the `buttons` group.
     #[prop_or_default]
     pub classes: Classes,
-    /// `data-testid` of the group; each button gets `<testid>-<storage value>`.
+    /// `data-testid` of the group; each button gets `<testid>-<storage value>`
+    /// (`theme-system`, `theme-light`, `theme-dark`, `theme-high-contrast`).
     #[prop_or_default]
     pub testid: Option<AttrValue>,
 }
 
-/// Three buttons -- System, Light, Dark -- with visible text and
+/// Four buttons -- System, Light, Dark, High contrast -- with visible text and
 /// `aria-pressed` on the chosen one. Choosing applies the scheme at once and
 /// remembers it in this browser.
 #[component(ThemeToggle)]
@@ -195,9 +233,9 @@ pub fn theme_toggle(props: &ThemeToggleProps) -> Html {
 /// tests and server-side rendering never reach a wasm-bindgen import.
 #[cfg(target_arch = "wasm32")]
 mod browser {
-    use super::{THEME_ATTRIBUTE, THEME_STORAGE_KEY};
+    use super::THEME_STORAGE_KEY;
 
-    pub fn set_root_attribute(value: Option<&str>) {
+    pub fn set_root_attribute(name: &str, value: Option<&str>) {
         let Some(root) = web_sys::window()
             .and_then(|window| window.document())
             .and_then(|document| document.document_element())
@@ -207,8 +245,8 @@ mod browser {
         // Neither call can fail for a valid attribute name; a refusal leaves
         // the page on its previous scheme, which is still readable.
         let _ = match value {
-            Some(value) => root.set_attribute(THEME_ATTRIBUTE, value),
-            None => root.remove_attribute(THEME_ATTRIBUTE),
+            Some(value) => root.set_attribute(name, value),
+            None => root.remove_attribute(name),
         };
     }
 
@@ -229,7 +267,7 @@ mod browser {
 
 #[cfg(not(target_arch = "wasm32"))]
 mod browser {
-    pub fn set_root_attribute(_value: Option<&str>) {}
+    pub fn set_root_attribute(_name: &str, _value: Option<&str>) {}
 
     pub fn read_storage() -> Option<String> {
         None

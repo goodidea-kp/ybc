@@ -22,6 +22,10 @@ pub struct ReasonedButtonProps {
     /// points to it instead of repeating the reason under itself.
     #[prop_or_default]
     pub reason_elsewhere: Option<AttrValue>,
+    /// Inline style of the button, e.g. a minimum target size. The disabled
+    /// look is appended to it.
+    #[prop_or_default]
+    pub style: Option<AttrValue>,
     #[prop_or_default]
     pub children: Children,
 }
@@ -51,6 +55,7 @@ pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
             }
         })
     };
+    let style = button_style(props.style.as_deref(), disabled);
     let classes = if props.classes.is_empty() {
         classes!("button")
     } else {
@@ -61,7 +66,7 @@ pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
             <button type="button" id={props.id.clone()} class={classes} {onclick}
                     aria-disabled={disabled.then_some("true")}
                     aria-describedby={disabled.then(|| reason_id.clone())}
-                    style={disabled.then_some("opacity: 0.55; cursor: not-allowed")}
+                    {style}
                     data-testid={props.testid.clone()}>
                 { props.children.clone() }
             </button>
@@ -70,5 +75,17 @@ pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
                 <span class="help" style="display: block" id={reason_id} data-testid={props.reason_testid.clone()}>{ reason.clone() }</span>
             }
         </>
+    }
+}
+
+const DISABLED_STYLE: &str = "opacity: 0.55; cursor: not-allowed";
+
+/// The caller's style followed by the disabled look; `None` when both are absent.
+fn button_style(own: Option<&str>, disabled: bool) -> Option<String> {
+    match (own, disabled) {
+        (None, false) => None,
+        (None, true) => Some(DISABLED_STYLE.to_string()),
+        (Some(own), false) => Some(own.to_string()),
+        (Some(own), true) => Some(format!("{}; {DISABLED_STYLE}", own.trim_end_matches(';'))),
     }
 }

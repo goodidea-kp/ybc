@@ -250,6 +250,37 @@ fn focus_dialog(dialog: &HtmlDialogElement) {
     let _ = dialog.focus();
 }
 
+/// The element that has focus now, unless that is the page itself.
+fn focused_element() -> Option<HtmlElement> {
+    let document = web_sys::window()?.document()?;
+    let active = document.active_element()?;
+    if document.body().is_some_and(|body| body.is_same_node(Some(&active))) {
+        return None;
+    }
+    active.dyn_into::<HtmlElement>().ok()
+}
+
+/// Gives focus back to `opener` after a dialog closed or vanished, when it is
+/// still on the page and focus did not already move somewhere on purpose.
+/// The browser restores focus after `close()` on its own, but not when the
+/// page removes an open dialog, and not to an opener re-rendered meanwhile.
+fn restore_focus(opener: Option<HtmlElement>) {
+    let Some(opener) = opener else {
+        return;
+    };
+    if opener.is_connected() && focus_was_lost() {
+        let _ = opener.focus();
+    }
+}
+
+/// Focus is nowhere useful: on the page itself, or inside a closed dialog.
+fn focus_was_lost() -> bool {
+    let Some(active) = focused_element() else {
+        return true;
+    };
+    active.closest("dialog:not([open])").ok().flatten().is_some()
+}
+
 fn close_dialog(dialog_ref: &NodeRef) {
     if let Some(dialog) = dialog_ref.cast::<HtmlDialogElement>()
         && dialog.open()
@@ -291,8 +322,11 @@ fn dialog_shell(props: &DialogShellProps) -> Html {
         let dialog_ref = props.dialog_ref.clone();
         let set_is_active = props.set_is_active.clone();
         use_effect_with(props.is_active, move |active| {
+            let mut opener = None;
+            let dialog_ref_for_cleanup = dialog_ref.clone();
             if let Some(dialog) = dialog_ref.cast::<HtmlDialogElement>() {
                 if *active {
+                    opener = focused_element();
                     if !dialog.open() {
                         let _ = dialog.show_modal();
                     }
@@ -306,7 +340,14 @@ fn dialog_shell(props: &DialogShellProps) -> Html {
                 }
             }
 
-            || {}
+            // Runs when the dialog closes and when it is removed while open:
+            // focus goes back to the control that opened it (WCAG 2.4.3).
+            move || {
+                if opener.is_some() {
+                    close_dialog(&dialog_ref_for_cleanup);
+                }
+                restore_focus(opener);
+            }
         });
     }
 

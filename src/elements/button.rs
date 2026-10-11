@@ -183,6 +183,10 @@ pub struct ButtonProps {
     pub no_button_class: bool,
     #[prop_or_default]
     pub id: String,
+    /// A Bulma 1.x skeleton placeholder (`is-skeleton`, `aria-busy`) while what
+    /// the button acts on is on its way. A skeleton button is also disabled.
+    #[prop_or_default]
+    pub skeleton: bool,
 }
 
 /// A button element.
@@ -207,7 +211,8 @@ pub fn button(props: &ButtonProps) -> Html {
         props.size.as_ref().map(ToString::to_string),
         props.variant.as_ref().map(ToString::to_string),
         props.rounded.then_some("is-rounded"),
-        props.fullwidth.then_some("is-fullwidth")
+        props.fullwidth.then_some("is-fullwidth"),
+        props.skeleton.then_some("is-skeleton")
     );
     let _id = props.id.clone();
     html! {
@@ -223,9 +228,10 @@ pub fn button(props: &ButtonProps) -> Html {
             aria-expanded={aria_expanded}
             aria-selected={aria_selected}
             aria-pressed={aria_pressed}
+            aria-busy={props.skeleton.then_some("true")}
             onclick={props.onclick.clone()}
             onkeydown={props.onkeydown.clone()}
-            disabled={props.disabled}
+            disabled={props.disabled || props.skeleton}
         >
             {props.children.clone()}
         </button>
