@@ -61,7 +61,7 @@ pub use components::pagination::PaginationItemRouter;
 pub use components::pagination::{Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemType, PaginationProps};
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
 pub use components::remote::{Remote, RemoteView, RemoteViewProps};
-pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps, TabsProvider, TabsProviderProps};
+pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps, TabsProvider, TabsProviderProps, sibling_tab_index};
 
 pub use components::calendar::{Calendar, CalendarProps, TestAttr};
 
