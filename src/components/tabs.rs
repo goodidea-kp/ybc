@@ -321,7 +321,18 @@ pub fn sibling_tab_index(key: &str, current: usize, count: usize) -> Option<usiz
 /// tabs are skipped. `true` when the key was one of the list's own.
 fn move_to_sibling_tab(event: &KeyboardEvent, key: &str) -> bool {
     use wasm_bindgen::JsCast;
-    let Some(current) = event.current_target().and_then(|target| target.dyn_into::<web_sys::HtmlElement>().ok()) else {
+    // Yew delegates listeners to the app's root element, so `current_target()`
+    // is that root, not the tab. Start from the element the key event came
+    // from (the tab itself, or a child such as an icon) and walk up to the tab.
+    let Some(origin) = event.target().and_then(|target| target.dyn_into::<web_sys::Element>().ok()) else {
+        return false;
+    };
+    let Some(current) = origin
+        .closest("[role=tab]")
+        .ok()
+        .flatten()
+        .and_then(|tab| tab.dyn_into::<web_sys::HtmlElement>().ok())
+    else {
         return false;
     };
     let Some(list) = current.closest("[role=tablist]").ok().flatten() else {
