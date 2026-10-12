@@ -5,6 +5,12 @@ This changelog follows the patterns described here: https://keepachangelog.com/e
 Subheadings to categorize changes are `added, changed, deprecated, removed, fixed, security`.
 
 ## Unreleased
+### fixed
+- Tab arrow keys (Left/Right/Home/End) did nothing inside a Yew app: the
+  handler looked up the tab list from `event.current_target()`, which is the
+  app's root element because Yew delegates listeners there. It now starts from
+  `event.target()` and walks up to `[role=tab]`, so keys pressed on the tab or
+  on a child (an icon) move focus as intended.
 ### added
 - List controls (Bastion BASTION-105), generalised from the Bastion console's
   shared listing markup. They hold no list state: the page owns the query.
