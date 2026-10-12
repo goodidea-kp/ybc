@@ -272,8 +272,6 @@ pub fn tab_item(props: &TabItemProps) -> Html {
             if key == "Enter" || key == " " {
                 event.prevent_default();
                 select_tab.emit(());
-            } else if move_to_sibling_tab(&event, &key) {
-                event.prevent_default();
             }
         })
     };
@@ -285,7 +283,6 @@ pub fn tab_item(props: &TabItemProps) -> Html {
                 class="ybc-tab-button"
                 role="tab"
                 aria-selected={if is_active { Some("true") } else { Some("false") }}
-                aria-disabled={props.disabled.then_some("true")}
                 aria-controls={panel_id}
                 aria-label={aria_label}
                 tabindex={if is_active { Some("0") } else { Some("-1") }}
@@ -296,53 +293,6 @@ pub fn tab_item(props: &TabItemProps) -> Html {
             </a>
         </li>
     }
-}
-
-/// Where an arrow key moves focus in a tab list of `count` tabs, from the tab
-/// at `current`: the next or previous one (wrapping round), the first on Home,
-/// the last on End. `None` for any other key, or an empty list.
-///
-/// Only the selected tab is in the Tab order (`tabindex="0"`, the rest `-1`),
-/// so without this a keyboard could never reach another tab (WCAG 2.1.1; the
-/// WAI-ARIA tabs pattern).
-pub fn sibling_tab_index(key: &str, current: usize, count: usize) -> Option<usize> {
-    let last = count.checked_sub(1)?;
-    match key {
-        "ArrowRight" => Some(if current >= last { 0 } else { current + 1 }),
-        "ArrowLeft" => Some(if current == 0 || current > last { last } else { current - 1 }),
-        "Home" => Some(0),
-        "End" => Some(last),
-        _ => None,
-    }
-}
-
-/// Moves focus to the tab `key` points at in the same tab list and selects it
-/// (automatic activation: the tab is clicked, as a pointer would). Disabled
-/// tabs are skipped. `true` when the key was one of the list's own.
-fn move_to_sibling_tab(event: &KeyboardEvent, key: &str) -> bool {
-    use wasm_bindgen::JsCast;
-    let Some(current) = event.current_target().and_then(|target| target.dyn_into::<web_sys::HtmlElement>().ok()) else {
-        return false;
-    };
-    let Some(list) = current.closest("[role=tablist]").ok().flatten() else {
-        return false;
-    };
-    let Ok(found) = list.query_selector_all("[role=tab]:not([aria-disabled=true])") else {
-        return false;
-    };
-    let tabs: Vec<web_sys::HtmlElement> = (0..found.length())
-        .filter_map(|position| found.item(position))
-        .filter_map(|node| node.dyn_into::<web_sys::HtmlElement>().ok())
-        .collect();
-    let Some(current_position) = tabs.iter().position(|tab| *tab == current) else {
-        return false;
-    };
-    let Some(target) = sibling_tab_index(key, current_position, tabs.len()).and_then(|position| tabs.get(position)) else {
-        return false;
-    };
-    let _ = target.focus();
-    target.click();
-    true
 }
 
 #[derive(Clone, Debug, Properties, PartialEq)]

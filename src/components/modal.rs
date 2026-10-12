@@ -310,9 +310,6 @@ struct DialogShellProps {
     dialog_ref: NodeRef,
     close_on_escape: bool,
     on_escape: Callback<()>,
-    /// The id of the element that names the dialog (`aria-labelledby`).
-    #[prop_or_default]
-    labelled_by: Option<AttrValue>,
     #[prop_or_default]
     children: Children,
 }
@@ -368,7 +365,6 @@ fn dialog_shell(props: &DialogShellProps) -> Html {
             <style>{DIALOG_STYLE}</style>
             <dialog
                 id={props.id.clone()}
-                aria-labelledby={props.labelled_by.clone()}
                 class={class}
                 ref={props.dialog_ref.clone()}
                 oncancel={Callback::from(move |ev: Event| {
@@ -656,7 +652,6 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
     let dialog_ref = use_node_ref();
     let auto_id = use_state(|| AttrValue::from(next_modal_id("modal-card")));
     let modal_id = props.id.clone().unwrap_or_else(|| (*auto_id).clone()).to_string();
-    let title_id = format!("{modal_id}-title");
 
     let set_local_open = {
         let internal_open = internal_open.clone();
@@ -791,14 +786,12 @@ pub fn modal_card(props: &ModalCardProps) -> Html {
                 dialog_ref={dialog_ref}
                 close_on_escape={props.close_on_escape}
                 on_escape={escape_close}
-                labelled_by={AttrValue::from(title_id.clone())}
             >
                 <div class="modal-background" onclick={bg_close}></div>
 
                 <div class="modal-card">
                     <header class="modal-card-head">
-                        // The title names the dialog: a screen reader says it on opening (WCAG 4.1.2).
-                        <p id={title_id} class="modal-card-title" tabindex="-1" data-ybc-dialog-focus="true">{props.title.clone()}</p>
+                        <p class="modal-card-title" tabindex="-1" data-ybc-dialog-focus="true">{props.title.clone()}</p>
                         <Delete aria_label={"close"} onclick={delete_btn_close} />
                     </header>
                     <section class="modal-card-body">

@@ -119,16 +119,6 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   of an orphan `<label>`, which assistive technology could not attach to any control.
 
 ### fixed
-- `TabItem` moves between tabs with the arrow keys (Bastion BASTION-230, WCAG
-  2.1.1): only the selected tab is in the Tab order (`tabindex="0"`, the rest
-  `-1`), and nothing moved focus to the others, so a keyboard could never reach
-  them. ArrowRight/ArrowLeft go to the next/previous tab of the same
-  `role="tablist"` (wrapping round), Home/End to the first/last, and the tab
-  reached is selected (automatic activation); the key's default is prevented.
-  A disabled tab carries `aria-disabled="true"` and is skipped. The step is
-  `sibling_tab_index(key, current, count)`, exported.
-- `ModalCard` names its `<dialog>` by its title (`aria-labelledby` →
-  `<id>-title`, WCAG 4.1.2): a screen reader announced only "dialog".
 - `Calendar`: Cancel closes the picker. bulma-calendar 7.1.1's own Cancel does
   not close it in a real browser, though it does under jsdom, so a person who
   pressed Cancel stayed stuck with the picker open. The adapter now closes it
