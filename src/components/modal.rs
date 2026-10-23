@@ -118,13 +118,17 @@ fn next_modal_id(prefix: &str) -> String {
     format!("{}-{}", prefix, MODAL_AUTO_ID.fetch_add(1, Ordering::Relaxed))
 }
 
-const DIALOG_STYLE: &str = r#"
-/* Avoid ghost overlays when state is closed. */
+// The rules ship inside every page that renders a modal, so their reasoning
+// lives here, as Rust comments, and the CSS a visitor receives carries none.
+const DIALOG_STYLE: &str = concat!(
+    // Avoid ghost overlays when state is closed.
+    r#"
 dialog.modal:not([open]) {
     display: none !important;
 }
-
-/* Make <dialog class="modal"> match Bulma's modal container behavior. */
+"#,
+    // Make <dialog class="modal"> match Bulma's modal container behavior.
+    r#"
 dialog.modal[open] {
     position: fixed !important;
     inset: 0 !important;
@@ -157,14 +161,15 @@ dialog.modal:focus-visible {
 dialog.modal::backdrop {
     background: rgba(10, 10, 10, 0.86);
 }
-
-/* Bulma's .modal-card-title has flex-shrink:0, which is an explicit "never
-   shrink below content width" declaration — min-width:0 alone does NOT
-   override it (that only fixes the *default* min-width:auto floor on a
-   shrinkable item). With flex-shrink:0 the title just clips instead of
-   wrapping once it's long enough (a hostname, an ARN) to not fit next to
-   the close button. Override flex-shrink itself so the item can actually
-   shrink and wrap. */
+"#,
+    // Bulma's .modal-card-title has flex-shrink:0, which is an explicit "never
+    // shrink below content width" declaration — min-width:0 alone does NOT
+    // override it (that only fixes the *default* min-width:auto floor on a
+    // shrinkable item). With flex-shrink:0 the title just clips instead of
+    // wrapping once it's long enough (a hostname, an ARN) to not fit next to
+    // the close button. Override flex-shrink itself so the item can actually
+    // shrink and wrap.
+    r#"
 .modal-card-head,
 .modal-card-title {
     min-width: 0;
@@ -178,18 +183,19 @@ dialog.modal::backdrop {
 .modal-card-body {
     overflow-x: auto;
 }
-
-/* A body that scrolls must say so. macOS hides overlay scrollbars until the
-   pointer moves, so a long form looked complete and a marked field below the
-   fold read as a Save that did nothing (Bastion BASTION-108). Scroll shadows,
-   CSS only: two covers in the body's own colour scroll WITH the content
-   (`local`) and two shadows stay put at the edges (`scroll`). While there is
-   more below, the bottom cover is still below the fold and the bottom shadow
-   shows; at the end the cover slides over it. The top pair does the same once
-   scrolled down. A body that fits shows neither, with no script and no
-   resize listener. Colours are Bulma's scheme variables, so dark mode follows;
-   forced colours drop backgrounds, and with them the shadows, which is the
-   system's call in that mode. */
+"#,
+    // A body that scrolls must say so. macOS hides overlay scrollbars until the
+    // pointer moves, so a long form looked complete and a marked field below the
+    // fold read as a Save that did nothing. Scroll shadows, CSS only: two covers
+    // in the body's own colour scroll WITH the content (`local`) and two shadows
+    // stay put at the edges (`scroll`). While there is more below, the bottom
+    // cover is still below the fold and the bottom shadow shows; at the end the
+    // cover slides over it. The top pair does the same once scrolled down. A
+    // body that fits shows neither, with no script and no resize listener.
+    // Colours are Bulma's scheme variables, so dark mode follows; forced colours
+    // drop backgrounds, and with them the shadows, which is the system's call in
+    // that mode.
+    r#"
 .modal-card-body {
     --ybc-scroll-cover: var(--bulma-modal-card-body-background-color, #fff);
     --ybc-scroll-shadow: hsla(var(--bulma-scheme-h, 221), var(--bulma-scheme-s, 14%),
@@ -201,9 +207,11 @@ dialog.modal::backdrop {
         radial-gradient(farthest-side at 50% 100%, var(--ybc-scroll-shadow), transparent) center bottom / 100% 0.85rem no-repeat scroll,
         var(--ybc-scroll-cover);
 }
-
-/* Dark: Bulma darkens the surface but keeps the scheme's invert near black, so
-   a dark shadow on a 9% surface is invisible. A soft light edge reads instead. */
+"#,
+    // Dark: Bulma darkens the surface but keeps the scheme's invert near black,
+    // so a dark shadow on a 9% surface is invisible. A soft light edge reads
+    // instead.
+    r#"
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme=light]) .modal-card-body {
         --ybc-scroll-shadow: hsla(0, 0%, 100%, 0.16);
@@ -212,24 +220,25 @@ dialog.modal::backdrop {
 [data-theme=dark] .modal-card-body {
     --ybc-scroll-shadow: hsla(0, 0%, 100%, 0.16);
 }
-
-/* Bulma centers .modal-card/.modal-content via `margin: 0 auto` (desktop)
-   or `margin: 0 <mobile-margin>` (mobile) — but this dialog centers via its
-   own flexbox (align-items/justify-content above). The two centering
-   mechanisms fight: a non-zero margin on a flex item skews it off the
-   flexbox-computed center once the item can't shrink to fit, which is what
-   pushed the whole card off-screen instead of just letting it wrap. Reset
-   the margin to 0 so flexbox is the only thing positioning the card, and
-   cap width with max-width (not width) so it can never exceed the
-   viewport regardless of which Bulma breakpoint is active. */
+"#,
+    // Bulma centers .modal-card/.modal-content via `margin: 0 auto` (desktop)
+    // or `margin: 0 <mobile-margin>` (mobile) — but this dialog centers via its
+    // own flexbox (align-items/justify-content above). The two centering
+    // mechanisms fight: a non-zero margin on a flex item skews it off the
+    // flexbox-computed center once the item can't shrink to fit, which is what
+    // pushed the whole card off-screen instead of just letting it wrap. Reset
+    // the margin to 0 so flexbox is the only thing positioning the card, and
+    // cap width with max-width (not width) so it can never exceed the
+    // viewport regardless of which Bulma breakpoint is active.
+    r#"
 dialog.modal[open] .modal-card,
 dialog.modal[open] .modal-content {
     margin: 0 !important;
     max-width: calc(100vw - 2rem) !important;
     max-height: calc(100vh - 2rem) !important;
 }
-
-"#;
+"#,
+);
 
 fn base_class(extra: &Classes, is_active: bool) -> Classes {
     let mut class = classes!("modal");
@@ -835,5 +844,31 @@ pub fn ModalControllerProvider(props: &ModalControllerProviderProps) -> Html {
         <ContextProvider<ModalControllerContext> context={controller}>
             { for props.children.iter() }
         </ContextProvider<ModalControllerContext>>
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DIALOG_STYLE;
+
+    #[test]
+    fn the_shipped_dialog_style_carries_no_css_comment() {
+        assert!(!DIALOG_STYLE.contains("/*"), "a CSS comment reached the page");
+        assert!(!DIALOG_STYLE.contains("*/"), "a CSS comment reached the page");
+    }
+
+    #[test]
+    fn the_dialog_style_keeps_every_rule() {
+        for selector in [
+            "dialog.modal:not([open])",
+            "dialog.modal[open] {",
+            "dialog.modal::backdrop",
+            ".modal-card-title {",
+            "--ybc-scroll-shadow",
+            "[data-theme=dark] .modal-card-body",
+            "dialog.modal[open] .modal-card,",
+        ] {
+            assert!(DIALOG_STYLE.contains(selector), "lost the rule for {selector}");
+        }
     }
 }
