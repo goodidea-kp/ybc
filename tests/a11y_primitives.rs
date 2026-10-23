@@ -2,8 +2,8 @@
 //! reader and a keyboard get from each one (Bastion BASTION-101).
 
 use ybc::{
-    Callout, CalloutProps, CalloutSeverity, CopyButton, CopyButtonProps, IconText, IconTextProps, Notification, NotificationProps, PaginationItem,
-    PaginationItemProps, PaginationItemType, ReasonedButton, ReasonedButtonProps,
+    CALLOUT_CLASS, Callout, CalloutProps, CalloutSeverity, CopyButton, CopyButtonProps, IconText, IconTextProps, Notification, NotificationProps,
+    PaginationItem, PaginationItemProps, PaginationItemType, ReasonedButton, ReasonedButtonProps,
 };
 use yew::LocalServerRenderer;
 use yew::prelude::*;
@@ -51,6 +51,24 @@ async fn every_callout_has_an_icon_a_screen_reader_skips() {
         let html = render::<Callout>(callout(severity, None)).await;
         assert!(html.contains(severity.icon()), "{html}");
         assert!(html.contains(r#"aria-hidden="true""#), "{html}");
+    }
+}
+
+#[tokio::test]
+async fn every_callout_follows_the_colour_scheme() {
+    // Bulma's soft/bold lightness swap between the light and dark schemes; a
+    // fixed `is-light` tint stayed a light block on a dark page (S1-F14).
+    for severity in [
+        CalloutSeverity::Info,
+        CalloutSeverity::Success,
+        CalloutSeverity::Warning,
+        CalloutSeverity::Danger,
+    ] {
+        let html = render::<Callout>(callout(severity, None)).await;
+        assert!(html.contains("--bulma-notification-background-l: var(--bulma-soft-l)"), "{html}");
+        assert!(html.contains("--bulma-notification-color-l: var(--bulma-bold-l)"), "{html}");
+        assert!(html.contains(CALLOUT_CLASS), "{html}");
+        assert!(html.contains("display: flex"), "kept its layout: {html}");
     }
 }
 
