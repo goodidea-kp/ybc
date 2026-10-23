@@ -6,6 +6,17 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 ## Unreleased
 ### fixed
+- `Callout` follows the dark colour scheme. Bulma's `.notification.is-light`
+  keeps a 90%-lightness tint in both schemes, so every callout stayed a light
+  block on a dark page (Bastion UX review S1-F14). The callout now sets its
+  tint to Bulma's `--bulma-soft-l` and its text to `--bulma-bold-l` (inline,
+  so it wins over the severity rule); both swap with the scheme, under
+  `prefers-color-scheme` and `data-theme` alike. Text and icon contrast on the
+  tint is 7.5:1 (warning) to 9.4:1 (danger) in both schemes. In the light
+  scheme the text moves from Bulma's 13-25% invert to 20% lightness.
+### added
+- `CALLOUT_CLASS` (`ybc-callout`), on every `Callout`, for a page's own rules
+  about what sits inside one, e.g. lighter secondary text in the dark scheme.
 - Tab arrow keys (Left/Right/Home/End) did nothing inside a Yew app: the
   handler looked up the tab list from `event.current_target()`, which is the
   app's root element because Yew delegates listeners there. It now starts from

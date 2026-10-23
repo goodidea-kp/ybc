@@ -74,7 +74,7 @@ pub use elements::button::{
 };
 #[cfg(feature = "router")]
 pub use elements::button::{ButtonAnchorRouter, ButtonRouter, ButtonRouterProps};
-pub use elements::callout::{Callout, CalloutProps, CalloutSeverity};
+pub use elements::callout::{CALLOUT_CLASS, Callout, CalloutProps, CalloutSeverity};
 pub use elements::content::{Content, ContentProps};
 pub use elements::copy_button::{CopyButton, CopyButtonProps};
 pub use elements::delete::{Delete, DeleteProps};
