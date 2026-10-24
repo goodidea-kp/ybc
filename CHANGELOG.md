@@ -5,6 +5,35 @@ This changelog follows the patterns described here: https://keepachangelog.com/e
 Subheadings to categorize changes are `added, changed, deprecated, removed, fixed, security`.
 
 ## Unreleased
+### changed
+- `Calendar` (Bastion BASTION-539): a date field is the browser's own
+  `<input type="date">`, still typed into from the keyboard, with a calendar
+  button beside it that opens a picker for the mouse. The picker is Yew, in a
+  native modal `<dialog>`: no third-party script, no stylesheet to load, no
+  CSP change. The button has a name (`picker_label`, default "Choose
+  <aria_label> from a calendar"), `aria-haspopup="dialog"` and
+  `aria-expanded`. The grid's days are buttons named by their full date, one
+  tab stop moved by the arrow keys, Home/End and PageUp/PageDown; Enter or a
+  click picks. Esc, Close, a click outside or a pick closes it and focus
+  returns to the field. In a `ModalCard` the picker sits in the top layer and
+  Esc closes only the picker. Colours are Bulma's scheme variables (light and
+  dark), with strong borders under `prefers-contrast: more` or
+  `data-contrast="more"`. Chromium's own picker indicator is hidden so one
+  calendar button shows. `time` and `datetime` fields are the native control
+  alone.
+- New `Calendar` props: `aria_label`, `aria_describedby`, `invalid`
+  (`aria-invalid`), `picker_label`. `CALENDAR_CLASS` (`ybc-calendar`) is on
+  the wrapper. Test ids: `X` on the input, `X-picker`, `X-picker-dialog`,
+  `X-picker-previous|next|close`; each day carries `data-ybc-day="yyyy-mm-dd"`.
+### removed
+- The bulma-calendar 7.1.1 adapter (`calendar.js`) and its jsdom test. Its
+  picker was a read-only box opened only by a pointer and named nothing.
+  `display_mode` is accepted and ignored.
+### added
+- `tests/browser/`: a test page and a Chromium test of the Calendar (typing,
+  opening, keys, picking, Esc, focus return, inside a modal), run by
+  `tests/browser/run.sh` with `PLAYWRIGHT_MODULE` pointing at a Playwright
+  install.
 ### fixed
 - `Callout` follows the dark colour scheme. Bulma's `.notification.is-light`
   keeps a 90%-lightness tint in both schemes, so every callout stayed a light

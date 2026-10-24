@@ -1,0 +1,13 @@
+[package]
+name = "ybc-calendar-page"
+version = "0.0.0"
+edition = "2024"
+license = "MIT/Apache-2.0"
+publish = false
+description = "The page tests/browser/calendar.test.mjs drives: ybc::Calendar on a page and inside a ModalCard."
+
+[dependencies]
+ybc = { path = "../../..", default-features = false }
+yew = { version = "0.23.0", features = ["csr"] }
+
+[workspace]

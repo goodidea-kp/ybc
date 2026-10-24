@@ -63,7 +63,7 @@ pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, Pane
 pub use components::remote::{Remote, RemoteView, RemoteViewProps};
 pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps, TabsProvider, TabsProviderProps, sibling_tab_index};
 
-pub use components::calendar::{Calendar, CalendarProps, TestAttr};
+pub use components::calendar::{CALENDAR_CLASS, Calendar, CalendarProps, TestAttr};
 
 // elements
 pub use elements::block::{Block, BlockProps};

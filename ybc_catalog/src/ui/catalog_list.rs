@@ -95,7 +95,7 @@ pub fn catalog_list() -> Html {
             "Calendar",
             ("fa-solid", "fa-calendar-days"),
             Route::Calendar,
-            "Date/time picker powered by bulma-calendar",
+            "Typable date field with a keyboard-operable calendar picker",
         ),
     ];
 
