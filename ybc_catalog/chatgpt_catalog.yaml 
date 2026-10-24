@@ -230,11 +230,11 @@ components:
 
   - id: "calendar"
     name: "Calendar"
-    additional_rules: "Set date to \" \" (single space) for programmatic clear; date updates push into existing picker instance."
+    additional_rules: "Set date to \" \" (single space) for programmatic clear. The field is a native date input; a date field also gets a calendar button that opens a keyboard-operable picker dialog. No third-party script."
     file: "src/components/calendar_example_page.rs"
     route: "/component/calendar"
-    requires_css: ["bulma", "bulma-calendar@7.1.1"]
-    requires_js: ["bulma-calendar@7.1.1"]
+    requires_css: ["bulma", "fontawesome"]
+    requires_js: []
     props_summary:
       - "id: String (unique DOM id)"
       - "date_format: String, time_format: String"

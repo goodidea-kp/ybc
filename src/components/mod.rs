@@ -2,6 +2,8 @@ pub mod accordion;
 pub mod autocomplete;
 pub mod breadcrumb;
 pub mod calendar;
+mod calendar_month;
+mod calendar_popup;
 mod calendar_value;
 pub mod card;
 pub mod chart;
