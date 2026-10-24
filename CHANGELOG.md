@@ -13,7 +13,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   CSP change. The button has a name (`picker_label`, default "Choose
   <aria_label> from a calendar"), `aria-haspopup="dialog"` and
   `aria-expanded`. The grid's days are buttons named by their full date, one
-  tab stop moved by the arrow keys, Home/End and PageUp/PageDown; Enter or a
+  tab stop moved by the arrow keys (weeks start on Sunday), Home/End and PageUp/PageDown; Enter or a
   click picks. Esc, Close, a click outside or a pick closes it and focus
   returns to the field. In a `ModalCard` the picker sits in the top layer and
   Esc closes only the picker. Colours are Bulma's scheme variables (light and

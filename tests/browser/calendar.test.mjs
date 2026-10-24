@@ -94,11 +94,16 @@ test('the named button opens the picker on today, with focus on that day', async
     await close();
 });
 
-test('arrow keys and PageDown move the day, Enter picks it and focus returns to the field', async () => {
+test('Home/End, arrow keys and PageUp move the day, Enter picks it and focus returns to the field', async () => {
     const { page, close } = await openPage();
     await page.locator('#plain').fill('2026-10-24');
     await page.getByTestId('plain-picker').click();
     assert.equal(await focusedDay(page), '2026-10-24');
+    assert.equal(await page.locator('#plain-picker-dialog th').first().getAttribute('abbr'), 'Sunday', 'weeks start on Sunday');
+    await page.keyboard.press('Home');
+    assert.equal(await focusedDay(page), '2026-10-18', 'Home goes back to Sunday');
+    await page.keyboard.press('End');
+    assert.equal(await focusedDay(page), '2026-10-24', 'End goes to Saturday');
     await page.keyboard.press('ArrowRight');
     assert.equal(await focusedDay(page), '2026-10-25');
     await page.keyboard.press('ArrowDown');

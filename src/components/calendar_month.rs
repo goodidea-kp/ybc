@@ -2,7 +2,7 @@
 //! the weeks of its month, and where each key moves it. Pure, so the host tests
 //! cover it without a browser.
 
-/// Days in one week; the picker's weeks start on Monday (ISO 8601).
+/// Days in one week; the picker's weeks start on Sunday, as a US calendar does.
 pub(super) const DAYS_PER_WEEK: u32 = 7;
 const MONTHS_PER_YEAR: u32 = 12;
 const FIRST_YEAR: u32 = 1;
@@ -23,8 +23,8 @@ const MONTH_NAMES: [&str; 12] = [
     "December",
 ];
 
-/// Monday first, as the column headers read them.
-pub(super) const WEEKDAY_NAMES: [&str; 7] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+/// Sunday first, as the column headers read them.
+pub(super) const WEEKDAY_NAMES: [&str; 7] = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /// One calendar day. Always a real date between years 1 and 9999.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -56,12 +56,11 @@ impl Day {
         format!("{:04}-{:02}-{:02}", self.year, self.month, self.day)
     }
 
-    /// 0 for Monday to 6 for Sunday (Sakamoto's method).
+    /// 0 for Sunday to 6 for Saturday (Sakamoto's method).
     pub fn weekday(self) -> u32 {
         const MONTH_OFFSETS: [u32; 12] = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
         let year = if self.month < 3 { self.year - 1 } else { self.year };
-        let sunday_first = (year + year / 4 - year / 100 + year / 400 + MONTH_OFFSETS[(self.month - 1) as usize] + self.day) % DAYS_PER_WEEK;
-        (sunday_first + DAYS_PER_WEEK - 1) % DAYS_PER_WEEK
+        (year + year / 4 - year / 100 + year / 400 + MONTH_OFFSETS[(self.month - 1) as usize] + self.day) % DAYS_PER_WEEK
     }
 
     /// "Friday 24 October 2026": what a screen reader says for the day's button.
@@ -155,7 +154,7 @@ pub(super) fn days_in_month(year: u32, month: u32) -> u32 {
     }
 }
 
-/// The weeks of `day`'s month, Monday first; `None` pads the cells before the
+/// The weeks of `day`'s month, Sunday first; `None` pads the cells before the
 /// 1st and after the last day.
 pub(super) fn month_weeks(day: Day) -> Vec<[Option<Day>; 7]> {
     let first = day.first_of_month();
@@ -217,10 +216,11 @@ mod tests {
     }
 
     #[test]
-    fn weekdays_count_from_monday() {
-        assert_eq!(day("2026-10-24").weekday(), 5, "a Saturday");
-        assert_eq!(day("2026-10-19").weekday(), 0, "a Monday");
-        assert_eq!(day("2000-01-01").weekday(), 5);
+    fn weekdays_count_from_sunday() {
+        assert_eq!(day("2026-10-24").weekday(), 6, "a Saturday");
+        assert_eq!(day("2026-10-18").weekday(), 0, "a Sunday");
+        assert_eq!(day("2026-10-19").weekday(), 1, "a Monday");
+        assert_eq!(day("2000-01-01").weekday(), 6);
         assert_eq!(day("2024-02-29").spoken(), "Thursday 29 February 2024");
         assert_eq!(day("2026-10-24").month_title(), "October 2026");
     }
@@ -236,15 +236,15 @@ mod tests {
     }
 
     #[test]
-    fn a_month_is_whole_weeks_monday_first() {
+    fn a_month_is_whole_weeks_sunday_first() {
         let weeks = month_weeks(day("2026-10-24"));
         assert_eq!(weeks.len(), 5);
-        assert_eq!(weeks[0][..3], [None, None, None], "1 October 2026 is a Thursday");
-        assert_eq!(weeks[0][3], Some(day("2026-10-01")));
-        assert_eq!(weeks[4][5], Some(day("2026-10-31")));
-        assert_eq!(weeks[4][6], None);
-        let february = month_weeks(day("2027-02-10"));
-        assert_eq!(february.len(), 4, "February 2027 starts on a Monday and fills four weeks");
+        assert_eq!(weeks[0][..4], [None, None, None, None], "1 October 2026 is a Thursday");
+        assert_eq!(weeks[0][4], Some(day("2026-10-01")));
+        assert_eq!(weeks[4][6], Some(day("2026-10-31")), "a Saturday ends the last week");
+        let february = month_weeks(day("2026-02-10"));
+        assert_eq!(february.len(), 4, "February 2026 starts on a Sunday and fills four weeks");
+        assert_eq!(february[0][0], Some(day("2026-02-01")));
     }
 
     #[test]
@@ -254,8 +254,8 @@ mod tests {
         assert_eq!(moved_by_key(saturday, "ArrowLeft"), Some(day("2026-10-23")));
         assert_eq!(moved_by_key(saturday, "ArrowDown"), Some(day("2026-10-31")));
         assert_eq!(moved_by_key(saturday, "ArrowUp"), Some(day("2026-10-17")));
-        assert_eq!(moved_by_key(saturday, "Home"), Some(day("2026-10-19")));
-        assert_eq!(moved_by_key(saturday, "End"), Some(day("2026-10-25")));
+        assert_eq!(moved_by_key(saturday, "Home"), Some(day("2026-10-18")), "back to Sunday");
+        assert_eq!(moved_by_key(saturday, "End"), Some(saturday), "Saturday ends the week");
         assert_eq!(moved_by_key(saturday, "PageDown"), Some(day("2026-11-24")));
         assert_eq!(moved_by_key(saturday, "PageUp"), Some(day("2026-09-24")));
         assert_eq!(moved_by_key(saturday, "Enter"), None, "Enter is the button's own");

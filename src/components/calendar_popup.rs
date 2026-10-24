@@ -161,6 +161,8 @@ mod tests {
         assert!(html.contains(r#"id="start-picker-title""#) && html.contains("October 2026"), "{html}");
         assert!(html.contains(r#"aria-label="Saturday 24 October 2026""#), "{html}");
         assert!(html.contains(r#"abbr="Monday""#) && html.contains(">Mo<"), "{html}");
+        let first_header = html.find(r#"abbr="Sunday""#).unwrap_or(usize::MAX);
+        assert!(first_header < html.find(r#"abbr="Monday""#).unwrap_or(0), "weeks start on Sunday: {html}");
         assert_eq!(html.matches(DAY_ATTRIBUTE).count(), 31, "one button per day of October");
     }
 
