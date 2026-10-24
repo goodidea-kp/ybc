@@ -64,6 +64,8 @@ dialog.ybc-calendar-popup::backdrop { background: rgba(10, 10, 10, 0.5); }
 :root[data-contrast="more"] dialog.ybc-calendar-popup { border-width: 2px; }
 "#;
 
+const SIZE_CLASSES: [&str; 3] = ["is-small", "is-medium", "is-large"];
+
 /// The month the picker opens on when the field is empty and the date of today
 /// is unknown (outside a browser).
 const FALLBACK_DAY: Day = Day {
@@ -194,6 +196,12 @@ impl CalendarProps {
         }
     }
 
+    /// The input's Bulma size (`is-small`, ...), which the button takes too so
+    /// the two stay the same height.
+    fn size_class(&self) -> Option<String> {
+        self.class.iter().find(|class| SIZE_CLASSES.contains(&class.as_str())).cloned()
+    }
+
     fn testid(&self) -> Option<AttrValue> {
         self.test_attr
             .as_ref()
@@ -295,7 +303,7 @@ fn picker(props: &PickerProps) -> Html {
     };
     html! {
         <>
-            <button type="button" class="button" aria-label={field.picker_name()} aria-haspopup="dialog"
+            <button type="button" class={classes!("button", field.size_class())} aria-label={field.picker_name()} aria-haspopup="dialog"
                     aria-expanded={focused.is_some().to_string()} aria-controls={popup_id.clone()}
                     disabled={field.disabled} data-testid={testid.as_ref().map(|testid| format!("{testid}-picker"))}
                     onclick={open}>

@@ -81,6 +81,16 @@ async fn a_disabled_field_disables_its_picker_too() {
 }
 
 #[tokio::test]
+async fn the_button_takes_the_size_of_the_input() {
+    let html = render(CalendarProps {
+        class: vec!["is-small".into()],
+        ..field()
+    })
+    .await;
+    assert!(html.contains(r#"class="button is-small""#), "{html}");
+}
+
+#[tokio::test]
 async fn us_dates_reach_the_input_in_its_own_shape() {
     let html = render(CalendarProps {
         date_format: "mm/dd/yyyy".into(),
