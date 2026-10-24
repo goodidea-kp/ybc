@@ -23,7 +23,7 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   alone.
 - New `Calendar` props: `aria_label`, `aria_describedby`, `invalid`
   (`aria-invalid`), `picker_label`. `CALENDAR_CLASS` (`ybc-calendar`) is on
-  the wrapper; the button takes the input's Bulma size class. Test ids: `X` on the input, `X-picker`, `X-picker-dialog`,
+  the wrapper, a Bulma `field has-addons` (the input's `control is-expanded`, then the button's); the button takes the input's Bulma size class. Test ids: `X` on the input, `X-picker`, `X-picker-dialog`,
   `X-picker-previous|next|close`; each day carries `data-ybc-day="yyyy-mm-dd"`.
 ### removed
 - The bulma-calendar 7.1.1 adapter (`calendar.js`) and its jsdom test. Its

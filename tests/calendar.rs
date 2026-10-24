@@ -42,6 +42,15 @@ async fn the_field_stays_a_native_date_input_a_keyboard_types_into() {
 }
 
 #[tokio::test]
+async fn the_input_and_its_button_are_bulma_addons() {
+    let html = render(field()).await;
+    assert!(html.contains(r#"class="field has-addons ybc-calendar""#), "{html}");
+    let input_control = html.find(r#"<div class="control is-expanded"><input"#).unwrap_or(usize::MAX);
+    let button_control = html.find(r#"<div class="control"><button"#).unwrap_or(0);
+    assert!(input_control < button_control, "the input's control comes first: {html}");
+}
+
+#[tokio::test]
 async fn the_picker_button_is_named_and_says_it_opens_a_dialog() {
     let html = render(field()).await;
     assert!(html.contains(r#"aria-label="Choose From date from a calendar""#), "{html}");

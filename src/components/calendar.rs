@@ -34,18 +34,16 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlDialogElement, HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
-/// The class on the field's wrapper, for a page's own rules.
+/// The class on the field's wrapper (a Bulma `field has-addons`), for a page's own rules.
 pub const CALENDAR_CLASS: &str = "ybc-calendar";
 
 /// The picker's look, in Bulma's scheme variables only, so it changes with the
 /// scheme. No CSS comments: this text reaches every page (see the modal's).
 const CALENDAR_STYLE: &str = r#"
-.ybc-calendar { display: flex; gap: 0.25rem; align-items: center; }
-.ybc-calendar > .input { flex: 1 1 auto; min-width: 0; }
-.ybc-calendar > .input::-webkit-calendar-picker-indicator { display: none; }
+.ybc-calendar .input::-webkit-calendar-picker-indicator { display: none; }
 dialog.ybc-calendar-popup { padding: 0; border: 1px solid var(--bulma-border); border-radius: var(--bulma-radius-large);
     background: var(--bulma-scheme-main); color: var(--bulma-text); box-shadow: var(--bulma-shadow); }
-dialog.ybc-calendar-popup::backdrop { background: rgba(10, 10, 10, 0.5); }
+dialog.ybc-calendar-popup::backdrop { background: hsla(var(--bulma-scheme-h, 221deg), var(--bulma-scheme-s, 14%), var(--bulma-scheme-invert-l, 4%), 0.5); }
 .ybc-calendar-body { padding: 0.75rem; }
 .ybc-calendar-head, .ybc-calendar-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .ybc-calendar-foot { justify-content: flex-end; margin-top: 0.5rem; }
@@ -53,7 +51,7 @@ dialog.ybc-calendar-popup::backdrop { background: rgba(10, 10, 10, 0.5); }
 .ybc-calendar-popup table { border-collapse: separate; border-spacing: 2px; margin-top: 0.5rem; background: transparent; color: inherit; }
 .ybc-calendar-popup th { text-align: center; font-weight: 600; color: var(--bulma-text-weak); padding: 0.25rem 0; }
 .ybc-calendar-popup td { padding: 0; }
-.ybc-calendar-day { width: 2.5rem; height: 2.5rem; padding: 0; border-color: transparent; }
+.ybc-calendar-day { width: 2.5rem; height: 2.5rem; padding: 0; border-color: var(--bulma-border); }
 .ybc-calendar-day[aria-current="date"] { border-color: var(--bulma-link); font-weight: 700; }
 .ybc-calendar-popup .button:focus-visible { outline: 3px solid var(--bulma-link); outline-offset: 2px; }
 @media (prefers-contrast: more) {
@@ -220,10 +218,15 @@ pub fn calendar(props: &CalendarProps) -> Html {
         return input;
     }
     html! {
-        <div class={CALENDAR_CLASS}>
-            <style>{CALENDAR_STYLE}</style>
-            { input }
-            <Picker field={props.clone()} selected={Day::parse_iso(&value)} />
+        // Bulma addons: the input and the button read as one control. The
+        // <style> sits in the button's control, so the input's control stays
+        // the field's :first-child and keeps its rounded start.
+        <div class={classes!("field", "has-addons", CALENDAR_CLASS)}>
+            <div class="control is-expanded">{ input }</div>
+            <div class="control">
+                <Picker field={props.clone()} selected={Day::parse_iso(&value)} />
+                <style>{CALENDAR_STYLE}</style>
+            </div>
         </div>
     }
 }
@@ -427,6 +430,10 @@ mod tests {
         ] {
             assert!(CALENDAR_STYLE.contains(token), "lost {token}");
         }
-        assert!(!CALENDAR_STYLE.contains('#'), "a literal colour does not follow the scheme");
+        assert!(
+            !CALENDAR_STYLE.contains('#') && !CALENDAR_STYLE.contains("rgb"),
+            "a literal colour does not follow the scheme"
+        );
+        assert!(CALENDAR_STYLE.contains("--bulma-scheme-invert-l"), "the backdrop is Bulma's modal shade");
     }
 }
