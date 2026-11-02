@@ -3,7 +3,7 @@
 
 use ybc::{
     CALLOUT_CLASS, Callout, CalloutProps, CalloutSeverity, CopyButton, CopyButtonProps, IconText, IconTextProps, Notification, NotificationProps,
-    PaginationItem, PaginationItemProps, PaginationItemType, ReasonedButton, ReasonedButtonProps,
+    PaginationItem, PaginationItemProps, PaginationItemType, Progress, ProgressProps, ReasonedButton, ReasonedButtonProps,
 };
 use yew::LocalServerRenderer;
 use yew::prelude::*;
@@ -192,4 +192,40 @@ async fn a_quiet_callout_leaves_the_announcing_to_its_live_region() {
     let html = render::<Callout>(props).await;
 
     assert!(!html.contains("role="), "{html}");
+}
+
+fn bar(value: f32, max: f32, label: Option<&str>) -> ProgressProps {
+    ProgressProps {
+        classes: classes!("is-small", "is-info"),
+        max,
+        value,
+        aria_label: label.map(AttrValue::from),
+    }
+}
+
+#[tokio::test]
+async fn a_progress_bar_without_a_label_renders_as_before() {
+    let html = render::<Progress>(bar(40.0, 100.0, None)).await;
+
+    assert!(html.contains(r#"class="progress is-small is-info""#), "{html}");
+    assert!(html.contains(r#"max="100""#) && html.contains(r#"value="40""#), "{html}");
+    assert!(html.contains("40%"), "{html}");
+    assert!(!html.contains("aria-label"), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_is_named_by_its_aria_label() {
+    let html = render::<Progress>(bar(40.0, 100.0, Some("Reading the audit log"))).await;
+
+    assert!(html.contains(r#"aria-label="Reading the audit log""#), "{html}");
+    assert!(html.contains(r#"value="40""#), "{html}");
+}
+
+#[tokio::test]
+async fn an_unknown_progress_has_no_value_and_still_a_name() {
+    let html = render::<Progress>(bar(-1.0, 100.0, Some("Loading"))).await;
+
+    assert!(!html.contains("value="), "indeterminate has no value attribute: {html}");
+    assert!(html.contains(r#"aria-label="Loading""#), "{html}");
+    assert!(html.contains(r#"max="100""#), "{html}");
 }
