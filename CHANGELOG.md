@@ -5,6 +5,9 @@ This changelog follows the patterns described here: https://keepachangelog.com/e
 Subheadings to categorize changes are `added, changed, deprecated, removed, fixed, security`.
 
 ## Unreleased
+### added
+- `Progress` takes an optional `aria_label` (the bar's accessible name; nothing is rendered when it is absent). `value={-1.0}` is documented as the way to ask for an indeterminate bar. It also takes an optional `testid`, rendered as `data-testid` (absent: nothing rendered).
+- `ReasonedButton` takes `loading` (default `false`): while true it adds `is-loading` to the button's classes and sets `aria-busy="true"`. Nothing else about the button changes.
 ### fixed
 - `Calendar` picker: the neighbouring months' day numbers (the muted cells before the 1st and after the last day) sat up to 14px left of their column on a page whose own `td` rule overrode the picker's `text-align`. Each one is now a `ybc-calendar-outside-day` span with the same 2.25rem centred box as a day button, so every cell of every row shares one column geometry. The cells stay `aria-hidden` and are still not buttons or tab stops.
 ### changed

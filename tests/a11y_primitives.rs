@@ -3,7 +3,7 @@
 
 use ybc::{
     CALLOUT_CLASS, Callout, CalloutProps, CalloutSeverity, CopyButton, CopyButtonProps, IconText, IconTextProps, Notification, NotificationProps,
-    PaginationItem, PaginationItemProps, PaginationItemType, ReasonedButton, ReasonedButtonProps,
+    PaginationItem, PaginationItemProps, PaginationItemType, Progress, ProgressProps, ReasonedButton, ReasonedButtonProps,
 };
 use yew::LocalServerRenderer;
 use yew::prelude::*;
@@ -82,6 +82,7 @@ fn reasoned(reason: Option<&str>) -> ReasonedButtonProps {
         reason_testid: Some("assign-why-not".into()),
         reason_elsewhere: None,
         style: None,
+        loading: false,
         children: Children::new(vec![html! { "Assign" }]),
     }
 }
@@ -192,4 +193,87 @@ async fn a_quiet_callout_leaves_the_announcing_to_its_live_region() {
     let html = render::<Callout>(props).await;
 
     assert!(!html.contains("role="), "{html}");
+}
+
+fn bar(value: f32, max: f32, label: Option<&str>) -> ProgressProps {
+    ProgressProps {
+        classes: classes!("is-small", "is-info"),
+        max,
+        value,
+        aria_label: label.map(AttrValue::from),
+        testid: None,
+    }
+}
+
+#[tokio::test]
+async fn a_progress_bar_without_a_label_renders_as_before() {
+    let html = render::<Progress>(bar(40.0, 100.0, None)).await;
+
+    assert!(html.contains(r#"class="progress is-small is-info""#), "{html}");
+    assert!(html.contains(r#"max="100""#) && html.contains(r#"value="40""#), "{html}");
+    assert!(html.contains("40%"), "{html}");
+    assert!(!html.contains("aria-label"), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_is_named_by_its_aria_label() {
+    let html = render::<Progress>(bar(40.0, 100.0, Some("Reading the audit log"))).await;
+
+    assert!(html.contains(r#"aria-label="Reading the audit log""#), "{html}");
+    assert!(html.contains(r#"value="40""#), "{html}");
+}
+
+#[tokio::test]
+async fn an_unknown_progress_has_no_value_and_still_a_name() {
+    let html = render::<Progress>(bar(-1.0, 100.0, Some("Loading"))).await;
+
+    assert!(!html.contains("value="), "indeterminate has no value attribute: {html}");
+    assert!(html.contains(r#"aria-label="Loading""#), "{html}");
+    assert!(html.contains(r#"max="100""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_button_that_is_not_loading_says_nothing_about_it() {
+    let html = render::<ReasonedButton>(reasoned(None)).await;
+
+    assert!(!html.contains("is-loading") && !html.contains("aria-busy"), "{html}");
+}
+
+#[tokio::test]
+async fn a_loading_button_is_marked_busy_and_keeps_its_own_classes() {
+    let mut props = reasoned(None);
+    props.loading = true;
+    props.classes = classes!("button", "is-primary");
+    let html = render::<ReasonedButton>(props).await;
+
+    assert!(html.contains(r#"class="button is-primary is-loading""#), "{html}");
+    assert!(html.contains(r#"aria-busy="true""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_loading_button_with_default_classes_is_still_a_button() {
+    let mut props = reasoned(None);
+    props.loading = true;
+    let html = render::<ReasonedButton>(props).await;
+
+    assert!(html.contains(r#"class="button is-loading""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_carries_its_test_id_as_data_testid() {
+    let mut props = bar(40.0, 100.0, None);
+    props.testid = Some("audit-bar".into());
+    let html = render::<Progress>(props).await;
+    assert!(html.contains(r#"data-testid="audit-bar""#), "{html}");
+
+    let mut unknown = bar(-1.0, 100.0, None);
+    unknown.testid = Some("wait-bar".into());
+    let html = render::<Progress>(unknown).await;
+    assert!(html.contains(r#"data-testid="wait-bar""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_without_a_test_id_renders_none() {
+    let html = render::<Progress>(bar(40.0, 100.0, None)).await;
+    assert!(!html.contains("data-testid"), "{html}");
 }

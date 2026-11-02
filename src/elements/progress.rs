@@ -7,9 +7,19 @@ pub struct ProgressProps {
     /// The maximum amount of progress; the 100% value.
     #[prop_or_else(|| 1.0)]
     pub max: f32,
-    /// The amount of progress which has been made.
+    /// The amount of progress which has been made. `-1.0` means "unknown": the
+    /// bar is then indeterminate (an animated stripe) and has no `value`.
     #[prop_or_else(|| 0.0)]
     pub value: f32,
+    /// The bar's accessible name (`aria-label`). A bare `<progress>` has none,
+    /// so a screen reader says only "progress bar" unless a visible label is
+    /// associated with it. Absent by default: nothing is rendered.
+    #[prop_or_default]
+    pub aria_label: Option<AttrValue>,
+    /// Rendered as `data-testid` so a test can find the bar. Absent by
+    /// default: nothing is rendered.
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
 }
 
 /// A native HTML progress bar.
@@ -21,13 +31,15 @@ pub fn progress(props: &ProgressProps) -> Html {
     let max = props.max.to_string();
     let value = props.value.to_string();
     let value_txt = format!("{}%", value);
+    let aria_label = props.aria_label.clone();
+    let testid = props.testid.clone();
     if props.value == -1.0 {
         html! {
-            <progress {class} {max}/>
+            <progress {class} {max} aria-label={aria_label} data-testid={testid}/>
         }
     } else {
         html! {
-            <progress {class} {max} {value}>
+            <progress {class} {max} {value} aria-label={aria_label} data-testid={testid}>
                 {value_txt}
             </progress>
         }
