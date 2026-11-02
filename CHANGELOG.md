@@ -5,6 +5,8 @@ This changelog follows the patterns described here: https://keepachangelog.com/e
 Subheadings to categorize changes are `added, changed, deprecated, removed, fixed, security`.
 
 ## Unreleased
+### fixed
+- `Calendar` picker: the neighbouring months' day numbers (the muted cells before the 1st and after the last day) sat up to 14px left of their column on a page whose own `td` rule overrode the picker's `text-align`. Each one is now a `ybc-calendar-outside-day` span with the same 2.25rem centred box as a day button, so every cell of every row shares one column geometry. The cells stay `aria-hidden` and are still not buttons or tab stops.
 ### changed
 - `Calendar` (Bastion BASTION-539): a date field is the browser's own
   `<input type="date">`, still typed into from the keyboard, with a calendar
