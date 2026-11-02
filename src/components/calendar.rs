@@ -56,6 +56,7 @@ dialog.ybc-calendar-popup::backdrop { background: hsla(var(--bulma-scheme-h, 221
 .ybc-calendar-popup th { text-align: center; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.75rem; font-weight: 600; color: var(--bulma-text-weak); padding: 0.25rem 0; width: 2.25rem; }
 .ybc-calendar-popup td { padding: 0; width: 2.25rem; height: 2.25rem; text-align: center; vertical-align: middle; }
 .ybc-calendar-outside { color: var(--bulma-text-weak); }
+.ybc-calendar-popup .ybc-calendar-outside-day, .ybc-calendar-popup .ybc-calendar-day { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 2.25rem; height: 2.25rem; padding: 0; border: 2px solid transparent; }
 .ybc-calendar-popup .ybc-calendar-day { width: 2.25rem; height: 2.25rem; padding: 0; border: 2px solid transparent; border-radius: 50% !important; background: transparent; color: var(--bulma-text);
     font-weight: 500; box-shadow: none; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
 .ybc-calendar-day:hover { background: color-mix(in oklab, var(--bulma-link) 26%, var(--bulma-scheme-main)); border-color: transparent; color: var(--bulma-text-strong); }
@@ -446,6 +447,25 @@ mod tests {
     #[test]
     fn the_shipped_style_carries_no_css_comment() {
         assert!(!CALENDAR_STYLE.contains("/*"), "a CSS comment reached the page");
+    }
+
+    #[test]
+    fn a_neighbouring_day_has_the_same_box_as_a_day_button() {
+        let shared = CALENDAR_STYLE
+            .lines()
+            .find(|line| line.contains(".ybc-calendar-outside-day") && line.contains(".ybc-calendar-day"))
+            .expect("one rule gives the neighbouring days and the day buttons one geometry");
+        for declaration in [
+            "display: inline-flex",
+            "align-items: center",
+            "justify-content: center",
+            "box-sizing: border-box",
+            "width: 2.25rem",
+            "height: 2.25rem",
+            "border: 2px solid transparent",
+        ] {
+            assert!(shared.contains(declaration), "the shared rule lost {declaration}");
+        }
     }
 
     #[test]

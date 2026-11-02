@@ -90,7 +90,7 @@ fn outside_cell(props: &CalendarPopupProps, position: usize) -> Html {
     let first = props.focused.first_of_month();
     let offset = i64::try_from(position).unwrap_or_default() - i64::from(first.weekday());
     let day = first.plus_days(offset);
-    html! { <td key={format!("outside-{position}")} class="ybc-calendar-outside" aria-hidden="true">{ day.day }</td> }
+    html! { <td key={format!("outside-{position}")} class="ybc-calendar-outside" aria-hidden="true"><span class="ybc-calendar-outside-day">{ day.day }</span></td> }
 }
 
 fn day_cell(props: &CalendarPopupProps, position: usize, cell: Option<Day>) -> Html {
@@ -177,7 +177,10 @@ mod tests {
     async fn the_days_of_the_neighbouring_months_are_shown_but_hidden_from_the_keyboard_and_readers() {
         let html = render(None, None).await;
         assert_eq!(html.matches(r#"class="ybc-calendar-outside""#).count(), 4, "{html}");
-        assert!(html.contains(r#"<td aria-hidden="true" class="ybc-calendar-outside">30</td>"#), "{html}");
+        assert!(
+            html.contains(r#"<td aria-hidden="true" class="ybc-calendar-outside"><span class="ybc-calendar-outside-day">30</span></td>"#),
+            "{html}"
+        );
     }
 
     #[tokio::test]
