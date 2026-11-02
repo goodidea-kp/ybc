@@ -82,6 +82,7 @@ fn reasoned(reason: Option<&str>) -> ReasonedButtonProps {
         reason_testid: Some("assign-why-not".into()),
         reason_elsewhere: None,
         style: None,
+        loading: false,
         children: Children::new(vec![html! { "Assign" }]),
     }
 }
@@ -228,4 +229,31 @@ async fn an_unknown_progress_has_no_value_and_still_a_name() {
     assert!(!html.contains("value="), "indeterminate has no value attribute: {html}");
     assert!(html.contains(r#"aria-label="Loading""#), "{html}");
     assert!(html.contains(r#"max="100""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_button_that_is_not_loading_says_nothing_about_it() {
+    let html = render::<ReasonedButton>(reasoned(None)).await;
+
+    assert!(!html.contains("is-loading") && !html.contains("aria-busy"), "{html}");
+}
+
+#[tokio::test]
+async fn a_loading_button_is_marked_busy_and_keeps_its_own_classes() {
+    let mut props = reasoned(None);
+    props.loading = true;
+    props.classes = classes!("button", "is-primary");
+    let html = render::<ReasonedButton>(props).await;
+
+    assert!(html.contains(r#"class="button is-primary is-loading""#), "{html}");
+    assert!(html.contains(r#"aria-busy="true""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_loading_button_with_default_classes_is_still_a_button() {
+    let mut props = reasoned(None);
+    props.loading = true;
+    let html = render::<ReasonedButton>(props).await;
+
+    assert!(html.contains(r#"class="button is-loading""#), "{html}");
 }

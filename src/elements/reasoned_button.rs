@@ -26,6 +26,11 @@ pub struct ReasonedButtonProps {
     /// look is appended to it.
     #[prop_or_default]
     pub style: Option<AttrValue>,
+    /// Show Bulma's `is-loading` spinner and mark the button `aria-busy`
+    /// while work is under way. The button stays focusable; whether a click is
+    /// accepted is still decided by `disabled_reason`.
+    #[prop_or_default]
+    pub loading: bool,
     #[prop_or_default]
     pub children: Children,
 }
@@ -61,11 +66,13 @@ pub fn reasoned_button(props: &ReasonedButtonProps) -> Html {
     } else {
         props.classes.clone()
     };
+    let classes = classes!(classes, props.loading.then_some("is-loading"));
     html! {
         <>
             <button type="button" id={props.id.clone()} class={classes} {onclick}
                     aria-disabled={disabled.then_some("true")}
                     aria-describedby={disabled.then(|| reason_id.clone())}
+                    aria-busy={props.loading.then_some("true")}
                     {style}
                     data-testid={props.testid.clone()}>
                 { props.children.clone() }
