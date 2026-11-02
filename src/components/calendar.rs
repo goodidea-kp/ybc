@@ -41,24 +41,53 @@ pub const CALENDAR_CLASS: &str = "ybc-calendar";
 /// scheme. No CSS comments: this text reaches every page (see the modal's).
 const CALENDAR_STYLE: &str = r#"
 .ybc-calendar .input::-webkit-calendar-picker-indicator { display: none; }
-dialog.ybc-calendar-popup { padding: 0; border: 1px solid var(--bulma-border); border-radius: var(--bulma-radius-large);
-    background: var(--bulma-scheme-main); color: var(--bulma-text); box-shadow: var(--bulma-shadow); }
+dialog.ybc-calendar-popup { padding: 0; overflow: hidden; border: 1px solid var(--bulma-border); border-radius: var(--bulma-radius-large);
+    background: var(--bulma-scheme-main); color: var(--bulma-text); box-shadow: 0 0.75rem 2rem hsla(0, 0%, 0%, 0.28); }
 dialog.ybc-calendar-popup::backdrop { background: hsla(var(--bulma-scheme-h, 221deg), var(--bulma-scheme-s, 14%), var(--bulma-scheme-invert-l, 4%), 0.5); }
-.ybc-calendar-body { padding: 0.75rem; }
-.ybc-calendar-head, .ybc-calendar-foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.ybc-calendar-foot { justify-content: flex-end; margin-top: 0.5rem; }
-.ybc-calendar-title { font-weight: 600; color: var(--bulma-text-strong); }
-.ybc-calendar-popup table { border-collapse: separate; border-spacing: 2px; margin-top: 0.5rem; background: transparent; color: inherit; }
-.ybc-calendar-popup th { text-align: center; font-weight: 600; color: var(--bulma-text-weak); padding: 0.25rem 0; }
-.ybc-calendar-popup td { padding: 0; }
-.ybc-calendar-day { width: 2.5rem; height: 2.5rem; padding: 0; border-color: var(--bulma-border); }
-.ybc-calendar-day[aria-current="date"] { border-color: var(--bulma-link); font-weight: 700; }
-.ybc-calendar-popup .button:focus-visible { outline: 3px solid var(--bulma-link); outline-offset: 2px; }
+.ybc-calendar-body { padding: 0 0.75rem 0.75rem; }
+.ybc-calendar-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin: 0 -0.75rem; padding: 0.75rem;
+    background: var(--bulma-link); color: var(--bulma-link-invert); }
+.ybc-calendar-foot { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
+.ybc-calendar-title { font-size: 1.125rem; font-weight: 600; color: inherit; }
+.ybc-calendar-popup .ybc-calendar-head .button { width: 2.25rem; height: 2.25rem; padding: 0; border: 0; border-radius: 50% !important; background: transparent; color: inherit; box-shadow: none; }
+.ybc-calendar-head .button:hover { background: color-mix(in oklab, currentColor 22%, transparent); }
+.ybc-calendar-head .button:focus-visible { outline: 3px solid currentColor; outline-offset: 1px; }
+.ybc-calendar-popup table { table-layout: fixed; border-collapse: separate; border-spacing: 0.125rem; margin: 0.5rem auto 0; background: transparent; color: inherit; }
+.ybc-calendar-popup th { text-align: center; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.75rem; font-weight: 600; color: var(--bulma-text-weak); padding: 0.25rem 0; width: 2.25rem; }
+.ybc-calendar-popup td { padding: 0; width: 2.25rem; height: 2.25rem; text-align: center; vertical-align: middle; }
+.ybc-calendar-outside { color: var(--bulma-text-weak); }
+.ybc-calendar-popup .ybc-calendar-day { width: 2.25rem; height: 2.25rem; padding: 0; border: 2px solid transparent; border-radius: 50% !important; background: transparent; color: var(--bulma-text);
+    font-weight: 500; box-shadow: none; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
+.ybc-calendar-day:hover { background: color-mix(in oklab, var(--bulma-link) 26%, var(--bulma-scheme-main)); border-color: transparent; color: var(--bulma-text-strong); }
+.ybc-calendar-day[aria-current="date"] { border-color: var(--bulma-link-on-scheme); font-weight: 700; }
+.ybc-calendar-day.is-link, .ybc-calendar-day.is-link:hover { background: var(--bulma-link); border-color: var(--bulma-link); color: var(--bulma-link-invert); font-weight: 700; }
+.ybc-calendar-day.is-link[aria-current="date"] { box-shadow: inset 0 0 0 2px var(--bulma-scheme-main); }
+.ybc-calendar-day:disabled { background: transparent; color: var(--bulma-text-weak); text-decoration: line-through; opacity: 0.45; cursor: not-allowed; }
+.ybc-calendar-popup .ybc-calendar-day:focus-visible, .ybc-calendar-foot .button:focus-visible { outline: 3px solid var(--bulma-link-on-scheme); outline-offset: 2px; }
+.ybc-calendar-popup .ybc-calendar-foot .button { border-radius: var(--bulma-radius-rounded) !important; }
+@media (prefers-reduced-motion: no-preference) {
+    dialog.ybc-calendar-popup[open] { animation: ybc-calendar-in 140ms ease-out; }
+}
+@keyframes ybc-calendar-in { from { opacity: 0; transform: translateY(0.25rem); } }
+@media (prefers-reduced-motion: reduce) {
+    .ybc-calendar-popup * { transition: none; }
+}
+@media (forced-colors: active) {
+    .ybc-calendar-head { background: Canvas; color: CanvasText; border-bottom: 1px solid CanvasText; }
+    .ybc-calendar-head .button { border: 1px solid ButtonText; }
+    .ybc-calendar-popup .ybc-calendar-day { border-color: Canvas; }
+    .ybc-calendar-popup .ybc-calendar-day:hover { border-color: Highlight; }
+    .ybc-calendar-popup .ybc-calendar-day[aria-current="date"] { border-color: CanvasText; }
+    .ybc-calendar-popup .ybc-calendar-day.is-link, .ybc-calendar-popup .ybc-calendar-day.is-link:hover { forced-color-adjust: none; background: Highlight; border-color: Highlight; color: HighlightText; }
+    .ybc-calendar-popup .ybc-calendar-day.is-link[aria-current="date"] { border-color: CanvasText; }
+    .ybc-calendar-popup .ybc-calendar-day:focus-visible, .ybc-calendar-head .button:focus-visible, .ybc-calendar-foot .button:focus-visible { outline: 3px solid Highlight; }
+    .ybc-calendar-day:disabled { color: GrayText; }
+}
 @media (prefers-contrast: more) {
-    dialog.ybc-calendar-popup, .ybc-calendar-popup .button { border-color: var(--bulma-text-strong); }
+    dialog.ybc-calendar-popup, .ybc-calendar-foot .button { border-color: var(--bulma-text-strong); }
     dialog.ybc-calendar-popup { border-width: 2px; }
 }
-:root[data-contrast="more"] dialog.ybc-calendar-popup, :root[data-contrast="more"] .ybc-calendar-popup .button { border-color: var(--bulma-text-strong); }
+:root[data-contrast="more"] dialog.ybc-calendar-popup, :root[data-contrast="more"] .ybc-calendar-foot .button { border-color: var(--bulma-text-strong); }
 :root[data-contrast="more"] dialog.ybc-calendar-popup { border-width: 2px; }
 "#;
 

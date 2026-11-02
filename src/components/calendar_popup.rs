@@ -53,7 +53,7 @@ pub(super) fn calendar_popup(props: &CalendarPopupProps) -> Html {
                 </thead>
                 <tbody>
                     { for month_weeks(props.focused).into_iter().enumerate().map(|(index, week)| html! {
-                        <tr key={index}>{ for week.into_iter().enumerate().map(|(column, cell)| day_cell(props, column, cell)) }</tr>
+                        <tr key={index}>{ for week.into_iter().enumerate().map(|(column, cell)| day_cell(props, index * 7 + column, cell)) }</tr>
                     }) }
                 </tbody>
             </table>
@@ -86,9 +86,16 @@ fn month_head(props: &CalendarPopupProps, title_id: &str) -> Html {
     }
 }
 
-fn day_cell(props: &CalendarPopupProps, column: usize, cell: Option<Day>) -> Html {
+fn outside_cell(props: &CalendarPopupProps, position: usize) -> Html {
+    let first = props.focused.first_of_month();
+    let offset = i64::try_from(position).unwrap_or_default() - i64::from(first.weekday());
+    let day = first.plus_days(offset);
+    html! { <td key={format!("outside-{position}")} class="ybc-calendar-outside" aria-hidden="true">{ day.day }</td> }
+}
+
+fn day_cell(props: &CalendarPopupProps, position: usize, cell: Option<Day>) -> Html {
     let Some(day) = cell else {
-        return html! { <td key={format!("blank-{column}")}></td> };
+        return outside_cell(props, position);
     };
     let is_selected = props.selected == Some(day);
     let is_focused = props.focused == day;
@@ -164,6 +171,13 @@ mod tests {
         let first_header = html.find(r#"abbr="Sunday""#).unwrap_or(usize::MAX);
         assert!(first_header < html.find(r#"abbr="Monday""#).unwrap_or(0), "weeks start on Sunday: {html}");
         assert_eq!(html.matches(DAY_ATTRIBUTE).count(), 31, "one button per day of October");
+    }
+
+    #[tokio::test]
+    async fn the_days_of_the_neighbouring_months_are_shown_but_hidden_from_the_keyboard_and_readers() {
+        let html = render(None, None).await;
+        assert_eq!(html.matches(r#"class="ybc-calendar-outside""#).count(), 4, "{html}");
+        assert!(html.contains(r#"<td aria-hidden="true" class="ybc-calendar-outside">30</td>"#), "{html}");
     }
 
     #[tokio::test]

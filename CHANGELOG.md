@@ -25,6 +25,15 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
   (`aria-invalid`), `picker_label`. `CALENDAR_CLASS` (`ybc-calendar`) is on
   the wrapper, a Bulma `field has-addons` (the input's `control is-expanded`, then the button's); the button takes the input's Bulma size class. Test ids: `X` on the input, `X-picker`, `X-picker-dialog`,
   `X-picker-previous|next|close`; each day carries `data-ybc-day="yyyy-mm-dd"`.
+- `Calendar` picker look: a card with a link-coloured header band (month and
+  round previous/next buttons), uppercase weekday heads, round 2.25rem days,
+  the neighbouring months' days shown muted (and hidden from the keyboard and
+  screen readers), today ringed, the picked day a filled circle, a tinted hover
+  and a 3px focus ring, `:disabled` days struck through. All colours are Bulma
+  scheme variables (light and dark, each contrast-checked); under
+  `forced-colors: active` selection, today and focus use system colours;
+  transitions and the opening fade stop under `prefers-reduced-motion`. No
+  change to keys, roles, labels, test ids or props.
 ### removed
 - The bulma-calendar 7.1.1 adapter (`calendar.js`) and its jsdom test. Its
   picker was a read-only box opened only by a pointer and named nothing.
