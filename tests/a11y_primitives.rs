@@ -201,6 +201,7 @@ fn bar(value: f32, max: f32, label: Option<&str>) -> ProgressProps {
         max,
         value,
         aria_label: label.map(AttrValue::from),
+        testid: None,
     }
 }
 
@@ -256,4 +257,23 @@ async fn a_loading_button_with_default_classes_is_still_a_button() {
     let html = render::<ReasonedButton>(props).await;
 
     assert!(html.contains(r#"class="button is-loading""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_carries_its_test_id_as_data_testid() {
+    let mut props = bar(40.0, 100.0, None);
+    props.testid = Some("audit-bar".into());
+    let html = render::<Progress>(props).await;
+    assert!(html.contains(r#"data-testid="audit-bar""#), "{html}");
+
+    let mut unknown = bar(-1.0, 100.0, None);
+    unknown.testid = Some("wait-bar".into());
+    let html = render::<Progress>(unknown).await;
+    assert!(html.contains(r#"data-testid="wait-bar""#), "{html}");
+}
+
+#[tokio::test]
+async fn a_progress_bar_without_a_test_id_renders_none() {
+    let html = render::<Progress>(bar(40.0, 100.0, None)).await;
+    assert!(!html.contains("data-testid"), "{html}");
 }

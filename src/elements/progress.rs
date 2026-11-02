@@ -16,6 +16,10 @@ pub struct ProgressProps {
     /// associated with it. Absent by default: nothing is rendered.
     #[prop_or_default]
     pub aria_label: Option<AttrValue>,
+    /// Rendered as `data-testid` so a test can find the bar. Absent by
+    /// default: nothing is rendered.
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
 }
 
 /// A native HTML progress bar.
@@ -28,13 +32,14 @@ pub fn progress(props: &ProgressProps) -> Html {
     let value = props.value.to_string();
     let value_txt = format!("{}%", value);
     let aria_label = props.aria_label.clone();
+    let testid = props.testid.clone();
     if props.value == -1.0 {
         html! {
-            <progress {class} {max} aria-label={aria_label}/>
+            <progress {class} {max} aria-label={aria_label} data-testid={testid}/>
         }
     } else {
         html! {
-            <progress {class} {max} {value} aria-label={aria_label}>
+            <progress {class} {max} {value} aria-label={aria_label} data-testid={testid}>
                 {value_txt}
             </progress>
         }
