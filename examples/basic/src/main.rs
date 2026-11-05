@@ -104,6 +104,15 @@ fn language_segments() -> Vec<PieSegment> {
         .collect()
 }
 
+fn import_phases() -> Vec<ybc::Phase> {
+    vec![
+        ybc::Phase::new("schema", "Copy schema", ybc::PhaseState::Done),
+        ybc::Phase::new("rows", "Copy rows", ybc::PhaseState::Current),
+        ybc::Phase::new("verify", "Verify", ybc::PhaseState::Waiting).with_reason("Starts when every row is copied"),
+        ybc::Phase::new("switch", "Switch over", ybc::PhaseState::Waiting),
+    ]
+}
+
 #[derive(Clone, Properties, PartialEq)]
 struct LanguagePageProps {
     language_key: String,
@@ -324,6 +333,27 @@ pub fn home() -> Html {
                                     follow_href={false}
                                     on_select={go_to_language}
                                 />
+                            </ybc::Tile>
+                        </ybc::Tile>
+                        <ybc::Tile ctx={Parent}>
+                            <ybc::Tile ctx={Child} classes={classes!("box")}>
+                                <ybc::Subtitle size={ybc::HeaderSize::Is4}>{"Phase stepper"}</ybc::Subtitle>
+                                <p class="mb-4">{"An ordered list of phases; the icon shape and a screen-reader word tell each state. The row wraps on a phone."}</p>
+                                <ybc::PhaseStepper aria_label={"Import progress"} phases={import_phases()} testid={"import-phases"} />
+                            </ybc::Tile>
+                            <ybc::Tile ctx={Child} classes={classes!("box")}>
+                                <ybc::Subtitle size={ybc::HeaderSize::Is4}>{"Sparkline"}</ybc::Subtitle>
+                                <p>
+                                    {"Copy rate "}
+                                    <ybc::Sparkline
+                                        values={vec![1200.0, 1350.0, 980.0, f64::NAN, 1410.0, 1390.0]}
+                                        aria_label={"Copy rate"}
+                                        format_value={Callback::from(|value: f64| format!("{value:.0} rows/min"))}
+                                    />
+                                    <span class="ml-2">
+                                        <ybc::Sparkline values={vec![3.0, 3.0, 3.0]} aria_label={"Lag"} width={64} color={"var(--bulma-link-on-scheme)"} />
+                                    </span>
+                                </p>
                             </ybc::Tile>
                         </ybc::Tile>
                         <ybc::Tile>
