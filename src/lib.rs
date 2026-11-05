@@ -60,7 +60,9 @@ pub use components::navbar::{
 pub use components::pagination::PaginationItemRouter;
 pub use components::pagination::{Pagination, PaginationEllipsis, PaginationItem, PaginationItemProps, PaginationItemType, PaginationProps};
 pub use components::panel::{Panel, PanelBlock, PanelBlockProps, PanelProps, PanelTabs, PanelTabsProps};
+pub use components::phase_stepper::{Phase, PhaseState, PhaseStateWords, PhaseStepper, PhaseStepperProps};
 pub use components::remote::{Remote, RemoteView, RemoteViewProps};
+pub use components::sparkline::{Sparkline, SparklineProps, SparklineStats};
 pub use components::tabs::{TabItem, TabItemProps, TabPanel, TabPanelProps, Tabs, TabsProps, TabsProvider, TabsProviderProps, sibling_tab_index};
 
 pub use components::calendar::{CALENDAR_CLASS, Calendar, CalendarProps, TestAttr};

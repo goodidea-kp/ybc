@@ -442,7 +442,7 @@ fn format_percent(fraction: f64) -> String {
 }
 
 /// Thousands separators, and at most one decimal.
-fn format_number(value: f64) -> String {
+pub(crate) fn format_number(value: f64) -> String {
     let text = if value.fract().abs() < f64::EPSILON {
         format!("{value:.0}")
     } else {
