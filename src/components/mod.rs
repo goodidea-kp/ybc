@@ -15,5 +15,7 @@ pub mod modal;
 pub mod navbar;
 pub mod pagination;
 pub mod panel;
+pub mod phase_stepper;
 pub mod remote;
+pub mod sparkline;
 pub mod tabs;
