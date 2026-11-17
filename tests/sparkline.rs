@@ -26,7 +26,10 @@ async fn a_series_is_one_focusable_image_named_by_its_range_and_latest_value() {
     assert!(html.contains(r#"class="ybc-sparkline-line""#), "{html}");
     assert!(html.contains(r#"role="img""#), "{html}");
     assert!(html.contains(r#"tabindex="0""#), "{html}");
-    assert!(html.contains(r#"aria-label="Copy rate: from 980 to 1,410.5, now 1,350""#), "{html}");
+    assert!(
+        html.contains(r#"aria-label="Copy rate: between 980 and 1,410.5, latest 1,350""#),
+        "{html}"
+    );
     assert!(html.contains(r#"data-testid="copy-rate""#), "{html}");
     assert!(html.contains("<polyline"), "{html}");
     assert!(html.contains("<circle"), "the latest value is marked: {html}");
@@ -62,7 +65,7 @@ async fn the_callers_formatter_writes_each_figure() {
     let html = render(props).await;
 
     assert!(
-        html.contains(r#"aria-label="Copy rate: from 10 rows/min to 30 rows/min, now 20 rows/min""#),
+        html.contains(r#"aria-label="Copy rate: between 10 rows/min and 30 rows/min, latest 20 rows/min""#),
         "{html}"
     );
 }
@@ -94,7 +97,7 @@ async fn nan_and_infinite_values_are_left_out() {
     let mixed = render(copy_rate(vec![f64::NAN, 5.0, f64::NAN, 7.0, f64::NEG_INFINITY])).await;
 
     assert!(only_nan.contains(r#"aria-label="Copy rate: No data""#), "{only_nan}");
-    assert!(mixed.contains(r#"aria-label="Copy rate: from 5 to 7, now 7""#), "{mixed}");
+    assert!(mixed.contains(r#"aria-label="Copy rate: between 5 and 7, latest 7""#), "{mixed}");
     assert!(!mixed.contains("NaN"), "{mixed}");
 }
 
@@ -102,7 +105,7 @@ async fn nan_and_infinite_values_are_left_out() {
 async fn a_single_value_is_a_dot_without_a_line() {
     let html = render(copy_rate(vec![42.0])).await;
 
-    assert!(html.contains(r#"aria-label="Copy rate: now 42""#), "{html}");
+    assert!(html.contains(r#"aria-label="Copy rate: latest 42""#), "{html}");
     assert!(html.contains("<circle"), "{html}");
     assert!(!html.contains("<polyline"), "{html}");
 }
@@ -121,7 +124,7 @@ fn copy_rate_said_in_words(values: Vec<f64>) -> SparklineProps {
     props.unit_words = Some("rows per second".into());
     props.span = Some("last 3 min".into());
     props.span_words = Some("last 3 minutes".into());
-    props.point_labels = vec!["2 min ago".into(), "1 min ago".into(), "now".into()];
+    props.point_labels = vec!["2 min ago".into(), "1 min ago".into(), "latest".into()];
     props.format_value = Some(Callback::from(|value: f64| ybc::format_number(value.round())));
     props
 }
@@ -132,11 +135,14 @@ async fn a_label_shows_what_the_line_draws_without_a_hover() {
 
     let label = html.find(r#"data-testid="copy-rate-label""#).expect("a visible label");
     let line = html.find("<svg").expect("the line");
-    let latest = html.find(r#"data-testid="copy-rate-now""#).expect("the latest value");
+    let latest = html.find(r#"data-testid="copy-rate-latest""#).expect("the latest value");
     assert!(label < line && line < latest, "label, line, latest value in reading order: {html}");
     assert!(html.contains(">Copy rate</span>"), "{html}");
     assert!(html.contains(">56,590 rows/s</span>"), "{html}");
-    assert!(html.contains("48k\u{2013}71k rows/s, last 3 min</span>"), "{html}");
+    assert!(
+        html.contains(">(48k\u{2013}71k rows/s, last 3 min)</span>"),
+        "the range apart from the latest value: {html}"
+    );
 }
 
 #[tokio::test]
@@ -144,14 +150,17 @@ async fn the_summary_says_the_window_in_words_a_screen_reader_reads() {
     let html = render(copy_rate_said_in_words(vec![48_000.0, 71_000.0, 56_590.4])).await;
 
     assert!(
-        html.contains(r#"aria-label="Copy rate, last 3 minutes: from 48,000 to 71,000 rows per second, now 56,590""#),
+        html.contains(r#"aria-label="Copy rate, last 3 minutes: between 48,000 and 71,000, latest 56,590 rows per second""#),
         "{html}"
     );
     assert!(
         html.contains(r#"<span aria-hidden="true" data-testid="copy-rate-label""#),
         "the image says it once: {html}"
     );
-    assert!(html.contains(r#"aria-live="polite""#), "points moved to are announced: {html}");
+    assert!(
+        html.contains(r#"<span aria-live="polite" class="is-sr-only"></span>"#),
+        "the live region is silent until the keyboard moves to a point: {html}"
+    );
 }
 
 #[tokio::test]
@@ -159,7 +168,7 @@ async fn without_a_label_only_the_line_is_shown() {
     let html = render(copy_rate(vec![1.0, 2.0, 3.0])).await;
 
     assert!(!html.contains("copy-rate-label"), "{html}");
-    assert!(!html.contains("copy-rate-now"), "{html}");
+    assert!(!html.contains("copy-rate-latest"), "{html}");
     assert!(!html.contains("copy-rate-range"), "{html}");
     assert!(!html.contains("copy-rate-tip"), "no tooltip before a hover or focus: {html}");
 }
@@ -174,12 +183,8 @@ async fn the_lowest_and_highest_points_are_marked() {
 }
 
 #[tokio::test]
-async fn its_style_follows_the_scheme_and_forced_colours_without_motion() {
+async fn its_style_goes_to_the_head_once_not_into_each_sparkline() {
     let html = render(copy_rate(vec![1.0, 2.0])).await;
 
-    assert!(html.contains("var(--bulma-scheme-invert"), "{html}");
-    assert!(html.contains(":focus-visible"), "{html}");
-    assert!(html.contains("forced-colors: active"), "{html}");
-    assert!(!html.contains("transition") && !html.contains("animation"), "{html}");
-    assert!(!html.contains("/*"), "no CSS comments reach the page: {html}");
+    assert!(!html.contains("<style"), "{html}");
 }

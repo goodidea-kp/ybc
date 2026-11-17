@@ -19,4 +19,5 @@ pub mod phase_stepper;
 pub mod remote;
 pub mod sparkline;
 mod sparkline_parts;
+mod sparkline_pick;
 pub mod tabs;

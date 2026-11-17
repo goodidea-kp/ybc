@@ -114,16 +114,40 @@ pub(super) fn moved_by_key(key: &str, active: Option<usize>, count: usize) -> Op
     }
 }
 
+/// The index of the point `back` points before the latest, among `count`; `None` past the first.
+/// The shown point is kept as `back`, so a poll that appends a point keeps the same one shown.
+pub(super) fn index_from_back(back: usize, count: usize) -> Option<usize> {
+    count.checked_sub(1)?.checked_sub(back)
+}
+
+/// How many points before the latest `index` is, among `count`.
+pub(super) fn back_from_index(index: usize, count: usize) -> usize {
+    count.saturating_sub(1).saturating_sub(index)
+}
+
 /// A figure in few characters, for the range: "980", "1.4k", "48k", "2.5M".
+/// A figure that rounds up to the next step takes that step's suffix: 999,999 is "1M", not "1000k".
 pub(super) fn compact_number(value: f64) -> String {
     let magnitude = value.abs();
-    let (scaled, suffix) = if magnitude >= MILLION {
-        (value / MILLION, "M")
-    } else if magnitude >= THOUSAND {
-        (value / THOUSAND, "k")
+    if magnitude >= MILLION || rounded_compact(magnitude / THOUSAND) >= THOUSAND {
+        return with_suffix(value / MILLION, "M");
+    }
+    if magnitude >= THOUSAND || rounded_compact(magnitude) >= THOUSAND {
+        return with_suffix(value / THOUSAND, "k");
+    }
+    format_number(value)
+}
+
+/// What a compact figure rounds to: one decimal below ten, whole above.
+fn rounded_compact(scaled: f64) -> f64 {
+    if scaled.abs() < ONE_DECIMAL_BELOW {
+        (scaled * 10.0).round() / 10.0
     } else {
-        return format_number(value);
-    };
+        scaled.round()
+    }
+}
+
+fn with_suffix(scaled: f64, suffix: &str) -> String {
     let text = if scaled.abs() < ONE_DECIMAL_BELOW {
         format!("{scaled:.1}")
     } else {
@@ -141,17 +165,18 @@ pub(super) fn with_unit(figure: String, unit: Option<&AttrValue>) -> String {
 }
 
 /// "48k–71k rows/s, last 5 min": the window's lowest to highest value and how long it spans.
-/// One value has no range, so nothing.
+/// Two figures that read alike ("56k–56k") are said once. One value has no range, so nothing.
 pub(super) fn range_text(
     stats: &SparklineStats, short: &dyn Fn(f64) -> String, unit: Option<&AttrValue>, span: Option<&AttrValue>,
 ) -> Option<String> {
     if stats.count < 2 {
         return None;
     }
-    let figures = if stats.max > stats.min {
-        format!("{}\u{2013}{}", short(stats.min), short(stats.max))
+    let (lowest, highest) = (short(stats.min), short(stats.max));
+    let figures = if lowest == highest {
+        highest
     } else {
-        short(stats.max)
+        format!("{lowest}\u{2013}{highest}")
     };
     let range = with_unit(figures, unit);
     Some(match span {
@@ -167,17 +192,19 @@ pub(super) struct SummaryWords<'words> {
     pub unit: Option<&'words AttrValue>,
 }
 
-/// "Copy rate, last 5 minutes: from 48,000 to 71,000 rows per second, now 56,590".
+/// "Copy rate, last 5 minutes: between 48,000 and 71,000, latest 56,590 rows per second". The
+/// range is said as bounds ("between"), not as a trend from the first value to the last.
 pub(super) fn summary_text(stats: &SparklineStats, words: &SummaryWords, format: &dyn Fn(f64) -> String) -> String {
     let head = match words.span {
         Some(span) => format!("{}, {span}", words.name),
         None => words.name.to_string(),
     };
-    if stats.count < 2 {
-        return format!("{head}: now {}", with_unit(format(stats.last), words.unit));
+    let latest = with_unit(format(stats.last), words.unit);
+    let (lowest, highest) = (format(stats.min), format(stats.max));
+    if stats.count < 2 || lowest == highest {
+        return format!("{head}: latest {latest}");
     }
-    let range = with_unit(format!("from {} to {}", format(stats.min), format(stats.max)), words.unit);
-    format!("{head}: {range}, now {}", format(stats.last))
+    format!("{head}: between {lowest} and {highest}, latest {latest}")
 }
 
 /// "3 min ago · 56,590 rows/s" (or the value alone when the point has no label).
@@ -247,11 +274,11 @@ mod tests {
 
     #[test]
     fn labels_follow_their_values_when_nan_is_left_out() {
-        let labels = vec![AttrValue::from("2 min ago"), AttrValue::from("1 min ago"), AttrValue::from("now")];
+        let labels = vec![AttrValue::from("2 min ago"), AttrValue::from("1 min ago"), AttrValue::from("latest")];
         let points = drawn_points(&[5.0, f64::NAN, 7.0], &labels);
         assert_eq!(points.len(), 2);
         assert_eq!(points[0].label.as_deref(), Some("2 min ago"));
-        assert_eq!(points[1].label.as_deref(), Some("now"));
+        assert_eq!(points[1].label.as_deref(), Some("latest"));
         assert_eq!(drawn_points(&[1.0, 2.0], &[])[1].label, None);
     }
 
@@ -293,6 +320,20 @@ mod tests {
         assert_eq!(compact_number(71_000.0), "71k");
         assert_eq!(compact_number(2_500_000.0), "2.5M");
         assert_eq!(compact_number(-48_000.0), "-48k");
+        assert_eq!(compact_number(999_999.0), "1M");
+        assert_eq!(compact_number(999.97), "1k");
+        assert_eq!(compact_number(9_960.0), "10k");
+    }
+
+    #[test]
+    fn the_shown_point_is_counted_back_from_the_latest() {
+        assert_eq!(index_from_back(0, 5), Some(4));
+        assert_eq!(index_from_back(4, 5), Some(0));
+        assert_eq!(index_from_back(5, 5), None);
+        assert_eq!(index_from_back(0, 0), None);
+        assert_eq!(back_from_index(4, 5), 0);
+        assert_eq!(back_from_index(1, 5), 3);
+        assert_eq!(index_from_back(back_from_index(3, 5), 6), Some(4), "a new point keeps the same one shown");
     }
 
     #[test]
@@ -308,6 +349,12 @@ mod tests {
         let flat = stats_of(&[3.0, 3.0]);
         assert_eq!(range_text(&flat, &compact_number, Some(&unit), None).as_deref(), Some("3 rows/s"));
         assert_eq!(range_text(&stats_of(&[3.0]), &compact_number, Some(&unit), None), None);
+        let alike = stats_of(&[56_100.0, 56_400.0]);
+        assert_eq!(
+            range_text(&alike, &compact_number, Some(&unit), None).as_deref(),
+            Some("56k rows/s"),
+            "not 56k\u{2013}56k"
+        );
     }
 
     #[test]
@@ -322,11 +369,11 @@ mod tests {
         let window = stats_of(&[48_000.0, 71_000.0, 56_590.0]);
         assert_eq!(
             summary_text(&window, &words, &format_number),
-            "Copy rate, last 5 minutes: from 48,000 to 71,000 rows per second, now 56,590"
+            "Copy rate, last 5 minutes: between 48,000 and 71,000, latest 56,590 rows per second"
         );
         assert_eq!(
             summary_text(&stats_of(&[42.0]), &words, &format_number),
-            "Copy rate, last 5 minutes: now 42 rows per second"
+            "Copy rate, last 5 minutes: latest 42 rows per second"
         );
     }
 

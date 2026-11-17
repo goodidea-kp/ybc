@@ -352,7 +352,7 @@ pub fn home() -> Html {
                                         unit_words={"rows per second"}
                                         span={"last 6 min"}
                                         span_words={"last 6 minutes"}
-                                        point_labels={vec!["5 min ago".into(), "4 min ago".into(), "3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "now".into()]}
+                                        point_labels={vec!["5 min ago".into(), "4 min ago".into(), "3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "latest".into()]}
                                         format_value={Callback::from(|value: f64| ybc::format_number(value.round()))}
                                     />
                                     <span class="ml-2">

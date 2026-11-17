@@ -6,26 +6,29 @@
 //! html! {
 //!     <ybc::Sparkline values={rows_per_second} aria_label="Copy rate" label="Copy rate" unit="rows/s"
 //!                     unit_words="rows per second" span="last 4 min" span_words="last 4 minutes"
-//!                     point_labels={vec!["3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "now".into()]}
+//!                     point_labels={vec!["3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "latest".into()]}
 //!                     format_value={whole} />
 //! }
 //! ```
 //!
 //! It says what it draws without a hover: with a `label`, the label stands before the line and the
-//! latest value and the range ("48k–71k rows/s, last 4 min") after it. Each point is there on
+//! latest value and the range ("56,590 rows/s (48k–71k rows/s, last 4 min)") after it. Each point is there on
 //! demand: the line is one tab stop; a hover, a tap or keyboard focus shows a point's time and
 //! value, the arrow keys (and Home/End) move between points, Escape closes it, and the pointer may
 //! rest on the text it shows (WCAG 1.4.13). A screen reader hears one image with a summary and,
 //! as the arrows move, each point. Nothing moves by itself, so there is nothing to reduce.
-use wasm_bindgen::JsCast;
-use wasm_bindgen::closure::Closure;
+//!
+//! Its CSS goes into the page's `<head>` once (`<style id="ybc-sparkline-style">`), however many
+//! sparklines the page draws.
+use std::rc::Rc;
+
 use yew::prelude::*;
 
 use super::chart::format_number;
 use super::sparkline_parts::{
-    Frame, INSET, Point, SummaryWords, compact_number, drawn_points, extremes, moved_by_key, nearest_index, point_text, range_text, stats,
-    summary_text, with_unit,
+    Frame, INSET, Point, SummaryWords, compact_number, drawn_points, extremes, point_text, range_text, stats, summary_text, with_unit,
 };
+use super::sparkline_pick::{Pick, use_pick, use_style_once};
 
 const STROKE_WIDTH: &str = "1.5";
 const LAST_POINT_RADIUS: &str = "2";
@@ -42,6 +45,8 @@ const SHOWN_SEPARATOR: &str = " \u{00b7} ";
 const SPOKEN_SEPARATOR: &str = ": ";
 /// Points in the left third anchor their tooltip left, in the right third right, else centred.
 const ANCHOR_THIRDS: f64 = 3.0;
+
+const STYLE_ID: &str = "ybc-sparkline-style";
 
 /// The look, in Bulma's scheme variables only, so it follows the light and dark schemes and forced
 /// colours. No CSS comments: this text reaches every page (see the modal's). No transition or
@@ -96,7 +101,7 @@ pub struct SparklineProps {
     /// The span as it is read aloud, e.g. "last 5 minutes". Defaults to `span`.
     #[prop_or_default]
     pub span_words: Option<AttrValue>,
-    /// When each value was taken, one per value in `values` (e.g. "3 min ago", "now"); shown
+    /// When each value was taken, one per value in `values` (e.g. "3 min ago", "latest"); shown
     /// with the value of the point a hover, a tap or the keyboard picks. Absent: the value alone.
     #[prop_or_default]
     pub point_labels: Vec<AttrValue>,
@@ -119,13 +124,13 @@ pub struct SparklineProps {
     #[prop_or_default]
     pub format_short: Option<Callback<f64, String>>,
     /// Writes the whole accessible text from the figures, in the caller's words. Defaults to
-    /// `"<aria_label>, <span_words>: from <min> to <max> <unit_words>, now <last>"`.
+    /// `"<aria_label>, <span_words>: between <min> and <max>, latest <last> <unit_words>"`.
     #[prop_or_default]
     pub describe: Option<Callback<SparklineStats, String>>,
     /// Said after `aria_label` when there is nothing to draw.
     #[prop_or_else(|| AttrValue::from("No data"))]
     pub empty_label: AttrValue,
-    /// Rendered as `data-testid` on the line; its parts carry `<testid>-label`, `-now`, `-range`
+    /// Rendered as `data-testid` on the line; its parts carry `<testid>-label`, `-latest`, `-range`
     /// and `-tip`. Absent: nothing is rendered.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
@@ -136,13 +141,14 @@ pub struct SparklineProps {
 /// A small line of how a value moved, read by a screen reader as one image with a text summary.
 ///
 /// No axes, no gridlines: it sits beside the number it explains. The vertical range is the series'
-/// own minimum to maximum, its first lowest and highest points marked by a hollow ring; equal
+/// own minimum to maximum, its first lowest and highest points marked by a hollow ring (filled
+/// with `--bulma-scheme-main`, the page surface, so it reads hollow in both schemes); equal
 /// values draw a flat line through the middle, a single value a dot, and an empty series a dashed line.
 #[component(Sparkline)]
 pub fn sparkline(props: &SparklineProps) -> Html {
-    let active = use_state_eq(|| None::<usize>);
+    let pick = use_pick();
     let line_ref = use_node_ref();
-    use_escape_closes(active.clone());
+    use_style_once(STYLE_ID, SPARKLINE_STYLE);
     let points = drawn_points(&props.values, &props.point_labels);
     let values: Vec<f64> = points.iter().map(|point| point.value).collect();
     let frame = Frame {
@@ -151,22 +157,20 @@ pub fn sparkline(props: &SparklineProps) -> Html {
     };
     let series_stats = stats(&values);
     let positions = series_stats.map(|stats| frame.points(&values, &stats)).unwrap_or_default();
-    let shown = (*active).filter(|index| *index < points.len());
     let plot = Plot {
         points: &points,
         positions: &positions,
         frame: &frame,
-        shown,
+        shown: pick.shown(points.len()),
     };
     html! {
         <span class={classes!("ybc-sparkline", props.classes.clone())}>
-            <style>{SPARKLINE_STYLE}</style>
             { render_label(props) }
-            <span class="ybc-sparkline-plot" onmouseleave={close(&active)}>
-                { render_line(props, &plot, series_stats.as_ref(), &active, &line_ref) }
+            <span class="ybc-sparkline-plot" onmouseleave={pick.on_leave(&line_ref)}>
+                { render_line(props, &plot, series_stats.as_ref(), &pick, &line_ref) }
                 { render_tip(props, &plot) }
             </span>
-            <span class="is-sr-only" aria-live="polite">{ shown.map(|index| spoken_point(props, &points[index])).unwrap_or_default() }</span>
+            <span class="is-sr-only" aria-live="polite">{ pick.announced() }</span>
             { series_stats.map(|stats| render_caption(props, &stats)).unwrap_or_default() }
         </span>
     }
@@ -180,105 +184,23 @@ struct Plot<'plot> {
     shown: Option<usize>,
 }
 
-fn render_line(
-    props: &SparklineProps, plot: &Plot, series_stats: Option<&SparklineStats>, active: &UseStateHandle<Option<usize>>, line_ref: &NodeRef,
-) -> Html {
+fn render_line(props: &SparklineProps, plot: &Plot, series_stats: Option<&SparklineStats>, pick: &Pick, line_ref: &NodeRef) -> Html {
     let summary = summarize(props, series_stats);
     let shape = match series_stats {
         Some(stats) => render_series(props, plot, stats),
         None => render_empty(plot.frame),
     };
-    let count = plot.points.len();
+    let spoken: Rc<Vec<String>> = Rc::new(plot.points.iter().map(|point| spoken_point(props, point)).collect());
+    let on_pointer = pick.on_pointer(line_ref, Rc::new(plot.positions.to_vec()), plot.frame.width);
     html! {
         <svg ref={line_ref.clone()} class="ybc-sparkline-line" role="img" aria-label={summary}
-             tabindex={(count > 0).then_some("0")}
+             tabindex={(!plot.points.is_empty()).then_some("0")}
              width={props.width.to_string()} height={props.height.to_string()}
              viewBox={format!("0 0 {} {}", props.width, props.height)} data-testid={props.testid.clone()}
-             onfocus={show_latest(active, count)} onblur={close(active)} onkeydown={move_by_key(active, count)}
-             onmousemove={show_nearest(active, line_ref, plot)} onclick={show_nearest(active, line_ref, plot)}>
+             onfocus={pick.on_focus()} onblur={pick.on_blur()} onkeydown={pick.on_key(spoken)}
+             onmousemove={on_pointer.clone()} onclick={on_pointer}>
             { shape }
         </svg>
-    }
-}
-
-fn close<Event: 'static>(active: &UseStateHandle<Option<usize>>) -> Callback<Event> {
-    let active = active.clone();
-    Callback::from(move |_: Event| active.set(None))
-}
-
-fn show_latest(active: &UseStateHandle<Option<usize>>, count: usize) -> Callback<FocusEvent> {
-    let active = active.clone();
-    Callback::from(move |_: FocusEvent| active.set(count.checked_sub(1)))
-}
-
-/// Only the key is read, never the event's target: Yew delegates listeners to the app root.
-fn move_by_key(active: &UseStateHandle<Option<usize>>, count: usize) -> Callback<KeyboardEvent> {
-    let active = active.clone();
-    Callback::from(move |event: KeyboardEvent| {
-        let Some(next) = moved_by_key(&event.key(), *active, count) else {
-            return;
-        };
-        event.prevent_default();
-        active.set(Some(next));
-    })
-}
-
-/// The pointer's place is measured against the line's own box (its `NodeRef`), never against
-/// `current_target()`, which is the app root under Yew's delegated listeners.
-fn show_nearest(active: &UseStateHandle<Option<usize>>, line_ref: &NodeRef, plot: &Plot) -> Callback<MouseEvent> {
-    let active = active.clone();
-    let line_ref = line_ref.clone();
-    let positions = plot.positions.to_vec();
-    let drawn_width = plot.frame.width;
-    Callback::from(move |event: MouseEvent| {
-        let Some(line) = line_ref.cast::<web_sys::Element>() else {
-            return;
-        };
-        let bounds = line.get_bounding_client_rect();
-        if bounds.width() <= 0.0 {
-            return;
-        }
-        let x = (f64::from(event.client_x()) - bounds.left()) * drawn_width / bounds.width();
-        active.set(nearest_index(x, &positions));
-    })
-}
-
-/// While a point is shown, Escape anywhere closes it: a hover tooltip is dismissible without
-/// moving the pointer (WCAG 1.4.13). The listener lives only while something is shown.
-#[hook]
-fn use_escape_closes(active: UseStateHandle<Option<usize>>) {
-    let open = active.is_some();
-    use_effect_with(open, move |open| {
-        let listener = open.then(|| EscapeListener::attach(active));
-        move || drop(listener)
-    });
-}
-
-struct EscapeListener {
-    document: web_sys::Document,
-    on_key: Closure<dyn Fn(web_sys::KeyboardEvent)>,
-}
-
-impl EscapeListener {
-    fn attach(active: UseStateHandle<Option<usize>>) -> Option<Self> {
-        let document = web_sys::window()?.document()?;
-        let on_key = Closure::<dyn Fn(web_sys::KeyboardEvent)>::new(move |event: web_sys::KeyboardEvent| {
-            if event.key() == "Escape" {
-                active.set(None);
-            }
-        });
-        document
-            .add_event_listener_with_callback("keydown", on_key.as_ref().unchecked_ref())
-            .ok()?;
-        Some(Self { document, on_key })
-    }
-}
-
-impl Drop for EscapeListener {
-    fn drop(&mut self) {
-        let _ = self
-            .document
-            .remove_event_listener_with_callback("keydown", self.on_key.as_ref().unchecked_ref());
     }
 }
 
@@ -332,9 +254,9 @@ fn render_caption(props: &SparklineProps, stats: &SparklineStats) -> Html {
     let range = range_text(stats, &|value| short.emit(value), props.unit.as_ref(), props.span.as_ref());
     html! {
         <>
-            <span class="ybc-sparkline-now" aria-hidden="true" data-testid={part_testid(props, "now")}>{ latest }</span>
+            <span class="ybc-sparkline-latest" aria-hidden="true" data-testid={part_testid(props, "latest")}>{ latest }</span>
             if let Some(range) = range {
-                <span class="ybc-sparkline-range" aria-hidden="true" data-testid={part_testid(props, "range")}>{ range }</span>
+                <span class="ybc-sparkline-range" aria-hidden="true" data-testid={part_testid(props, "range")}>{ format!("({range})") }</span>
             }
         </>
     }
@@ -410,5 +332,19 @@ fn render_empty(frame: &Frame) -> Html {
     html! {
         <line x1={format!("{INSET:.2}")} y1={middle.clone()} x2={format!("{:.2}", frame.width - INSET)} y2={middle}
               stroke="currentColor" stroke-width={STROKE_WIDTH} stroke-dasharray={EMPTY_DASHES} stroke-opacity={EMPTY_OPACITY} />
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn its_style_follows_the_scheme_and_forced_colours_without_motion() {
+        assert!(SPARKLINE_STYLE.contains("var(--bulma-scheme-invert"));
+        assert!(SPARKLINE_STYLE.contains(":focus-visible"));
+        assert!(SPARKLINE_STYLE.contains("forced-colors: active"));
+        assert!(!SPARKLINE_STYLE.contains("transition") && !SPARKLINE_STYLE.contains("animation"));
+        assert!(!SPARKLINE_STYLE.contains("/*"), "no CSS comments reach the page");
     }
 }
