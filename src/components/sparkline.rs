@@ -1,23 +1,72 @@
-//! A word-sized trend line drawn as inline SVG: no chart library, no script.
+//! A word-sized trend line drawn as inline SVG: no chart library, no script to load.
 //!
 //! ```rust,ignore
-//! let rows_per_minute = vec![1200.0, 1350.0, 980.0, 1410.0];
-//! let per_minute = Callback::from(|value: f64| format!("{value:.0} rows/min"));
+//! let rows_per_second = vec![48_000.0, 71_000.0, 63_200.0, 56_590.0];
+//! let whole = Callback::from(|value: f64| ybc::format_number(value.round()));
 //! html! {
-//!     <ybc::Sparkline values={rows_per_minute} aria_label="Copy rate" format_value={per_minute} />
+//!     <ybc::Sparkline values={rows_per_second} aria_label="Copy rate" label="Copy rate" unit="rows/s"
+//!                     unit_words="rows per second" span="last 4 min" span_words="last 4 minutes"
+//!                     point_labels={vec!["3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "latest".into()]}
+//!                     format_value={whole} />
 //! }
 //! ```
+//!
+//! It says what it draws without a hover: with a `label`, the label stands before the line and the
+//! latest value and the range ("56,590 rows/s (48k–71k rows/s, last 4 min)") after it. Each point is there on
+//! demand: the line is one tab stop; a hover, a tap or keyboard focus shows a point's time and
+//! value, the arrow keys (and Home/End) move between points, Escape closes it, and the pointer may
+//! rest on the text it shows (WCAG 1.4.13). A screen reader hears one image with a summary and,
+//! as the arrows move, each point. Nothing moves by itself, so there is nothing to reduce.
+//!
+//! Its CSS goes into the page's `<head>` once (`<style id="ybc-sparkline-style">`), however many
+//! sparklines the page draws.
+use std::rc::Rc;
+
 use yew::prelude::*;
 
-use crate::components::chart::format_number;
+use super::chart::format_number;
+use super::sparkline_parts::{
+    Frame, INSET, Point, SummaryWords, compact_number, drawn_points, extremes, point_text, range_text, stats, summary_text, with_unit,
+};
+use super::sparkline_pick::{Pick, use_pick, use_style_once};
 
-/// Room left around the line so the stroke and the last-point dot are never clipped.
-const INSET: f64 = 2.5;
 const STROKE_WIDTH: &str = "1.5";
 const LAST_POINT_RADIUS: &str = "2";
+const EXTREME_RADIUS: &str = "2";
+const EXTREME_STROKE_WIDTH: &str = "1.25";
+const ACTIVE_RADIUS: &str = "3.5";
 const EMPTY_DASHES: &str = "2 3";
 const EMPTY_OPACITY: &str = "0.4";
-const SVG_STYLE: &str = "display:inline-block;vertical-align:middle;overflow:visible";
+/// The page surface, so an extreme's ring reads as hollow in both schemes.
+const SURFACE_COLOR: &str = "var(--bulma-scheme-main, #ffffff)";
+/// Between a point's time and its value on screen.
+const SHOWN_SEPARATOR: &str = " \u{00b7} ";
+/// Between a point's time and its value, read aloud.
+const SPOKEN_SEPARATOR: &str = ": ";
+/// Points in the left third anchor their tooltip left, in the right third right, else centred.
+const ANCHOR_THIRDS: f64 = 3.0;
+
+const STYLE_ID: &str = "ybc-sparkline-style";
+
+/// The look, in Bulma's scheme variables only, so it follows the light and dark schemes and forced
+/// colours. No CSS comments: this text reaches every page (see the modal's). No transition or
+/// animation, so reduced motion has nothing to stop.
+const SPARKLINE_STYLE: &str = r#"
+.ybc-sparkline { display: inline-flex; flex-wrap: wrap; align-items: center; column-gap: 0.4em; vertical-align: middle; }
+.ybc-sparkline-plot { position: relative; display: inline-flex; }
+.ybc-sparkline-line { display: block; overflow: visible; cursor: crosshair; touch-action: manipulation; }
+.ybc-sparkline-line:focus { outline: none; }
+.ybc-sparkline-line:focus-visible { outline: 2px solid var(--bulma-link-on-scheme, currentColor); outline-offset: 3px; border-radius: 2px; }
+.ybc-sparkline-range { font-size: 0.85em; color: var(--bulma-text-weak, inherit); }
+.ybc-sparkline-tip { position: absolute; bottom: 100%; z-index: 30; padding-bottom: 0.3rem; white-space: nowrap; }
+.ybc-sparkline-tip > span { display: block; padding: 0.2rem 0.45rem; border: 1px solid transparent; border-radius: var(--bulma-radius, 4px);
+    background: var(--bulma-scheme-invert, #14161a); color: var(--bulma-scheme-main, #ffffff); font-size: 0.8rem; line-height: 1.3; }
+@media (forced-colors: active) {
+    .ybc-sparkline-line polyline, .ybc-sparkline-line circle { stroke: CanvasText; }
+    .ybc-sparkline-line circle.is-filled { fill: CanvasText; }
+    .ybc-sparkline-tip > span { border-color: CanvasText; }
+}
+"#;
 
 /// The figures a [`Sparkline`] summarises for a screen reader, over the drawn values only.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -36,6 +85,26 @@ pub struct SparklineProps {
     pub values: Vec<f64>,
     /// What the line measures, e.g. "Copy rate". The start of the accessible text.
     pub aria_label: AttrValue,
+    /// Shown before the line, e.g. "Copy rate". With it, the latest value and the range are shown
+    /// after the line, so the line says what it draws without a hover. Absent: the line alone.
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
+    /// Shown after each figure, e.g. "rows/s".
+    #[prop_or_default]
+    pub unit: Option<AttrValue>,
+    /// The unit as it is read aloud, e.g. "rows per second". Defaults to `unit`.
+    #[prop_or_default]
+    pub unit_words: Option<AttrValue>,
+    /// How long the values span, shown after the range, e.g. "last 5 min".
+    #[prop_or_default]
+    pub span: Option<AttrValue>,
+    /// The span as it is read aloud, e.g. "last 5 minutes". Defaults to `span`.
+    #[prop_or_default]
+    pub span_words: Option<AttrValue>,
+    /// When each value was taken, one per value in `values` (e.g. "3 min ago", "latest"); shown
+    /// with the value of the point a hover, a tap or the keyboard picks. Absent: the value alone.
+    #[prop_or_default]
+    pub point_labels: Vec<AttrValue>,
     /// Width in CSS pixels.
     #[prop_or(96)]
     pub width: u32,
@@ -43,21 +112,26 @@ pub struct SparklineProps {
     #[prop_or(24)]
     pub height: u32,
     /// Any CSS colour of the line. The default, `currentColor`, follows the surrounding text, so
-    /// it follows the theme and forced colours; a variable such as `var(--bulma-link-on-scheme)` (the text-safe shade in both schemes) works too.
+    /// it follows the theme and forced colours; a variable such as `var(--bulma-link-on-scheme)`
+    /// (the text-safe shade in both schemes, above 3:1 against the page) works too.
     #[prop_or_else(|| AttrValue::from("currentColor"))]
     pub color: AttrValue,
-    /// Formats each figure of the accessible text, e.g. with a unit. Defaults to thousands
-    /// separators and at most one decimal.
+    /// Formats each full figure: the latest value, a point's value and the accessible text.
+    /// Defaults to thousands separators and at most one decimal ([`format_number`]).
     #[prop_or_default]
     pub format_value: Option<Callback<f64, String>>,
+    /// Formats the two figures of the shown range. Defaults to a compact figure: "980", "1.4k", "48k", "2.5M".
+    #[prop_or_default]
+    pub format_short: Option<Callback<f64, String>>,
     /// Writes the whole accessible text from the figures, in the caller's words. Defaults to
-    /// `"<aria_label>: last <last>, min <min>, max <max>"`.
+    /// `"<aria_label>, <span_words>: between <min> and <max>, latest <last> <unit_words>"`.
     #[prop_or_default]
     pub describe: Option<Callback<SparklineStats, String>>,
     /// Said after `aria_label` when there is nothing to draw.
     #[prop_or_else(|| AttrValue::from("No data"))]
     pub empty_label: AttrValue,
-    /// Rendered as `data-testid`. Absent: nothing is rendered.
+    /// Rendered as `data-testid` on the line; its parts carry `<testid>-label`, `-latest`, `-range`
+    /// and `-tip`. Absent: nothing is rendered.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
     #[prop_or_default]
@@ -66,109 +140,190 @@ pub struct SparklineProps {
 
 /// A small line of how a value moved, read by a screen reader as one image with a text summary.
 ///
-/// No axes, no hover: it sits beside the number it explains. The vertical range is the series'
-/// own minimum to maximum; equal values draw a flat line through the middle, a single value a
-/// dot, and an empty series a dashed line.
+/// No axes, no gridlines: it sits beside the number it explains. The vertical range is the series'
+/// own minimum to maximum, its first lowest and highest points marked by a hollow ring (filled
+/// with `--bulma-scheme-main`, the page surface, so it reads hollow in both schemes); equal
+/// values draw a flat line through the middle, a single value a dot, and an empty series a dashed line.
 #[component(Sparkline)]
 pub fn sparkline(props: &SparklineProps) -> Html {
-    let values: Vec<f64> = props.values.iter().copied().filter(|value| value.is_finite()).collect();
+    let pick = use_pick();
+    let line_ref = use_node_ref();
+    use_style_once(STYLE_ID, SPARKLINE_STYLE);
+    let points = drawn_points(&props.values, &props.point_labels);
+    let values: Vec<f64> = points.iter().map(|point| point.value).collect();
     let frame = Frame {
         width: f64::from(props.width),
         height: f64::from(props.height),
     };
-    let summary = summarize(&values, props);
-    let shape = match stats(&values) {
-        Some(stats) => render_series(&frame.points(&values, &stats), &props.color),
-        None => render_empty(&frame),
+    let series_stats = stats(&values);
+    let positions = series_stats.map(|stats| frame.points(&values, &stats)).unwrap_or_default();
+    let plot = Plot {
+        points: &points,
+        positions: &positions,
+        frame: &frame,
+        shown: pick.shown(points.len()),
     };
     html! {
-        <svg class={classes!("ybc-sparkline", props.classes.clone())} role="img" aria-label={summary}
+        <span class={classes!("ybc-sparkline", props.classes.clone())}>
+            { render_label(props) }
+            <span class="ybc-sparkline-plot" onmouseleave={pick.on_leave(&line_ref)}>
+                { render_line(props, &plot, series_stats.as_ref(), &pick, &line_ref) }
+                { render_tip(props, &plot) }
+            </span>
+            <span class="is-sr-only" aria-live="polite">{ pick.announced() }</span>
+            { series_stats.map(|stats| render_caption(props, &stats)).unwrap_or_default() }
+        </span>
+    }
+}
+
+/// What one render knows about the drawn points, and which one is shown.
+struct Plot<'plot> {
+    points: &'plot [Point],
+    positions: &'plot [(f64, f64)],
+    frame: &'plot Frame,
+    shown: Option<usize>,
+}
+
+fn render_line(props: &SparklineProps, plot: &Plot, series_stats: Option<&SparklineStats>, pick: &Pick, line_ref: &NodeRef) -> Html {
+    let summary = summarize(props, series_stats);
+    let shape = match series_stats {
+        Some(stats) => render_series(props, plot, stats),
+        None => render_empty(plot.frame),
+    };
+    let spoken: Rc<Vec<String>> = Rc::new(plot.points.iter().map(|point| spoken_point(props, point)).collect());
+    let on_pointer = pick.on_pointer(line_ref, Rc::new(plot.positions.to_vec()), plot.frame.width);
+    html! {
+        <svg ref={line_ref.clone()} class="ybc-sparkline-line" role="img" aria-label={summary}
+             tabindex={(!plot.points.is_empty()).then_some("0")}
              width={props.width.to_string()} height={props.height.to_string()}
-             viewBox={format!("0 0 {} {}", props.width, props.height)} style={SVG_STYLE} data-testid={props.testid.clone()}>
+             viewBox={format!("0 0 {} {}", props.width, props.height)} data-testid={props.testid.clone()}
+             onfocus={pick.on_focus()} onblur={pick.on_blur()} onkeydown={pick.on_key(spoken)}
+             onmousemove={on_pointer.clone()} onclick={on_pointer}>
             { shape }
         </svg>
     }
 }
 
-/// The drawing area, in CSS pixels.
-struct Frame {
-    width: f64,
-    height: f64,
+fn full_format(props: &SparklineProps) -> Callback<f64, String> {
+    props.format_value.clone().unwrap_or_else(|| Callback::from(format_number))
 }
 
-impl Frame {
-    /// Each value's position: spread evenly left to right, the last one at the right edge;
-    /// the maximum at the top and the minimum at the bottom.
-    fn points(&self, values: &[f64], stats: &SparklineStats) -> Vec<(f64, f64)> {
-        let usable_width = (self.width - 2.0 * INSET).max(0.0);
-        let step = if values.len() > 1 {
-            usable_width / (values.len() - 1) as f64
-        } else {
-            0.0
-        };
-        let first_x = if values.len() > 1 { INSET } else { self.width - INSET };
-        values
-            .iter()
-            .enumerate()
-            .map(|(index, value)| (first_x + step * index as f64, self.y_of(*value, stats)))
-            .collect()
-    }
-
-    fn y_of(&self, value: f64, stats: &SparklineStats) -> f64 {
-        let range = stats.max - stats.min;
-        if range <= 0.0 {
-            return self.height / 2.0;
-        }
-        let usable_height = (self.height - 2.0 * INSET).max(0.0);
-        INSET + (stats.max - value) / range * usable_height
-    }
+fn spoken_unit(props: &SparklineProps) -> Option<&AttrValue> {
+    props.unit_words.as_ref().or(props.unit.as_ref())
 }
 
-fn stats(values: &[f64]) -> Option<SparklineStats> {
-    let last = *values.last()?;
-    let min = values.iter().copied().fold(f64::INFINITY, f64::min);
-    let max = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-    Some(SparklineStats {
-        min,
-        max,
-        last,
-        count: values.len(),
-    })
-}
-
-fn summarize(values: &[f64], props: &SparklineProps) -> String {
-    let Some(stats) = stats(values) else {
+fn summarize(props: &SparklineProps, series_stats: Option<&SparklineStats>) -> String {
+    let Some(stats) = series_stats else {
         return format!("{}: {}", props.aria_label, props.empty_label);
     };
     if let Some(describe) = &props.describe {
-        return describe.emit(stats);
+        return describe.emit(*stats);
     }
-    let format = props.format_value.clone().unwrap_or_else(|| Callback::from(format_number));
-    format!(
-        "{}: last {}, min {}, max {}",
-        props.aria_label,
-        format.emit(stats.last),
-        format.emit(stats.min),
-        format.emit(stats.max)
-    )
+    let words = SummaryWords {
+        name: &props.aria_label,
+        span: props.span_words.as_ref().or(props.span.as_ref()),
+        unit: spoken_unit(props),
+    };
+    let format = full_format(props);
+    summary_text(stats, &words, &|value| format.emit(value))
+}
+
+fn spoken_point(props: &SparklineProps, point: &Point) -> String {
+    point_text(point, SPOKEN_SEPARATOR, full_format(props).emit(point.value), spoken_unit(props))
+}
+
+/// A part's test id: `<testid>-<part>`, or nothing without a `testid`.
+fn part_testid(props: &SparklineProps, part: &str) -> Option<AttrValue> {
+    props.testid.as_ref().map(|testid| AttrValue::from(format!("{testid}-{part}")))
+}
+
+/// The label, latest value and range repeat the image's summary, so a screen reader skips them.
+fn render_label(props: &SparklineProps) -> Html {
+    let Some(label) = &props.label else {
+        return Html::default();
+    };
+    html! { <span class="ybc-sparkline-label" aria-hidden="true" data-testid={part_testid(props, "label")}>{ label.clone() }</span> }
+}
+
+fn render_caption(props: &SparklineProps, stats: &SparklineStats) -> Html {
+    if props.label.is_none() {
+        return Html::default();
+    }
+    let latest = with_unit(full_format(props).emit(stats.last), props.unit.as_ref());
+    let short = props.format_short.clone().unwrap_or_else(|| Callback::from(compact_number));
+    let range = range_text(stats, &|value| short.emit(value), props.unit.as_ref(), props.span.as_ref());
+    html! {
+        <>
+            <span class="ybc-sparkline-latest" aria-hidden="true" data-testid={part_testid(props, "latest")}>{ latest }</span>
+            if let Some(range) = range {
+                <span class="ybc-sparkline-range" aria-hidden="true" data-testid={part_testid(props, "range")}>{ format!("({range})") }</span>
+            }
+        </>
+    }
+}
+
+/// The shown point's time and value above it, kept inside the plot so the pointer may move onto it.
+fn render_tip(props: &SparklineProps, plot: &Plot) -> Html {
+    let Some(index) = plot.shown else {
+        return Html::default();
+    };
+    let (x, _) = plot.positions[index];
+    let text = point_text(
+        &plot.points[index],
+        SHOWN_SEPARATOR,
+        full_format(props).emit(plot.points[index].value),
+        props.unit.as_ref(),
+    );
+    html! {
+        <span class="ybc-sparkline-tip" aria-hidden="true" style={tip_anchor(x, plot.frame.width)} data-testid={part_testid(props, "tip")}>
+            <span>{ text }</span>
+        </span>
+    }
+}
+
+fn tip_anchor(x: f64, width: f64) -> String {
+    if x < width / ANCHOR_THIRDS {
+        "left:0".to_string()
+    } else if x > width - width / ANCHOR_THIRDS {
+        "right:0".to_string()
+    } else {
+        format!("left:{x:.2}px;transform:translateX(-50%)")
+    }
 }
 
 fn polyline_points(points: &[(f64, f64)]) -> String {
     points.iter().map(|(x, y)| format!("{x:.2},{y:.2}")).collect::<Vec<_>>().join(" ")
 }
 
-fn render_series(points: &[(f64, f64)], color: &AttrValue) -> Html {
-    let last_point = points.last().copied();
+fn render_series(props: &SparklineProps, plot: &Plot, stats: &SparklineStats) -> Html {
+    let values: Vec<f64> = plot.points.iter().map(|point| point.value).collect();
+    let extreme_marks = extremes(&values, stats)
+        .map(|(lowest, highest)| html! { <>{ ring(plot.positions[lowest], &props.color) }{ ring(plot.positions[highest], &props.color) }</> })
+        .unwrap_or_default();
+    let last_point = plot.positions.last().copied();
     html! {
         <>
-            if points.len() > 1 {
-                <polyline points={polyline_points(points)} fill="none" stroke={color.clone()} stroke-width={STROKE_WIDTH}
+            if plot.positions.len() > 1 {
+                <polyline points={polyline_points(plot.positions)} fill="none" stroke={props.color.clone()} stroke-width={STROKE_WIDTH}
                           stroke-linejoin="round" stroke-linecap="round" />
             }
+            { extreme_marks }
             if let Some((x, y)) = last_point {
-                <circle cx={format!("{x:.2}")} cy={format!("{y:.2}")} r={LAST_POINT_RADIUS} fill={color.clone()} />
+                <circle class="is-filled" cx={format!("{x:.2}")} cy={format!("{y:.2}")} r={LAST_POINT_RADIUS} fill={props.color.clone()} />
+            }
+            if let Some(index) = plot.shown {
+                <circle class="ybc-sparkline-active" cx={format!("{:.2}", plot.positions[index].0)} cy={format!("{:.2}", plot.positions[index].1)}
+                        r={ACTIVE_RADIUS} fill="none" stroke={props.color.clone()} stroke-width={STROKE_WIDTH} />
             }
         </>
+    }
+}
+
+/// A hollow ring: the lowest or highest point.
+fn ring((x, y): (f64, f64), color: &AttrValue) -> Html {
+    html! {
+        <circle class="ybc-sparkline-extreme" cx={format!("{x:.2}")} cy={format!("{y:.2}")} r={EXTREME_RADIUS}
+                fill={SURFACE_COLOR} stroke={color.clone()} stroke-width={EXTREME_STROKE_WIDTH} />
     }
 }
 
@@ -184,51 +339,12 @@ fn render_empty(frame: &Frame) -> Html {
 mod tests {
     use super::*;
 
-    const FRAME: Frame = Frame { width: 100.0, height: 20.0 };
-
-    fn points_of(values: &[f64]) -> Vec<(f64, f64)> {
-        let stats = stats(values).unwrap_or(SparklineStats {
-            min: 0.0,
-            max: 0.0,
-            last: 0.0,
-            count: 0,
-        });
-        FRAME.points(values, &stats)
-    }
-
     #[test]
-    fn the_maximum_is_at_the_top_and_the_minimum_at_the_bottom() {
-        let points = points_of(&[1.0, 3.0, 2.0]);
-        assert_eq!(points, vec![(INSET, 20.0 - INSET), (50.0, INSET), (100.0 - INSET, 10.0)]);
-    }
-
-    #[test]
-    fn equal_values_draw_a_flat_line_through_the_middle() {
-        let points = points_of(&[7.0, 7.0, 7.0]);
-        assert!(points.iter().all(|(_, y)| (*y - 10.0).abs() < 1e-9), "{points:?}");
-    }
-
-    #[test]
-    fn a_single_value_sits_at_the_right_edge_in_the_middle() {
-        assert_eq!(points_of(&[42.0]), vec![(100.0 - INSET, 10.0)]);
-    }
-
-    #[test]
-    fn no_values_have_no_stats() {
-        assert_eq!(stats(&[]), None);
-    }
-
-    #[test]
-    fn stats_cover_min_max_last_and_count() {
-        let stats = stats(&[4.0, -1.0, 9.0, 2.0]);
-        assert_eq!(
-            stats,
-            Some(SparklineStats {
-                min: -1.0,
-                max: 9.0,
-                last: 2.0,
-                count: 4
-            })
-        );
+    fn its_style_follows_the_scheme_and_forced_colours_without_motion() {
+        assert!(SPARKLINE_STYLE.contains("var(--bulma-scheme-invert"));
+        assert!(SPARKLINE_STYLE.contains(":focus-visible"));
+        assert!(SPARKLINE_STYLE.contains("forced-colors: active"));
+        assert!(!SPARKLINE_STYLE.contains("transition") && !SPARKLINE_STYLE.contains("animation"));
+        assert!(!SPARKLINE_STYLE.contains("/*"), "no CSS comments reach the page");
     }
 }
