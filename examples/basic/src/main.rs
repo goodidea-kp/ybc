@@ -344,11 +344,16 @@ pub fn home() -> Html {
                             <ybc::Tile ctx={Child} classes={classes!("box")}>
                                 <ybc::Subtitle size={ybc::HeaderSize::Is4}>{"Sparkline"}</ybc::Subtitle>
                                 <p>
-                                    {"Copy rate "}
                                     <ybc::Sparkline
-                                        values={vec![1200.0, 1350.0, 980.0, f64::NAN, 1410.0, 1390.0]}
+                                        values={vec![48_000.0, 52_400.0, 71_000.0, f64::NAN, 63_200.0, 56_590.0]}
                                         aria_label={"Copy rate"}
-                                        format_value={Callback::from(|value: f64| format!("{value:.0} rows/min"))}
+                                        label={"Copy rate"}
+                                        unit={"rows/s"}
+                                        unit_words={"rows per second"}
+                                        span={"last 6 min"}
+                                        span_words={"last 6 minutes"}
+                                        point_labels={vec!["5 min ago".into(), "4 min ago".into(), "3 min ago".into(), "2 min ago".into(), "1 min ago".into(), "now".into()]}
+                                        format_value={Callback::from(|value: f64| ybc::format_number(value.round()))}
                                     />
                                     <span class="ml-2">
                                         <ybc::Sparkline values={vec![3.0, 3.0, 3.0]} aria_label={"Lag"} width={64} color={"var(--bulma-link-on-scheme)"} />

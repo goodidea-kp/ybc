@@ -41,7 +41,7 @@ pub use components::breadcrumb::{Breadcrumb, BreadcrumbProps, BreadcrumbSeparato
 pub use components::card::{
     Card, CardContent, CardContentProps, CardFooter, CardFooterProps, CardHeader, CardHeaderProps, CardImage, CardImageProps, CardProps,
 };
-pub use components::chart::{PieChart, PieChartProps, PieSegment};
+pub use components::chart::{PieChart, PieChartProps, PieSegment, format_number};
 pub use components::dropdown::{Dropdown, DropdownMsg, DropdownProps};
 pub use components::list::{
     ListToolbar, ListToolbarProps, MIN_TARGET_STYLE, PAGE_SIZES, Pager, PagerProps, SortDirection, SortHeader, SortHeaderProps, page_links,
