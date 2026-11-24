@@ -1,3 +1,4 @@
+use wasm_bindgen::JsValue;
 use yew::events::{KeyboardEvent, MouseEvent};
 use yew::prelude::*;
 
@@ -107,18 +108,27 @@ pub fn panel_block(props: &PanelBlockProps) -> Html {
     let keyboard_interactive = props.interactive && props.tag != "button" && props.tag != "a";
     let role = keyboard_interactive.then_some("button");
     let tabindex = keyboard_interactive.then_some("0");
-    let onkeydown = {
+    let block = use_node_ref();
+    // Only a block that is itself the control listens for keys. A plain block is a container:
+    // a handler on it would see, and cancel, the Enter and Space of every control inside it.
+    let onkeydown = keyboard_interactive.then(|| {
         let onactivate = props.onactivate.clone();
+        let block = block.clone();
         Callback::from(move |event: KeyboardEvent| {
-            let key = event.key();
-            if key == "Enter" || key == " " {
+            // `target`, not `current_target`: Yew delegates listeners to the app root.
+            let on_block_itself = event
+                .target()
+                .zip(block.get())
+                .is_some_and(|(target, node)| JsValue::from(target) == JsValue::from(node));
+            if block_answers(&event.key(), on_block_itself) {
                 event.prevent_default();
                 onactivate.emit(());
             }
         })
-    };
+    });
     html! {
         <@{props.tag.clone()}
+            ref={block}
             {class}
             role={role}
             tabindex={tabindex}
@@ -131,5 +141,38 @@ pub fn panel_block(props: &PanelBlockProps) -> Html {
         >
             {props.children.clone()}
         </@>
+    }
+}
+
+/// Whether a key pressed inside an interactive [`PanelBlock`] activates the block.
+///
+/// Enter and Space activate it only when the block itself has the focus. Pressed in a control
+/// inside the block (a field, a button, a link) they belong to that control: a typed space must
+/// reach the field, and Enter must reach the button.
+fn block_answers(key: &str, on_block_itself: bool) -> bool {
+    on_block_itself && (key == "Enter" || key == " ")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::block_answers;
+
+    #[test]
+    fn enter_and_space_on_the_block_itself_activate_it() {
+        assert!(block_answers("Enter", true));
+        assert!(block_answers(" ", true));
+    }
+
+    #[test]
+    fn keys_pressed_in_a_control_inside_the_block_are_left_to_that_control() {
+        assert!(!block_answers(" ", false), "a typed space must reach the field");
+        assert!(!block_answers("Enter", false), "Enter must reach the button");
+    }
+
+    #[test]
+    fn other_keys_never_activate_the_block() {
+        assert!(!block_answers("a", true));
+        assert!(!block_answers("Tab", true));
+        assert!(!block_answers("Escape", true));
     }
 }
